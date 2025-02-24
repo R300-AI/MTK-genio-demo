@@ -10,7 +10,8 @@ with open ('coco_labels.txt', 'rb') as f:
     
 #require python3.7
 img = cv2.imread('./bus.jpg')
-interpreter = tflite_runtime.Interpreter(model_path='./yolov8n_float32.tflite')
+
+interpreter = tflite_runtime.Interpreter(model_path='./models/yolov8n_float32.tflite')
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 imgsz = input_details[0]['shape'][1:3]   # (640, 640)
