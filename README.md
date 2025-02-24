@@ -5,8 +5,9 @@
 </div>
 
 * [Config Board](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html)
-
-## Object Detection
-### **NeuronRT (DLA)**
-### **ArmNN (TFLite)**
+## Compile
+## Running
+### Object Detection
+#### **NeuronRT (DLA)**
+#### **ArmNN (TFLite)**
 
