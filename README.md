@@ -11,11 +11,11 @@
 ## Compile
 ## Running
 ```bash
-sudo neuronrt -a ./models/yolov8n_float32.dla -d
+$ sudo neuronrt -a ./models/yolov8n_float32.dla -d
 [sudo] password for ubuntu:
 ```
 ```bash
-python run_yolov8n_dla.py
+$ python run_yolov8n_dla.py
 ```
 ### Object Detection
 #### **NeuronRT (DLA)**
