@@ -11,7 +11,7 @@
 ## Compile
 ## Running
 ```bash
-sudo neuronrt -a yolov8n_float32.dla -d
+sudo neuronrt -a ./models/yolov8n_float32.dla -d
 [sudo] password for ubuntu:
 ```
 ```bash
