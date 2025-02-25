@@ -12,7 +12,9 @@
 ## Running
 ```bash
 sudo neuronrt -a yolov8n_float32.dla -d
-
+[sudo] password for ubuntu:
+```
+```bash
 python run_yolov8n_dla.py
 ```
 ### Object Detection
