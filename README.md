@@ -12,6 +12,8 @@
 ## Running
 ```bash
 sudo neuronrt -a yolov8n_float32.dla -d
+
+python run_yolov8n_dla.py
 ```
 ### Object Detection
 #### **NeuronRT (DLA)**
