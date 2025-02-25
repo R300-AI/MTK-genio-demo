@@ -11,7 +11,7 @@
 ## Compile
 ## Running
 ```bash
-# you can use the 'sudo neuronrt -a yolov8n_float32.dla -d' cammand to check the number of output handlers needed.
+sudo neuronrt -a yolov8n_float32.dla -d
 ```
 ### Object Detection
 #### **NeuronRT (DLA)**
