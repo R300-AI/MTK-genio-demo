@@ -21,3 +21,10 @@ $ python run_yolov8n_dla.py
 #### **NeuronRT (DLA)**
 #### **ArmNN (TFLite)**
 
+```
+export LD_LIBRARY_PATH=/path/to/armnn/build:$LD_LIBRARY_PATH
+export PATH=/path/to/armnn/build:$PATH
+```
+```
+find /path/to/armnn/build -name "libarmnn.so"
+```
