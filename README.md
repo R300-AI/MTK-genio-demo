@@ -27,4 +27,6 @@ export PATH=/path/to/armnn/build:$PATH
 ```
 ```
 find /path/to/armnn/build -name "libarmnn.so"
+
+AttributeError: 'Delegate' object has no attribute '_library'
 ```
