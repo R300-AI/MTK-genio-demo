@@ -32,11 +32,6 @@ $ python run_yolov8n_armnn.py
 > $ export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>/build:$LD_LIBRARY_PATH
 > ```
 
-```
-# IF OCCUR DELEGATE ERROR, PLEASE USE THIS
-
-```
-
 ## Running
 ```bash
 $ sudo neuronrt -a ./models/yolov8n_float32.dla -d
