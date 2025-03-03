@@ -18,7 +18,8 @@ $ conda create --name armnn python=3.9
 $ conda activate armnn
 ```
 ```
-$ pip install -r requirments/armnn.txt
+$ pip install -r requirments.txt
+$ pip install tflite-runtime
 ```
 
 ```
