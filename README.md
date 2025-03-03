@@ -38,6 +38,3 @@ $ sudo neuronrt -a ./models/yolov8n_float32.dla -d
 ```bash
 $ python run_yolov8n_neuronrt.py
 ```
-### Object Detection
-#### **NeuronRT (DLA)**
-
