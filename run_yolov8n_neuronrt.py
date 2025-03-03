@@ -22,12 +22,12 @@ import numpy as np
 # - classes: List of object detection classes from the trained dataset.
 # - labels: Mapping of class indices to their respective names.
 # - nc: Total number of object detection classes.
-image_path = './resources/bus.jpg'
+image_path = './data/bus.jpg'
 model_path = "./models/yolov8n_float32.dla"
 imgsz = (640, 640)
 output_handlers_with_shape = {'./bin/output0.bin': (1, 1, 84, 8400)}
 
-with open ('./resources/coco_labels.txt', 'rb') as f:
+with open ('./data/coco_labels.txt', 'rb') as f:
     classes = pickle.load(f)
     nc, labels = len(classes), {i: cls for i, cls in enumerate(classes)}
 
