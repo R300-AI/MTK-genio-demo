@@ -9,7 +9,7 @@
 > * [Pretrain or Custom]()
 
 
-## ArmNN
+## ArmNN Runtime
 
 ```bash
 $ conda create --name armnn python=3.9
@@ -30,7 +30,7 @@ $ python run_yolov8n_armnn.py
 > $ export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>/build:$LD_LIBRARY_PATH
 > ```
 
-## NeuronRT
+## NeuronRT Runtime
 ```bash
 $ sudo neuronrt -a ./models/yolov8n_float32.dla -d
 [sudo] password for ubuntu:
