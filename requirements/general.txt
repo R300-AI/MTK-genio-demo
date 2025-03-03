@@ -1,3 +1,0 @@
-matplotlib
-tflite-runtime
-opencv-python
