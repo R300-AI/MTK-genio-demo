@@ -11,8 +11,6 @@
 
 ## ArmNN
 
-#### **ArmNN (TFLite)**
-
 ```bash
 $ conda create --name armnn python=3.9
 $ conda activate armnn
