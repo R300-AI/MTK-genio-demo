@@ -23,8 +23,11 @@ $ pip install tflite-runtime
 ```
 
 ```
+$ python run_yolov8n_armnn.py
+```
+```
 # IF OCCUR DELEGATE ERROR, PLEASE USE THIS
-export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>/build:$LD_LIBRARY_PATH
+$ export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>/build:$LD_LIBRARY_PATH
 ```
 
 ## Running
