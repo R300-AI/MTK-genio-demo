@@ -18,6 +18,11 @@ $ conda create --name armnn python=3.9
 $ conda activate armnn
 ```
 ```
+$ pip install -r requirments/armnn.txt
+```
+
+```
+# IF OCCUR DELEGATE ERROR, PLEASE USE THIS
 export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>/build:$LD_LIBRARY_PATH
 ```
 
