@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2, pickle, time
 
-with open ('./resources/coco_labels.txt', 'rb') as f:
+with open ('./data/coco_labels.txt', 'rb') as f:
     classes = pickle.load(f)
     nc, labels = len(classes), {i: cls for i, cls in enumerate(classes)}
     
 #require python3.9
-img = cv2.imread('./resources/bus.jpg')
+img = cv2.imread('./data/bus.jpg')
 
 interpreter = tflite.Interpreter(model_path='./models/yolov8n_float32.tflite')
 #armnn_delegate = tflite.load_delegate( library="/home/ubuntu/armnn/ArmNN-linux-aarch64/libarmnnDelegate.so",
