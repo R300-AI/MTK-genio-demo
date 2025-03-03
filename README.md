@@ -8,7 +8,19 @@
 > * [Config Board](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html)
 > * [Pretrain or Custom]()
 
-## Compile
+
+## ArmNN
+
+#### **ArmNN (TFLite)**
+
+```
+$ conda create --name armnn python=3.9
+$ conda activate armnn
+```
+```
+export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>/build:$LD_LIBRARY_PATH
+```
+
 ## Running
 ```bash
 $ sudo neuronrt -a ./models/yolov8n_float32.dla -d
@@ -19,8 +31,4 @@ $ python run_yolov8n_dla.py
 ```
 ### Object Detection
 #### **NeuronRT (DLA)**
-#### **ArmNN (TFLite)**
 
-```
-export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>/build:$LD_LIBRARY_PATH
-```
