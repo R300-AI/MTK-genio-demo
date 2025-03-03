@@ -30,3 +30,6 @@ find /path/to/armnn/build -name "libarmnn.so"
 
 AttributeError: 'Delegate' object has no attribute '_library'
 ```
+```
+export LD_LIBRARY_PATH=/home/ubuntu/armnn/ArmNN-linux-aarch64/:$LD_LIBRARY_PATH
+```
