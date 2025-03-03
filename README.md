@@ -32,4 +32,6 @@ AttributeError: 'Delegate' object has no attribute '_library'
 ```
 ```
 export LD_LIBRARY_PATH=/home/ubuntu/armnn/ArmNN-linux-aarch64/:$LD_LIBRARY_PATH
+https://github.com/ARM-software/armnn/releases
+https://github.com/ARM-software/armnn/releases/download/v24.02/ArmNN-linux-aarch64.tar.gz
 ```
