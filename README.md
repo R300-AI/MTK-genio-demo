@@ -31,6 +31,10 @@ $ python run_yolov8n_armnn.py
 > ```
 
 ## NeuronRT Runtime
+
+```bash
+$ pip install -r requirments.txt
+```
 ```bash
 $ sudo neuronrt -a ./models/yolov8n_float32.dla -d
 [sudo] password for ubuntu:
