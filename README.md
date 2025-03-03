@@ -13,21 +13,28 @@
 
 #### **ArmNN (TFLite)**
 
-```
+```bash
 $ conda create --name armnn python=3.9
 $ conda activate armnn
 ```
-```
+```bash
 $ pip install -r requirments.txt
 $ pip install tflite-runtime
 ```
 
-```
+```bash
 $ python run_yolov8n_armnn.py
 ```
+
+> [!NOTE]
+> IF OCCUR DELEGATE ERROR, PLEASE USE THIS
+> ```bash
+> $ export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>/build:$LD_LIBRARY_PATH
+> ```
+
 ```
 # IF OCCUR DELEGATE ERROR, PLEASE USE THIS
-$ export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>/build:$LD_LIBRARY_PATH
+
 ```
 
 ## Running
