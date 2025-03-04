@@ -4,8 +4,9 @@
 <img src="https://github.com/R300-AI/ITRI-AI-Hub/blob/main/docs/assets/images/pages/genio_510_demonstration_workflow.png" width="780"/>
 </div>
 
-* [Pretrain or Custom](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html)
-* [Compile Models]()
+## Useful Instructions
+* [Genio EVK Configuration Guide](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html)
+* [How to compile TFlite to DLA Format?]()
 
 ## Demo
 ### ArmNN Runtime
