@@ -5,10 +5,10 @@
 </div>
 
 ## Requirments
-* A Genio Board with Ubuntu.
+* A Genio Board with Ubuntu installed.
     - [How to Configure Your Genio EVK: A Beginner's Guide](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html)
-* Model with `TFLite` or `DLA` Format.
-    - [Step-by-Step: Compiling the TFLite Model to DLA Format](#)
+* Pre-trained or Custom Models with Compatible Operators.
+    - [Step-by-Step Instructions: Converting TFLite Models to DLA Format for NeuronRT Runtime](#)
 
 ## Demo
 
