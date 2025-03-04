@@ -4,9 +4,8 @@
 <img src="https://github.com/R300-AI/ITRI-AI-Hub/blob/main/docs/assets/images/pages/genio_510_demonstration_workflow.png" width="780"/>
 </div>
 
-> [!NOTE]
-> * [Config Board](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html)
-> * [Pretrain or Custom]()
+* [Config Board](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html)
+* [Pretrain or Custom]()
 
 
 ## ArmNN Runtime
