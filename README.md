@@ -22,28 +22,27 @@
     $ pip install tflite-runtime
     ```
 
-3. Run the `YOLOv8n.tflite` model with ArmNN.
+3. Run the `YOLOv8n_float32.tflite` model with ArmNN.
     ```bash
     $ python run_yolov8n_armnn.py
     ```
-    > [!NOTE]
-    > If you encounter a delegate error, set the `LD_LIBRARY_PATH` environment variable as below:
+    > **Note:** If you encounter a delegate error, set the `LD_LIBRARY_PATH` environment variable as below:
     > ```bash
     > $ export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>:$LD_LIBRARY_PATH
     > ```
 
 ### NeuronRT Runtime 
 
-1. Install the required packages:
+1. Install the required packages.
 ```bash
 $ pip install -r requirments.txt
 ```
-2. Start the NeuronRT runtime with the YOLOv8n model:
+2. Start the NeuronRT runtime with the YOLOv8n model.
 ```bash
 $ sudo neuronrt -a ./models/yolov8n_float32.dla -d
 [sudo] password for ubuntu:
 ```
-3. Run the `YOLOv8n.dla` model with NeuronRT:
+3. Run the `YOLOv8n_float32.dla` model with NeuronRT.
 ```bash
 $ python run_yolov8n_neuronrt.py
 ```
