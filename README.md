@@ -4,14 +4,16 @@
 <img src="https://github.com/R300-AI/ITRI-AI-Hub/blob/main/docs/assets/images/pages/genio_510_demonstration_workflow.png" width="780"/>
 </div>
 
-## Useful Instructions
-* [How to Configure Your Genio EVK: A Beginner's Guide](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html)
-* [Step-by-Step: Compiling TFLite to DLA Format](#)
+## Requirments
+* A Genio Board with Ubuntu.
+    - [How to Configure Your Genio EVK: A Beginner's Guide](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html)
+* Model with `TFLite` or `DLA` Format.
+* [Step-by-Step: Compiling the TFLite Model to DLA Format](#)
 
 ## Demo
 ### ArmNN Runtime
 
-1. Create a new conda environment and activate it.
+1. Create a new conda environment for ArmNN and activate it.
     ```bash
     $ conda create --name armnn python=3.9
     $ conda activate armnn
