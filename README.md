@@ -8,9 +8,12 @@
 * A Genio Board with Ubuntu.
     - [How to Configure Your Genio EVK: A Beginner's Guide](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html)
 * Model with `TFLite` or `DLA` Format.
-* [Step-by-Step: Compiling the TFLite Model to DLA Format](#)
+    - [Step-by-Step: Compiling the TFLite Model to DLA Format](#)
 
 ## Demo
+
+By exploring these example programs, you will gain a comprehensive understanding of how each step in the inference process is implemented. These examples provide detailed insights into the setup, execution, and optimization of inference tasks, allowing you to see the practical application of various runtime environments and model configurations. Whether you are a beginner or an experienced developer, these examples will help you grasp the intricacies of the inference workflow and apply them to your own projects.
+
 ### ArmNN Runtime
 
 1. Create a new conda environment for ArmNN and activate it.
