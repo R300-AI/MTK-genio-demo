@@ -7,7 +7,7 @@
 
 2. Create a new conda environment for ArmNN and activate it.
     ```bash
-    $ conda create --name armnn python=3.9
+    $ conda create --name armnn python=3.7
     $ conda activate armnn
     ```
 
