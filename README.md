@@ -25,6 +25,6 @@ $ python test_armnn.py --tflite_model <path_to_tflite_model> --device GpuAcc
 $ pip install -r requirements.txt
 $ python test_neuronrt.py --dla_model <path_to_dla_model> --device GpuAcc
 ```
-## Tutorial
+## Demo 
 ### Object Detection
 * **YOLOv8n Delegation Demo Tutorial** | [[ArmNN]](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/run_yolov8n_via_armnn.md), [[NeuronRT]](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/run_yolov8n_via_neuronrt.md)
