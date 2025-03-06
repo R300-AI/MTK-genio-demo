@@ -17,9 +17,15 @@ By exploring these Python examples, you will be able to fully understand the fun
 The available applications and models are listed below, and it is recommended to start with similar functionality of your senarios.
 
 ## Benchmarks
+### TFLite
 ```bash
 $ pip install -r requirements.txt
 $ python test_armnn.py --tflite_model <path_to_tflite_model> --device GpuAcc
+```
+### DLA
+```bash
+$ pip install -r requirements.txt
+$ python test_neuronrt.py --dla_model <path_to_dla_model> --device GpuAcc
 ```
 ## Tutorial
 ### Object Detection
