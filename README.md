@@ -9,8 +9,6 @@
 
 ## How to Use This?
 
-
-
 ## Benchmarks
 ### ArmNN Delegation
 ```bash
