@@ -14,12 +14,12 @@ By exploring these Python examples, you will be able to fully understand the fun
 The available applications and models are listed below, and it is recommended to start with similar functionality of your senarios.
 
 ## Benchmarks
-### TFLite
+### ArmNN Delegation
 ```bash
 $ pip install -r requirements.txt
 $ python test_armnn.py --tflite_model <path_to_tflite_model> --device GpuAcc
 ```
-### DLA
+### NeuronRT Delegation
 - [How to Converting TFLite Models to DLA Format for NeuronRT](#)
 ```bash
 $ pip install -r requirements.txt
