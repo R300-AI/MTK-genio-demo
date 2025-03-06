@@ -1,4 +1,5 @@
 import argparse, time
+import tensorflow as tf
 
 parser = argparse.ArgumentParser()
 
@@ -8,10 +9,11 @@ parser.add_argument("-t", "--iteration", default=10, type=int, help="Test How Ma
 args = parser.parse_args()
 
 # Initialize Interpreter
-armnn_delegate = tflite.load_delegate( library="/home/ubuntu/armnn/ArmNN-linux-aarch64/libarmnnDelegate.so",
+Interpreter, load_delegate = tf.lite.Interpreter, tf.lite.experimental.load_delegate
+armnn_delegate = load_delegate( library="/home/ubuntu/armnn/ArmNN-linux-aarch64/libarmnnDelegate.so",
                                        options={"backends": args.device, "logging-severity":"info"})
-interpreter = tflite.Interpreter(model_path=args.tflite_model, 
-                                 experimental_delegates=[armnn_delegate])
+interpreter = Interpreter(model_path=args.tflite_model, 
+                          experimental_delegates=[armnn_delegate])
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
