@@ -16,7 +16,7 @@ interpreter = Interpreter(model_path=args.tflite_model,
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
-# Forward Propagation Speed
+# Forward Propagation
 inputs = np.random.rand(*input_details[0]['shape']).astype(input_details[0]['dtype'])
 for _ in range(args.iteration):
   t = time.time()
