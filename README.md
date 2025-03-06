@@ -12,7 +12,7 @@
 
 ## How to use this?
 
-By exploring these Python example programs, you will be able to fully understand the basic steps involved in implementing AI model deployment on these chips, including: preprocessing, inference operations, post-processing, and visualization. This will help you quickly master the intricacies of the workflow and apply it to your own projects.
+By exploring these Python examples, you will be able to fully understand the basic steps involved in implementing AI model deployment on these chips, including: preprocessing, inference operations, post-processing, and visualization. This will help you quickly master the intricacies of the workflow and apply it to your own projects.
 
 ### Object Detection
 * **YOLOv8n Delegation Demo Tutorial** | [[ArmNN]](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/run_yolov8n_via_armnn.md), [[NeuronRT]](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/run_yolov8n_via_neuronrt.md)
