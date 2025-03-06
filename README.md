@@ -5,7 +5,7 @@
 </div>
 
 ## Requirments
-* A Genio Board with Ubuntu installed.
+* A Genio Board with Ubuntu system.
     - [How to Configure Your Genio EVK: A Beginner's Guide](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html)
 * A TFLite Pre-trained Models is required for custom inference.
     - [Step-by-Step Instructions: Converting TFLite Models to DLA Format for NeuronRT Runtime](#)
