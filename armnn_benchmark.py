@@ -19,7 +19,6 @@ output_details = interpreter.get_output_details()
 
 # Forward Propagation Speed
 inputs = np.random.rand(*input_details[0]['shape']).astype(input_details[0]['dtype'])
-
 for _ in range(args.iteration):
   t = time.time()
   interpreter.set_tensor(input_details[0]['index'], inputs)
