@@ -17,7 +17,7 @@
     $ pip install tflite-runtime
     ```
 ## Start Runing
-1. Run the `YOLOv8n_float32.tflite` model with ArmNN.
+1. Run the script.
     ```bash
     $ python run_yolov8n_armnn.py
     ```
