@@ -2,7 +2,6 @@ import argparse, time
 import tensorflow as tf
 
 parser = argparse.ArgumentParser()
-
 parser.add_argument("-m", "--tflite_model", type=str, help="Path to .tflite")
 parser.add_argument("-d", "--device", default='GpuAcc', choices=['CpuAcc', 'GpuAcc'], type=str, help="Device name for acceleration")
 parser.add_argument("-t", "--iteration", default=10, type=int, help="Test How Many Times?")
