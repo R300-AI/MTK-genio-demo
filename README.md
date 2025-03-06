@@ -5,10 +5,7 @@
 </div>
 
 ## Requirments
-* A Genio Board with Ubuntu System.
-    - [How to Configure Your Genio EVK: A Beginner's Guide](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html)
-* TFLite Pre-trained Models is required for Custom Inference.
-    - [Step-by-Step: Converting TFLite Models to DLA Format for NeuronRT](#)
+* Follow the [Instruction](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html) to setup your Genio board with Ubuntu System.
 
 ## How to Use This?
 
@@ -23,6 +20,7 @@ $ pip install -r requirements.txt
 $ python test_armnn.py --tflite_model <path_to_tflite_model> --device GpuAcc
 ```
 ### DLA
+- [How to Converting TFLite Models to DLA Format for NeuronRT](#)
 ```bash
 $ pip install -r requirements.txt
 $ python test_neuronrt.py --dla_model <path_to_dla_model> --device GpuAcc
