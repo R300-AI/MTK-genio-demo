@@ -16,10 +16,10 @@ By exploring these Python examples, you will be able to fully understand the fun
 
 The available applications and models are listed below, and it is recommended to start with similar functionality of your senarios.
 
-## Quick Start
+## Benchmarks
 ```bash
 $ pip install -r requirements.txt
-$ python armnn_benchmark.py --tflite_model <path_to_tflite_model> --device GpuAcc
+$ python test_armnn.py --tflite_model <path_to_tflite_model> --device GpuAcc
 ```
 ## Tutorial
 ### Object Detection
