@@ -1,6 +1,4 @@
-## ArmNN Runtime
-
-### Setup
+## Preparation
 1. Connect Genio board to the internet and clone this repository.
     ```bash
     $ git clone https://github.com/R300-AI/MTK-genio-demo.git
@@ -18,7 +16,7 @@
     $ pip install -r requirments.txt
     $ pip install tflite-runtime
     ```
-### Run
+## Start Runing
 1. Run the `YOLOv8n_float32.tflite` model with ArmNN.
     ```bash
     $ python run_yolov8n_armnn.py
