@@ -5,7 +5,7 @@
 </div>
 
 ## Requirments
-* Follow the [Instruction](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html) to setup your Genio board with Ubuntu System.
+* Follow the [Instruction](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html) to install Ubuntu on your Genio board.
 
 ## How to Use This?
 
