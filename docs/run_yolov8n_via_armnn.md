@@ -13,7 +13,7 @@
 
 3. Install the required packages.
     ```bash
-    $ pip install -r requirments.txt
+    $ pip install -r requirements.txt
     $ pip install tflite-runtime
     ```
 ## Start Runing
