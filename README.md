@@ -9,7 +9,7 @@
 
 ## How to Use This?
 
-## Demo 
+### Demo 
 
 By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects.
 
