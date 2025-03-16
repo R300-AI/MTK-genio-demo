@@ -9,15 +9,10 @@
 
 2. Create a new conda environment for ArmNN and activate it.
     ```bash
-    $ conda create --name armnn python=3.7
-    $ conda activate armnn
+    $ conda create --name armnn python=3.12 && conda activate armnn
+    $ pip install -r requirements.txt
     ```
 
-3. Install the required packages.
-    ```bash
-    $ pip install -r requirements.txt
-    $ pip install tflite-runtime
-    ```
 ## Start Runing
 1. Run the script.
     ```bash
