@@ -9,18 +9,6 @@
 
 ## How to Use This?
 
-## Benchmarks
-### ArmNN Delegation
-```bash
-$ pip install -r requirements.txt
-$ python test_armnn.py --tflite_model <path_to_tflite_model> --device GpuAcc
-```
-### NeuronRT Delegation
-```bash
-$ pip install -r requirements.txt
-$ python test_neuronrt.py --dla_model <path_to_dla_model>
-```
-
 ## Demo 
 
 By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects.
