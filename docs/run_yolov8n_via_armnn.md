@@ -10,6 +10,7 @@
     ```bash
     $ git clone https://github.com/R300-AI/MTK-genio-demo.git
     $ cd MTK-genio-demo
+    $ bash build.sh
     ```
 
 2. Create a new conda environment for ArmNN and activate it.
