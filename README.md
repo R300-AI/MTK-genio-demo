@@ -9,6 +9,7 @@
 
 # How to Use This?
 ## Benchmark Tools
+### ArmNN Runtime
 for demo, you can replace `<path-to-tflite-model> ` to `./models/yolov8n_float32.tflite`
   ```bash
   $ conda create --name armnn python=3.12 && conda activate armnn
@@ -20,7 +21,14 @@ for demo, you can replace `<path-to-tflite-model> ` to `./models/yolov8n_float32
   > ```bash
   > $ export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>:$LD_LIBRARY_PATH
   > ```
-  
+### NeuronRT Runtime
+  ```bash
+  $ sudo neuronrt -a ./models/yolov8n_float32.dla -d
+  [sudo] password for ubuntu:
+
+  $ python armnn.py --tflite <path-to-tflite-model> 
+  ```
+
 ## Demo
 By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects.
 
