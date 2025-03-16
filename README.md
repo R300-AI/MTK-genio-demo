@@ -12,6 +12,9 @@
 ### ArmNN Runtime
 for demo, you can replace `<path-to-tflite-model> ` to `./models/yolov8n_float32.tflite`
   ```bash
+  $ git clone https://github.com/R300-AI/MTK-genio-demo.git
+  $ cd MTK-genio-demo
+
   $ conda create --name armnn python=3.12 && conda activate armnn
   $ pip install -r requirements.txt
 
