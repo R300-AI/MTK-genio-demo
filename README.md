@@ -9,8 +9,8 @@
 
 # How to Use This?
 ## Benchmark Tools
-`./models/yolov8n_float32.tflite`
-```
+for demo, you can replace `<path-to-tflite-model> ` to `./models/yolov8n_float32.tflite`
+```bash
 $ conda create --name armnn python=3.12 && armnn
 $ pip install -r requirements.txt
 $ python armnn.py --tflite <path-to-tflite-model> --device GpuAcc --iteration 10
