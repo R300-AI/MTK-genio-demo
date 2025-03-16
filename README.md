@@ -8,14 +8,14 @@
 * A **Workstation** and **Genio board**.
 * Follow the [Instruction](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html) to flash **Ubuntu** for your Genio board.
 
-# How to Use This?
-## Benchmarks
+## How to Use This?
+
   ```bash
   $ git clone https://github.com/R300-AI/MTK-genio-demo.git
   $ cd MTK-genio-demo
   ```
 
-### ArmNN Runtime
+### ArmNN Benchmarks
 for demo, you can replace `<path-to-tflite-model> ` to `./models/yolov8n_float32.tflite`
   ```bash
   $ conda create --name armnn python=3.12 && conda activate armnn
@@ -27,7 +27,7 @@ for demo, you can replace `<path-to-tflite-model> ` to `./models/yolov8n_float32
   > ```bash
   > $ export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>:$LD_LIBRARY_PATH
   > ```
-### NeuronRT Runtime
+### NeuronRT Benchmarks
   ```bash
   $ sudo neuronrt -a ./models/yolov8n_float32.dla -d
   [sudo] password for ubuntu:
