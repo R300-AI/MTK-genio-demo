@@ -10,12 +10,16 @@
 # How to Use This?
 ## Benchmark Tools
 for demo, you can replace `<path-to-tflite-model> ` to `./models/yolov8n_float32.tflite`
-```bash
-$ conda create --name armnn python=3.12 && conda activate armnn
-$ pip install -r requirements.txt
-$ python armnn.py --tflite <path-to-tflite-model> --device GpuAcc --iteration 10
-```
-
+  ```bash
+  $ conda create --name armnn python=3.12 && conda activate armnn
+  $ pip install -r requirements.txt
+  $ python armnn.py --tflite <path-to-tflite-model> --device GpuAcc --iteration 10
+  ```
+  > **Note:** If `AttributeError: 'Delegate' object has no attribute '_library'` occur, set the `LD_LIBRARY_PATH` environment variable as below:
+  > ```bash
+  > $ export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>:$LD_LIBRARY_PATH
+  > ```
+  
 ## Demo
 By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects.
 
