@@ -5,7 +5,7 @@
 </div>
 
 ## Requirments
-* Follow the [Instruction](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html) to install the **Ubuntu** on your Genio board.
+* Follow the [Instruction](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html) to install the **Workstation** and flash **Ubuntu** for your Genio board.
 
 ## How to Use This?
 
