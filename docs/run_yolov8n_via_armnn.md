@@ -1,6 +1,6 @@
 ## Preparation
 ```
-& it clone https://github.com/ultralytics/ultralytics.git
+& git clone https://github.com/ultralytics/ultralytics.git
 & mv ./ultralytics ./ultralytics_old
 & mv ./ultralytics_old/ultralytics ./ultralytics
 & rm -rf ./ultralytics_old
