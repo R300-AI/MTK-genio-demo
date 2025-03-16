@@ -9,6 +9,5 @@ def predict(input_handlers, output_handlers, compiled_dla_model, boost_value = 1
                 "-i",  ' -i '.join(input_handlers),  
                 "-o",  ' -o '.join(output_handlers)]
                       
-    subprocess.Popen(commands)
-                    
-                    
+    p = subprocess.Popen(commands, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    #p.wait()

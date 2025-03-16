@@ -1,4 +1,11 @@
+# interpreter
 matplotlib
 opencv-python
+tensorflow
+
+# ultralytics framework
+pyyaml
+tqdm
+psutil
 torch
 torchvision
