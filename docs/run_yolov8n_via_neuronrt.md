@@ -1,5 +1,11 @@
-### NeuronRT Runtime 
+## Preparation
+1. Connect Genio board to the internet and clone this repository.
+    ```bash
+    $ git clone https://github.com/R300-AI/MTK-genio-demo.git
+    $ cd MTK-genio-demo
+    ```
 
+### NeuronRT Runtime 
 1. Install the required packages.
     ```bash
     $ pip install -r requirments.txt
