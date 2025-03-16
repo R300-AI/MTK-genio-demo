@@ -11,6 +11,8 @@
 ## Benchmark Tools
 
 ```
+pip install -r requirements.txt
+python test_armnn.py --tflite ./models/yolov8n_float32.tflite --device GpuAcc
 ```
 
 ## Demo
