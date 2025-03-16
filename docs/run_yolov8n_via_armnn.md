@@ -1,4 +1,8 @@
 ## Preparation
+```
+git clone https://github.com/ultralytics/ultralytics.git
+```
+
 1. Connect Genio board to the internet and clone this repository.
     ```bash
     $ git clone https://github.com/R300-AI/MTK-genio-demo.git
