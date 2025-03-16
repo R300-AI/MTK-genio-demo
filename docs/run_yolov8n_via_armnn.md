@@ -1,6 +1,9 @@
 ## Preparation
 ```
-git clone https://github.com/ultralytics/ultralytics.git
+& it clone https://github.com/ultralytics/ultralytics.git
+& mv ./ultralytics ./ultralytics_old
+& mv ./ultralytics_old/ultralytics ./ultralytics
+& rm -rf ./ultralytics_old
 ```
 
 1. Connect Genio board to the internet and clone this repository.
