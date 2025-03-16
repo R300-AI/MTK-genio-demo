@@ -11,8 +11,9 @@
 ## Benchmark Tools
 
 ```
-pip install -r requirements.txt
-python test_armnn.py --tflite ./models/yolov8n_float32.tflite --device GpuAcc
+$ conda create --name armnn python=3.12
+$ pip install -r requirements.txt
+$ python test_armnn.py --tflite ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
 ```
 
 ## Demo
