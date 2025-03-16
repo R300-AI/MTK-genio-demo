@@ -15,7 +15,7 @@ for demo, you can replace `<path-to-tflite-model> ` to `./models/yolov8n_float32
   $ conda create --name armnn python=3.12 && conda activate armnn
   $ pip install -r requirements.txt
 
-  $ python armnn.py --tflite <path-to-tflite-model> --device GpuAcc --iteration 10
+  $ python armnn_benchmark.py --tflite <path-to-tflite-model> --device GpuAcc --iteration 10
   ```
   > If `AttributeError: 'Delegate' object has no attribute '_library'` occur, please set the `LD_LIBRARY_PATH`:
   > ```bash
@@ -26,7 +26,7 @@ for demo, you can replace `<path-to-tflite-model> ` to `./models/yolov8n_float32
   $ sudo neuronrt -a ./models/yolov8n_float32.dla -d
   [sudo] password for ubuntu:
 
-  $ python armnn.py --tflite <path-to-tflite-model> 
+  $ python neuronrt_benchmark.py --tflite <path-to-tflite-model> --iteration 10
   ```
 
 ## Demo
