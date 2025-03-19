@@ -5,7 +5,7 @@
 </div>
 
 ## Requirments
-* A **Workstation** and **Genio board**.
+* A **Workstation** and **Genio Evaluation Kit**.
 * Follow the Developer's [Document](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html) to build the **Ubuntu** and **Libraries** on your Genio board.
 
 ## How to Use This?
