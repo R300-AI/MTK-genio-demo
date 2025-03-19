@@ -16,6 +16,10 @@
   $ pip install -r requirements.txt
   ```
 
+### NeuronRT Benchmarks
+  ```bash
+  $ python neuronrt_delegate.py --tflite <path-to-tflite-model> --iteration 10
+  ```
 ### ArmNN Benchmarks
 for demo, you can replace `<path-to-tflite-model> ` to `./models/yolov8n_float32.tflite`
   ```bash
@@ -25,13 +29,7 @@ for demo, you can replace `<path-to-tflite-model> ` to `./models/yolov8n_float32
   > ```bash
   > $ export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>:$LD_LIBRARY_PATH
   > ```
-### NeuronRT Benchmarks
-  ```bash
-  $ sudo neuronrt -a ./models/yolov8n_float32.dla -d
-  [sudo] password for ubuntu:
 
-  $ python neuronrt_delegate.py --tflite <path-to-tflite-model> --iteration 10
-  ```
 
 ## Demo
 By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects.
