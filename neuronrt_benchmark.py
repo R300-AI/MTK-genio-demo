@@ -19,6 +19,7 @@ dla_path = Neuronpilot_WebAPI(
 print(f"Converted file saved to: {dla_path}")
 
 # Initialize Interpreter
+neuronrt.load(dla_path)
 interpreter = tf.lite.Interpreter(model_path=args.tflite_model)
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
@@ -31,7 +32,7 @@ t1 = time.time()
 bin_path = convert_to_binary(image_data = inputs, handeler = 0)
 t2 = time.time()
 for _ in range(args.iteration):
-  neuronrt.predict(input_handlers = [f"./bin/{bin_path}"], 
+  neuronrt.predict(input_handlers = [bin_path], 
                    output_handlers  = list(output_handlers_with_shape.keys()), 
                    compiled_dla_model = dla_path, 
   )

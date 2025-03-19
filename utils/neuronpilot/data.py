@@ -3,7 +3,7 @@ import cv2
 
 def convert_to_binary(image_data, handeler = 0):
     binary_file = f"./bin/input{handeler}.bin"
-    image_data.astype(np.int8).tofile(binary_file)
+    image_data.astype(np.float32).tofile(binary_file)
     return binary_file
     
 def conert_to_numpy(output_handlers_with_shape, dtype = np.float32):
