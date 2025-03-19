@@ -21,7 +21,6 @@
   $ python neuronrt_delegate.py --tflite <path-to-tflite-model> --iteration 10
   ```
 ### ArmNN Benchmarks
-for demo, you can replace `<path-to-tflite-model> ` to `./models/yolov8n_float32.tflite`
   ```bash
   $ python armnn_delegate.py --tflite <path-to-tflite-model> --device GpuAcc --iteration 10
   ```
