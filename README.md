@@ -9,7 +9,7 @@
 * Follow the Developer's [Document](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html) to build the **Ubuntu** and **Libraries** on your Genio board.
 
 ## How to Use This?
-  請依照下列指令將這個範例repository下載到您的Genio板子，然後安裝必要的環境(Python=`3.12`)。
+  請依照下列指令將這個範例repository下載到您的Genio板子，然後安裝必要的工作環境(Python=`3.12`)。
   ```bash
   $ git clone https://github.com/R300-AI/MTK-genio-demo.git
   $ cd MTK-genio-demo
