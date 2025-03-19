@@ -27,7 +27,7 @@
   $ python armnn_delegate.py --tflite ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
   ```
 
-* `./models/yolov8n_float32.tflite``<path-to-tflite-model>`
+請記得將`./models/yolov8n_float32.tflite`替換為你的tflite模型
 
 ## Demo
 By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects.
