@@ -24,11 +24,6 @@
   ```bash
   $ python armnn_delegate.py --tflite <path-to-tflite-model> --device GpuAcc --iteration 10
   ```
-  > If `AttributeError: 'Delegate' object has no attribute '_library'` occur, please set the `LD_LIBRARY_PATH`:
-  > ```bash
-  > $ export LD_LIBRARY_PATH=</path/to/ArmNN-linux-aarch64>:$LD_LIBRARY_PATH
-  > ```
-
 
 ## Demo
 By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects.
