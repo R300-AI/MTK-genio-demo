@@ -1,4 +1,8 @@
+# Deploy Whisper Applications Using OpenAI Library
+
 # Installation
+  To use the Whisper library, you need to install it along with some dependencies. Follow these steps:
+
   ```bash
   $ pip install -U openai-whisper
   $ sudo apt update && sudo apt install ffmpeg
@@ -6,7 +10,7 @@
   ```
 
 # Python Usage
-從[這裡](https://github.com/openai/whisper)找尋期望的模型，並且透過本repository的範例音訊測試執行
+From the [Whisper GitHub repository](https://github.com/openai/whisper), select the desired model and test it using the example audio files provided in the repository.
 ```python
 import whisper, time
 
