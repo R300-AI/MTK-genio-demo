@@ -8,16 +8,10 @@ $ cd MTK-genio-demo
 $ bash ./build.sh
 ```
 
-第二步、將`./ultralytics/nn/autobackend.py` 大約409 ~ 415行初始化TFLite解釋器的位置註解.
+第二步、將`./ultralytics/nn/autobackend.py` 419行初始化TFLite解釋器的位置註解.
 
   ```python
-  # delegate = {"Linux": "libedgetpu.so.1", "Darwin": "libedgetpu.1.dylib", "Windows": "edgetpu.dll"}[
-  #    platform.system()
-  # ]
-  # interpreter = Interpreter(
-  #    model_path=w,
-  #    experimental_delegates=[load_delegate(delegate, options={"device": device})],
-  # )
+  # interpreter = Interpreter(model_path=w)  # load TFLite model
   ```
 
 第三步、將註解的部分替換為以下內容
@@ -32,9 +26,10 @@ $ bash ./build.sh
       experimental_delegates=[armnn_delegate]
   )    
   ```
-
+  or
   ```python
   from utils.neuronpilot import runtime
 
   interpreter = runtime.Interpreter(model_path=w)
   ```
+  if you want to use neuronrt
