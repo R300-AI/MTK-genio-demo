@@ -14,7 +14,23 @@ $ bash ./build.sh
   Next, comment out the initialization of the TFLite interpreter at line 419 in　`./ultralytics/nn/autobackend.py`.
 
   ```python
-  # interpreter = Interpreter(model_path=w)  # load TFLite model
+  if edgetpu:
+      device = device[3:] if str(device).startswith("tpu") else ":0"
+      LOGGER.info(f"Loading {w} on device {device[1:]} for TensorFlow Lite Edge TPU inference...")
+      delegate = {"Linux": "libedgetpu.so.1", "Darwin": "libedgetpu.1.dylib", "Windows": "edgetpu.dll"}[
+          platform.system()
+      ]
+      interpreter = Interpreter(
+          model_path=w,
+          experimental_delegates=[load_delegate(delegate, options={"device": device})],
+      )
+      device = "cpu"
+  else:
+      LOGGER.info(f"Loading {w} for TensorFlow Lite inference...")
+      # interpreter = Interpreter(model_path=w)
+  interpreter.allocate_tensors()  
+  input_details = interpreter.get_input_details()
+  output_details = interpreter.get_output_details() 
   ```
 
 ### Step 3: Replace the Commented Code with the Following
