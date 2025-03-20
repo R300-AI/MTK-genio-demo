@@ -1,6 +1,6 @@
 # Deploy Computer Vision Applications Using Ultralytics YOLO
 
-## Download and Configure Ultralytics for ArmNN and NeuronRT
+## Configure a Custom Ultralytics for ArmNN and NeuronRT
 
 ### Step 1: Download and Set Up Ultralytics Source Code
 First, download and set up the Ultralytics source code using the provided script.
