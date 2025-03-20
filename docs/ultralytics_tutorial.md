@@ -53,9 +53,9 @@ $ bash ./build.sh
 
   interpreter = runtime.Interpreter(model_path=w)
   ```
-### Additional Information
-  * Ensure that the paths specified in the code (e.g., /home/ubuntu/armnn/ArmNN-linux-aarch64/libarmnnDelegate.so) are correct and accessible on your system.
-  * The `options` dictionary in the `load_delegate` function allows you to specify various backend options and logging settings. Adjust these settings as needed for your specific use case.
-  * The `runtime.Interpreter` class from `utils.neuronpilot` is used to initialize the NeuronRT interpreter. Make sure that the `utils.neuronpilot` module is correctly installed and accessible in your environment.
+#### Additional Information
+  * Ensure that the ArmNN paths specified in the code (e.g., /home/ubuntu/armnn/ArmNN-linux-aarch64/libarmnnDelegate.so) match the location where you have installed them.
+  * You need to specify the ArmNN backend options here by setting the `backends` in `options` dictionary.
+  * The `runtime.Interpreter` class mimics the functionality of the tflite runtime functions. If any modifications are needed, you can refer to the `utils.neuronpilot.runtime` file.
 
 By following these steps, you will be able to configure Ultralytics YOLO to work with ArmNN and NeuronRT for deploying computer vision applications on your target hardware.
