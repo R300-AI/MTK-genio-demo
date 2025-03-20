@@ -8,7 +8,7 @@ $ cd MTK-genio-demo
 $ bash ./build.sh
 ```
 
-第二部、將`./ultralytics/nn/autobackend.py` 大約409 ~ 415行初始化TFLite解釋器的位置註解.
+第二步、將`./ultralytics/nn/autobackend.py` 大約409 ~ 415行初始化TFLite解釋器的位置註解.
 
   ```python
   # delegate = {"Linux": "libedgetpu.so.1", "Darwin": "libedgetpu.1.dylib", "Windows": "edgetpu.dll"}[
