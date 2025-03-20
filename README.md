@@ -35,4 +35,4 @@ By exploring these Python examples, you will be able to fully understand the fun
 The available applications and models are listed below, and it is recommended to start with similar functionality of your senarios.
 ### List
 * **Deploy Computer Vision Applications Using Ultralytics YOLO** |
-* **Deploy Computer Vision Applications Using Ollama** |
+* **Deploy Language Process Applications Using Ollama** |
