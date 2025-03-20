@@ -4,14 +4,15 @@
 <img src="https://github.com/R300-AI/ITRI-AI-Hub/blob/main/docs/assets/images/pages/genio_510_demonstration_workflow.png" width="780"/>
 </div>
 
-## Requirments
+## Requirements
 * A **Workstation** and **Genio Evaluation Kit**.
-* Follow the Developer's [Document](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html) to build the **Ubuntu** and **Libraries** on your Genio board.
+* Follow the Developer's [Document](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html) to build the **Ubuntu** and **Packages** to your Genio board.
+
 
 ## How to Use This?
-  Genio為TLite模型提供Mali GPU及MDLA有關的加速選項，除此之外皆是以Cortex-A CPU執行處理。
-  
-  如果有意試著將您的TLite模型Porting到這兩張晶片之上，那麼可以依照下列指令將這個範例repository下載到您的Genio板子，然後安裝必要的工作環境(Python=`3.12`)。
+  Genio provides acceleration options for TLite models using Mali GPU and MDLA, while other operations are executed on the Cortex-A CPU.
+
+  If you are interested in porting your TLite model to these chips, you can follow the instructions below to download this example repository to your Genio board and set up the necessary environment (Python=`3.12`).
   ```bash
   $ git clone https://github.com/R300-AI/MTK-genio-demo.git
   $ cd MTK-genio-demo
@@ -19,12 +20,12 @@
   ```
 
 ### NeuronRT Benchmarks
-  您可以透過以下命令來初步測試您的模型於MDLA的運算速度
+  NeuronRT is a runtime library for neural network inference. You can use the following command to preliminarily test the computation speed of your model on MDLA.
   ```bash
   $ python neuronrt_benchmark.py --tflite ./models/yolov8n_float32.tflite --iteration 10
   ```
 ### ArmNN Benchmarks
-  您可以透過以下命令來測試您的模型於Cortex-A(device=`CpuAcc`)或Mail-G(device=`GpuAcc`)的運算速度
+  ArmNN is a neural network inference library optimized for Arm CPUs and GPUs. You can use the following command to test the computation speed of your model on Cortex-A(device=`CpuAcc`) or Mali-G(device=`GpuAcc`).
   ```bash
   $ python armnn_benchmark.py --tflite ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
   ```
@@ -34,7 +35,8 @@
 ## Tutorials
 By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects.
 
-The available applications and models are listed below, and it is recommended to start with similar functionality of your senarios.
+The available applications and models are listed below, and it is recommended to start with similar functionality to your scenarios.
+
 ### List
 * **Deploy Computer Vision Applications Using Ultralytics YOLO** |
 * **Deploy Language Process Applications Using Ollama** |
