@@ -10,13 +10,13 @@ $ bash ./build.sh
 
 ./ultralytics/nn/autobackend.py
   ```bash
-  # delegate = {"Linux": "libedgetpu.so.1", "Darwin": "libedgetpu.1.dylib", "Windows": "edgetpu.dll"}[
-  #    platform.system()
-  #]
-  #interpreter = Interpreter(
-  #    model_path=w,
-  #    experimental_delegates=[load_delegate(delegate, options={"device": device})],
-  #)
+  $ # delegate = {"Linux": "libedgetpu.so.1", "Darwin": "libedgetpu.1.dylib", "Windows": "edgetpu.dll"}[
+  $ #    platform.system()
+  $ # ]
+  $ # interpreter = Interpreter(
+  $ #    model_path=w,
+  $ #    experimental_delegates=[load_delegate(delegate, options={"device": device})],
+  $ # )
   ```
   ```bash
   armnn_delegate = load_delegate(
