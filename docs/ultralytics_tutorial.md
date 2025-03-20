@@ -1,20 +1,25 @@
 # Deploy Computer Vision Applications Using Ultralytics YOLO
 
-## Download and Config Ultralytics for ArmNN and NeuronRT
-第一步、透過script下載並設定ultralytics的source code
+## Download and Configure Ultralytics for ArmNN and NeuronRT
+
+### Step 1: Download and Set Up Ultralytics Source Code
+First, download and set up the Ultralytics source code using the provided script.
 ```bash
 $ git clone https://github.com/R300-AI/MTK-genio-demo.git
 $ cd MTK-genio-demo
 $ bash ./build.sh
 ```
 
-第二步、將`./ultralytics/nn/autobackend.py` 419行初始化TFLite解釋器的位置註解.
+### Step 2: Modify the TFLite Interpreter Initialization
+  Next, comment out the initialization of the TFLite interpreter at line 419 in　`./ultralytics/nn/autobackend.py`.
 
   ```python
   # interpreter = Interpreter(model_path=w)  # load TFLite model
   ```
 
-第三步、將註解的部分替換為以下內容
+### Step 3: Replace the Commented Code with the Following
+
+  Replace the commented code with the following content to use the ArmNN delegate:
 
   ```python
   armnn_delegate = load_delegate(
@@ -26,10 +31,15 @@ $ bash ./build.sh
       experimental_delegates=[armnn_delegate]
   )    
   ```
-  or
+  Alternatively, if you want to use NeuronRT, replace the commented code with the following:
   ```python
   from utils.neuronpilot import runtime
 
   interpreter = runtime.Interpreter(model_path=w)
   ```
-  if you want to use neuronrt
+### Additional Information
+  * Ensure that the paths specified in the code (e.g., /home/ubuntu/armnn/ArmNN-linux-aarch64/libarmnnDelegate.so) are correct and accessible on your system.
+  * The `options` dictionary in the `load_delegate` function allows you to specify various backend options and logging settings. Adjust these settings as needed for your specific use case.
+  * The `runtime.Interpreter` class from `utils.neuronpilot` is used to initialize the NeuronRT interpreter. Make sure that the `utils.neuronpilot` module is correctly installed and accessible in your environment.
+
+By following these steps, you will be able to configure Ultralytics YOLO to work with ArmNN and NeuronRT for deploying computer vision applications on your target hardware.

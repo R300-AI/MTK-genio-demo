@@ -12,12 +12,15 @@ parser.add_argument("-m", "--tflite_model", type=str, help="Path to .tflite")
 parser.add_argument("-t", "--iteration", default=10, type=int, help="Test How Many Times?")
 args = parser.parse_args()
 
-# Compile TFLite model to DLA format via NeuronPilot WebAPI.
-dla_path = Neuronpilot_WebAPI(
-    tflite_path = args.tflite_model, output_folder = './models', 
-    url = 'https://app-aihub-neuronpilot.azurewebsites.net/')
-print(f"Converted file saved to: {dla_path}")
-
+# Compile TFLite model to DLA format via NeuronPilot WebAPI if DLA not exist.
+if not os.path.exists(args.tflite_path.replace('.tflite', '.dla')):
+  dla_path = Neuronpilot_WebAPI(
+      tflite_path = args.tflite_model, output_folder = './models', 
+      url = 'https://app-aihub-neuronpilot.azurewebsites.net/')
+  print(f"Converted file saved to: {dla_path}")
+else:
+    dla_path = args.tflite_path.replace('.tflite', '.dla')
+    print(f"Load existed dla model: {self.dla_path}")
 if os.path.exists('./bin'):
   shutil.rmtree('./bin')
   os.mkdir('./bin')

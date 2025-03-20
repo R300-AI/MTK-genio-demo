@@ -20,7 +20,7 @@
   ```
 
 ### NeuronRT Benchmarks
-  You can use the following command to preliminarily test the computation speed of your model on MDLA.
+  You can use the following command to preliminarily test the computation speed of your model on MDLA. (**Note**: Internet access may be required to compile the tflite model into dla format)
   ```bash
   $ python neuronrt_benchmark.py --tflite ./models/yolov8n_float32.tflite --iteration 10
   ```
@@ -30,7 +30,7 @@
   $ python armnn_benchmark.py --tflite ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
   ```
 
-> `./models/yolov8n_float32.tflite`為範例之用，你可以將其替換為你自定義的tflite模型
+> `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model
 
 ## Tutorials
 By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects.
