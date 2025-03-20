@@ -17,6 +17,8 @@ $ bash ./build.sh
   #    model_path=w,
   #    experimental_delegates=[load_delegate(delegate, options={"device": device})],
   #)
+  ```
+  ```bash
   armnn_delegate = load_delegate(
       library="/home/ubuntu/armnn/ArmNN-linux-aarch64/libarmnnDelegate.so",
       options={"backends": 'GpuAcc', "logging-severity":"info"}
