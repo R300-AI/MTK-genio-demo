@@ -8,7 +8,7 @@ $ cd MTK-genio-demo
 $ bash ./build.sh
 ```
 
-第二部、將`./ultralytics/nn/autobackend.py`大約409~415行的位置註解，並替換為
+第二部、將`./ultralytics/nn/autobackend.py`大約409~415行及717~721行的位置註解，並替換為
   ```bash
   $ # delegate = {"Linux": "libedgetpu.so.1", "Darwin": "libedgetpu.1.dylib", "Windows": "edgetpu.dll"}[
   $ #    platform.system()
@@ -18,6 +18,16 @@ $ bash ./build.sh
   $ #    experimental_delegates=[load_delegate(delegate, options={"device": device})],
   $ # )
   ```
+  ```bash
+  $ # self.interpreter.set_tensor(details["index"], im)
+  $ # self.interpreter.invoke()
+  $ # y = []
+  $ # for output in self.output_details:
+  ```x = self.interpreter.get_tensor(output["index"])
+
+第三步、將上述替換為ArmNN及NeuronRT Delegation
+
+
   ```bash
   armnn_delegate = load_delegate(
       library="/home/ubuntu/armnn/ArmNN-linux-aarch64/libarmnnDelegate.so",
