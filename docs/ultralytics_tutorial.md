@@ -9,6 +9,7 @@ $ bash ./build.sh
 ```
 
 第二部、將`./ultralytics/nn/autobackend.py`大約409 ~ 415行及717 ~ 721行的位置註解
+  **Section A**
   ```bash
   $ # delegate = {"Linux": "libedgetpu.so.1", "Darwin": "libedgetpu.1.dylib", "Windows": "edgetpu.dll"}[
   $ #    platform.system()
@@ -18,6 +19,7 @@ $ bash ./build.sh
   $ #    experimental_delegates=[load_delegate(delegate, options={"device": device})],
   $ # )
   ```
+  **Section B**
   ```bash
   $ # self.interpreter.set_tensor(details["index"], im)
   $ # self.interpreter.invoke()
