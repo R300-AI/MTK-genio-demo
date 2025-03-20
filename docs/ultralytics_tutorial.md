@@ -23,7 +23,8 @@ $ bash ./build.sh
   $ # self.interpreter.invoke()
   $ # y = []
   $ # for output in self.output_details:
-  ```x = self.interpreter.get_tensor(output["index"])
+  $ #     x = self.interpreter.get_tensor(output["index"])
+  ```
 
 第三步、將上述替換為ArmNN及NeuronRT Delegation
 
