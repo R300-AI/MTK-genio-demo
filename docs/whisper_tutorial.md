@@ -6,7 +6,7 @@
   ```
 
 # Python Usage
-從[這裡](https://github.com/openai/whisper)找尋期望的模型，並且透過本repository的下範例測試執行
+從[這裡](https://github.com/openai/whisper)找尋期望的模型，並且透過本repository的範例音訊測試執行
 ```python
 import whisper, time
 
