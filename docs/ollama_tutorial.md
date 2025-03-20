@@ -18,12 +18,13 @@
 
 ## Usage
 ### Command-Line Response
-
+  透過`ollama run`激活問答環境，並輸入你想提問的內容
   ```bash
   $ ollama run llama3.2:1b
   ```
 
 ### Python Streaming Responses
+  透過`vim`文字編輯器建立`streaming.py`檔，並執行以下內容
   ```python
   from ollama import chat
   
