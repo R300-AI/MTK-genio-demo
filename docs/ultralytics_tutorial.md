@@ -1,6 +1,6 @@
 # Deploy Computer Vision Applications Using Ultralytics YOLO
 
-## Installation
+## Download and Config Ultralytics Framework
 第一步、透過script下載並設定ultralytics的source code
 ```bash
 $ git clone https://github.com/R300-AI/MTK-genio-demo.git
