@@ -1,4 +1,4 @@
-# Deploy Language Process Applications Using Ollama
+# Deploy Computer Vision Applications Using Ultralytics YOLO
 
 ## Installation
 第一步、透過script下載並設定ultralytics的source code
@@ -8,7 +8,7 @@ $ cd MTK-genio-demo
 $ bash ./build.sh
 ```
 
-./ultralytics/nn/autobackend.py
+第二部、將`./ultralytics/nn/autobackend.py`大約409~415行的位置註解，並替換為
   ```bash
   $ # delegate = {"Linux": "libedgetpu.so.1", "Darwin": "libedgetpu.1.dylib", "Windows": "edgetpu.dll"}[
   $ #    platform.system()
