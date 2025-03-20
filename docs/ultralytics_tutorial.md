@@ -32,3 +32,9 @@ $ bash ./build.sh
       experimental_delegates=[armnn_delegate]
   )    
   ```
+
+  ```python
+  from utils.neuronpilot import runtime
+
+  interpreter = runtime.Interpreter(model_path=w)
+  ```
