@@ -49,7 +49,7 @@ Visit the [Models](https://ollama.com/search) page to find a suitable model and 
   for chunk in stream:
     print(chunk['message']['content'], end='', flush=True)
  ```
- Run the streaming.py file
+ Run the `streaming.py` file
  ```bash
  $ python streaming.py
  ```
