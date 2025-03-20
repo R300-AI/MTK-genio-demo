@@ -1,6 +1,6 @@
 # Deploy Whisper Applications Using OpenAI Library
 
-# Installation
+## Installation
   To use the Whisper library, you need to install it along with some dependencies. Follow these steps:
 
   ```bash
@@ -9,7 +9,7 @@
   $ pip install setuptools-rust
   ```
 
-# Python Usage
+## Python Usage
 From the [Whisper GitHub repository](https://github.com/openai/whisper), select the desired model and test it using the example audio files provided in the repository.
 ```python
 import whisper, time
