@@ -11,7 +11,7 @@
   $ ollama pull llama3.2:1b
   ```
 
-第三步、安裝Python SDK
+第三步、安裝Python library
   ```bash
   $ pip install ollama
   ```
