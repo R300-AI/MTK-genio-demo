@@ -1,30 +1,42 @@
 # Deploy Language Process Applications Using Ollama
 
 ## Installation
-第一步、下載並安裝Ollama框架
+
+### Step 1: Download and Install Ollama Framework
   ```bash
   $ curl -fsSL https://ollama.com/install.sh | sh
+
+  # After running the above command, verify the installation by checking the version:
+  $ ollama --version
   ```
 
-第二步、從[Models](https://ollama.com/search)找到合適的模型及尺寸, 並透過`Ollama pull`命令下載pre-built模型
+### Step 2: Find and Download a Suitable Model
+Visit the [Models](https://ollama.com/search) page to find a suitable model and size. Use the `ollama pull` command to download a pre-built model:
   ```bash
   $ ollama pull llama3.2:1b
+
+  # Ensure the model is downloaded successfully by listing available models:
+  $ ollama models
   ```
 
-第三步、安裝Python library
+### Step 3: Install Python Library
   ```bash
   $ pip install ollama
+
+  # Verify the installation by checking the installed packages:
+  $ pip list | grep ollama
   ```
 
 ## Usage
 ### Command-Line Response
-  透過`ollama run`激活問答環境，並輸入你想提問的內容
+  Activate the Q&A environment using the `ollama run` command and input your query:
   ```bash
   $ ollama run llama3.2:1b
   ```
+  To exit the Q&A environment, press Ctrl+C.
 
 ### Python Streaming Responses
-  透過`vim`文字編輯器建立`streaming.py`檔，並執行以下內容
+  Create a `streaming.py` file using a text editor like `vim` and add the following content:
   ```python
   from ollama import chat
   
@@ -36,4 +48,8 @@
   
   for chunk in stream:
     print(chunk['message']['content'], end='', flush=True)
+ ```
+ Run the streaming.py file
+ ```bash
+ $ python streaming.py
  ```
