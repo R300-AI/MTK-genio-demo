@@ -28,7 +28,7 @@ $ bash ./build.sh
       options={"backends": 'GpuAcc', "logging-severity":"info"}
   )
   interpreter = Interpreter(
-      model_path=args.tflite_model, 
+      model_path=w, 
       experimental_delegates=[armnn_delegate]
   )    
   ```
