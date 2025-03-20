@@ -12,7 +12,7 @@
 ## How to Use This?
   Genio provides acceleration options for TLite models using Mali GPU and MDLA, while other operations are executed on the Cortex-A CPU.
 
-  If you are interested in porting your TLite model to these chips, you can follow the instructions below to download this example repository to your Genio board and set up the necessary environment (Python=`3.12`).
+  NeuronRT is a runtime library for neural network inference. and ArmNN is a neural network inference library optimized for Arm CPUs and GPUs. If you are interested in porting your TLite model to these chips, you can follow the instructions below to download this example repository to your Genio board and set up the necessary environment (Python=`3.12`).
   ```bash
   $ git clone https://github.com/R300-AI/MTK-genio-demo.git
   $ cd MTK-genio-demo
@@ -20,12 +20,12 @@
   ```
 
 ### NeuronRT Benchmarks
-  NeuronRT is a runtime library for neural network inference. You can use the following command to preliminarily test the computation speed of your model on MDLA.
+  You can use the following command to preliminarily test the computation speed of your model on MDLA.
   ```bash
   $ python neuronrt_benchmark.py --tflite ./models/yolov8n_float32.tflite --iteration 10
   ```
 ### ArmNN Benchmarks
-  ArmNN is a neural network inference library optimized for Arm CPUs and GPUs. You can use the following command to test the computation speed of your model on Cortex-A(device=`CpuAcc`) or Mali-G(device=`GpuAcc`).
+  You can use the following command to test the computation speed of your model on Cortex-A(device=`CpuAcc`) or Mali-G(device=`GpuAcc`).
   ```bash
   $ python armnn_benchmark.py --tflite ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
   ```
