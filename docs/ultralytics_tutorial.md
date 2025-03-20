@@ -8,10 +8,9 @@ $ cd MTK-genio-demo
 $ bash ./build.sh
 ```
 
-第二部、將`./ultralytics/nn/autobackend.py` **Section A**(大約409 ~ 415行)及**Section B**(大約717 ~ 721行)的位置註解.
+第二部、將`./ultralytics/nn/autobackend.py` 大約409 ~ 415行初始化TFLite解釋器的位置註解.
 
-  **Section A**
-  ```bash
+  ```python
   $ # delegate = {"Linux": "libedgetpu.so.1", "Darwin": "libedgetpu.1.dylib", "Windows": "edgetpu.dll"}[
   $ #    platform.system()
   $ # ]
@@ -20,19 +19,10 @@ $ bash ./build.sh
   $ #    experimental_delegates=[load_delegate(delegate, options={"device": device})],
   $ # )
   ```
-  **Section B**
-  ```bash
-  $ # self.interpreter.set_tensor(details["index"], im)
-  $ # self.interpreter.invoke()
-  $ # y = []
-  $ # for output in self.output_details:
-  $ #     x = self.interpreter.get_tensor(output["index"])
-  ```
 
-第三步、將上述替換為ArmNN及NeuronRT Delegation
+第三步、將註解的部分替換為以下內容
 
-
-  ```bash
+  ```python
   armnn_delegate = load_delegate(
       library="/home/ubuntu/armnn/ArmNN-linux-aarch64/libarmnnDelegate.so",
       options={"backends": 'GpuAcc', "logging-severity":"info"}
