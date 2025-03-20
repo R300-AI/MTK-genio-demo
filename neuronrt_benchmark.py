@@ -1,7 +1,7 @@
 from utils.neuronpilot.data import convert_to_binary, conert_to_numpy
 from utils.tools import Neuronpilot_WebAPI
 from utils.neuronpilot import neuronrt
-import argparse, time, warnings
+import argparse, time, warnings, shutil, os
 import numpy as np
 import tensorflow as tf
 
@@ -17,6 +17,10 @@ dla_path = Neuronpilot_WebAPI(
     tflite_path = args.tflite_model, output_folder = './models', 
     url = 'https://app-aihub-neuronpilot.azurewebsites.net/')
 print(f"Converted file saved to: {dla_path}")
+
+if os.path.exists('./bin'):
+  shutil.rmtree('./bin')
+  os.mkdir('./bin')
 
 # Initialize Interpreter
 neuronrt.load(dla_path)
