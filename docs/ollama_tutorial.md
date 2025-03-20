@@ -11,7 +11,7 @@
   ```
 
 ### Step 2: Find and Download a Suitable Model
-Visit the [Models](https://ollama.com/search) page to find a suitable model and size. Use the `ollama pull` command to download a pre-built model (here we use llama3.2 1b as an example):
+Visit the [Models](https://ollama.com/search) page to find a suitable model and size. Use the `ollama pull` command to download a pre-built model (here we use **llama3.2 1B** as an example):
   ```bash
   $ ollama pull llama3.2:1b
 
