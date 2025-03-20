@@ -9,7 +9,9 @@
 * Follow the Developer's [Document](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html) to build the **Ubuntu** and **Libraries** on your Genio board.
 
 ## How to Use This?
-  請依照下列指令將這個範例repository下載到您的Genio板子，然後安裝必要的工作環境(Python=`3.12`)。
+  Genio為TLite模型提供Mali GPU及MDLA有關的加速選項，除此之外皆是以Cortex-A CPU執行處理。
+  
+  如果有意試著將您的TLite模型Porting到這兩張晶片之上，那麼可以依照下列指令將這個範例repository下載到您的Genio板子，然後安裝必要的工作環境(Python=`3.12`)。
   ```bash
   $ git clone https://github.com/R300-AI/MTK-genio-demo.git
   $ cd MTK-genio-demo
@@ -17,7 +19,7 @@
   ```
 
 ### NeuronRT Benchmarks
-  您可以透過以下命令來測試您的模型於MDLA的運算速度
+  您可以透過以下命令來初步測試您的模型於MDLA的運算速度
   ```bash
   $ python neuronrt_benchmark.py --tflite ./models/yolov8n_float32.tflite --iteration 10
   ```
