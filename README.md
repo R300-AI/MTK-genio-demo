@@ -34,4 +34,5 @@ By exploring these Python examples, you will be able to fully understand the fun
 
 The available applications and models are listed below, and it is recommended to start with similar functionality of your senarios.
 ### List
-* **Deploy Computer Vision Applications Using Ultralytics YOLO** | [[ArmNN]](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/run_yolov8n_via_armnn.md), [[NeuronRT]](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/run_yolov8n_via_neuronrt.md)
+* **Deploy Computer Vision Applications Using Ultralytics YOLO** |
+* **Deploy Computer Vision Applications Using Ollama** |
