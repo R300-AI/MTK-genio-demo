@@ -19,12 +19,12 @@
 ### NeuronRT Benchmarks
   您可以透過以下命令來測試您的模型於MDLA的運算速度
   ```bash
-  $ python neuronrt_delegate.py --tflite ./models/yolov8n_float32.tflite --iteration 10
+  $ python neuronrt_benchmark.py --tflite ./models/yolov8n_float32.tflite --iteration 10
   ```
 ### ArmNN Benchmarks
   您可以透過以下命令來測試您的模型於Cortex-A(device=`CpuAcc`)或Mail-G(device=`GpuAcc`)的運算速度
   ```bash
-  $ python armnn_delegate.py --tflite ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
+  $ python armnn_benchmark.py --tflite ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
   ```
 
 > `./models/yolov8n_float32.tflite`為範例之用，你可以將其替換為你自定義的tflite模型
