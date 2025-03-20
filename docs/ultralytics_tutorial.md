@@ -1,6 +1,6 @@
 # Deploy Computer Vision Applications Using Ultralytics YOLO
 
-## Download and Config Ultralytics Framework
+## Download and Config Ultralytics for ArmNN and NeuronRT
 第一步、透過script下載並設定ultralytics的source code
 ```bash
 $ git clone https://github.com/R300-AI/MTK-genio-demo.git
