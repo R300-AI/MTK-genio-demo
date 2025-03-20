@@ -8,7 +8,7 @@
 
 第二步、從[Models](https://ollama.com/search)找到合適的模型及尺寸, 並透過`Ollama pull`命令下載pre-built模型
   ```bash
-  $ ollama run llama3.2:1b
+  $ ollama pull llama3.2:1b
   ```
 
 第三步、安裝Python SDK
@@ -17,5 +17,22 @@
   ```
 
 ## Usage
-### Command-line
-### Python 
+### Command-Line Response
+
+  ```bash
+  $ ollama run llama3.2:1b
+  ```
+
+### Python Streaming Responses
+  ```python
+  from ollama import chat
+  
+  stream = chat(
+      model='llama3.2',
+      messages=[{'role': 'user', 'content': 'Why is the sky blue?'}],
+      stream=True,
+  )
+  
+  for chunk in stream:
+    print(chunk['message']['content'], end='', flush=True)
+ ```
