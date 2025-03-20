@@ -8,7 +8,7 @@ $ cd MTK-genio-demo
 $ bash ./build.sh
 ```
 
-第二部、將`./ultralytics/nn/autobackend.py`大約409 ~ 415行及717 ~ 721行的位置註解.
+第二部、將`./ultralytics/nn/autobackend.py` **Section A**(大約409 ~ 415行)及**Section B**(大約717 ~ 721行)的位置註解.
 
   **Section A**
   ```bash
