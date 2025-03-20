@@ -1,6 +1,6 @@
-## Deploy Language Process Applications Using Ollama
+# Deploy Language Process Applications Using Ollama
 
-### Installation
+## Installation
 第一步、下載並安裝Ollama框架
   ```bash
   $ curl -fsSL https://ollama.com/install.sh | sh
@@ -16,5 +16,6 @@
   $ pip install ollama
   ```
 
-### Usage
-#### Command-line
+## Usage
+### Command-line
+### Python 
