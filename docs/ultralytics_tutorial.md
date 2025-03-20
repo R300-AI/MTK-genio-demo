@@ -58,4 +58,12 @@ $ bash ./build.sh
   * You need to specify the ArmNN backend options here by setting the `backends` in `options` dictionary.
   * The `runtime.Interpreter` class mimics the functionality of the tflite runtime functions. If any modifications are needed, you can refer to the `utils.neuronpilot.runtime` file.
 
-By following these steps, you will be able to configure Ultralytics YOLO to work with ArmNN and NeuronRT for deploying computer vision applications on your target hardware.
+  By following these steps, you will be able to configure Ultralytics YOLO to work with ArmNN and NeuronRT for deploying computer vision applications on your target hardware.
+
+### Step 4: Run the Inference
+  Execute the following command to run the inference using the Ultralytics framework:
+
+  ```bash
+  python ultralytics_demo.py
+  ```
+  This step utilizes the Ultralytics framework's execution tool to perform inference. For more information on why to use Ultralytics YOLO for inference, refer to the [Ultralytics documentation](https://docs.ultralytics.com/modes/predict/#why-use-ultralytics-yolo-for-inference).
