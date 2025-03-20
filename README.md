@@ -32,7 +32,7 @@
 
 > `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model
 
-## Tutorials
+## Other Tutorials
 By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects.
 
 The available applications and models are listed below, and it is recommended to start with similar functionality to your scenarios.
