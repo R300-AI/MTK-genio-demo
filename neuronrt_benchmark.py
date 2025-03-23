@@ -15,7 +15,9 @@ args = parser.parse_args()
 # Compile TFLite model to DLA format via NeuronPilot WebAPI if DLA not exist.
 if not os.path.exists(args.tflite_path.replace('.tflite', '.dla')):
   dla_path = Neuronpilot_WebAPI(
-      tflite_path = args.tflite_model, output_folder = './models', 
+      tflite_path = args.tflite_model, 
+      output_folder = './models', 
+      device = 'mdla3.0',      #params: ['mdla2.0', 'mdla3.0', 'vpu']
       url = 'https://app-aihub-neuronpilot.azurewebsites.net/')
   print(f"Converted file saved to: {dla_path}")
 else:
