@@ -41,3 +41,4 @@ The available applications and models are listed below, and it is recommended to
 * **[Deploy Computer Vision Applications Using Ultralytics YOLO](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ultralytics_tutorial.md)**
 * **[Deploy Language Process Applications Using Ollama](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ollama_tutorial.md)**
 * **[Deploy Whisper Applications Using OpenAI Library](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/whisper_tutorial.md)**
+* **Optimizing the Performance of AI Streaming Analytics Through Queuing (TO DO)**
