@@ -21,7 +21,6 @@ def tflite_to_dla(tflite_name, device):
     device_name = device.replace('.', '_')
     return dla_name.replace('.dla', f'_{device_name}.dla')
     
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--url", default='https://app-aihub-neuronpilot.azurewebsites.net/', type=str)
