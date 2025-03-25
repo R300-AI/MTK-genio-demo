@@ -8,10 +8,11 @@ warnings.simplefilter('ignore')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-m", "--tflite_model", type=str, help="Path to .tflite")
+parser.add_argument("-d", "--device", type=str, default='mdla3.0', choices = ['mdla3.0', 'mdla2.0', 'vpu'], help="Path to .tflite")
 parser.add_argument("-t", "--iteration", default=10, type=int, help="Test How Many Times?")
 args = parser.parse_args()
 
-interpreter = neuronrt.Interpreter(model_path=args.tflite_model, device = 'mdla3.0')
+interpreter = neuronrt.Interpreter(model_path=args.tflite_model, device = )
 interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
