@@ -11,7 +11,6 @@ parser.add_argument("-m", "--tflite_model", type=str, help="Path to .tflite")
 parser.add_argument("-t", "--iteration", default=10, type=int, help="Test How Many Times?")
 args = parser.parse_args()
 
-from utils.neuronpilot import neuronrt
 interpreter = neuronrt.Interpreter(model_path=args.tflite_model, device = 'mdla3.0')
 interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
