@@ -15,6 +15,12 @@ def Neuronpilot_WebAPI(tflite_path, device, output_folder = './', url = 'http://
     with open(output_path, 'wb') as f:
         f.write(response.content)
     return output_path
+    
+def tflite_to_dla(tflite_name, device):
+    dla_name = tflite_name.rstrip('.tflite') + '.dla'
+    device_name = device.replace('.', '_')
+    return dla_name.replace('.dla', f'_{device_name}.dla')
+    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
