@@ -24,6 +24,8 @@
   ```bash
   $ python neuronrt_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device mdla3.0 --iteration 10
   ```
+  * **Genio-510/700**: `mdla3.0`, `vpu`
+  * **Genio-1200**: `mdla2.0`, `vpu` 
 ### ArmNN Benchmarks
   You can use the following command to test the computation speed of your model on Cortex-A(device=`CpuAcc`) or Mali-G(device=`GpuAcc`).
   ```bash
