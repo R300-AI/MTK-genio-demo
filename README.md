@@ -22,12 +22,12 @@
 ### NeuronRT Benchmarks
   You can use the following command to preliminarily test the computation speed of your model on MDLA. (**Note**: Internet access may be required to compile the tflite model into dla format)
   ```bash
-  $ python neuronrt_benchmark.py --tflite ./models/yolov8n_float32.tflite --iteration 10
+  $ python neuronrt_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --iteration 10
   ```
 ### ArmNN Benchmarks
   You can use the following command to test the computation speed of your model on Cortex-A(device=`CpuAcc`) or Mali-G(device=`GpuAcc`).
   ```bash
-  $ python armnn_benchmark.py --tflite ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
+  $ python armnn_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
   ```
 
 > `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model
