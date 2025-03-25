@@ -49,7 +49,7 @@ $ bash ./build.sh
   ```
   Alternatively, if you want to use NeuronRT, replace the commented code with the following:
   ```python
-  from utils.neuronpilot import runtime
+  from utils.neuronpilot import neuronrt
 
   interpreter = runtime.Interpreter(model_path=w)
   ```
