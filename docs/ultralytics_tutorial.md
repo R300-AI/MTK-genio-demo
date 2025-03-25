@@ -51,7 +51,7 @@ $ bash ./build.sh
   ```python
   from utils.neuronpilot import neuronrt
 
-  interpreter = runtime.Interpreter(model_path=w)
+  interpreter = runtime.Interpreter(model_path=w, device='mdla3.0')
   ```
 #### Additional Information
   * Ensure that the ArmNN paths specified in the code (e.g., /home/ubuntu/armnn/ArmNN-linux-aarch64/libarmnnDelegate.so) match the location where you have installed them.
