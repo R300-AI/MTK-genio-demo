@@ -1,7 +1,7 @@
 # The Best Implementation for Genio EVKs
 
 <div align="center">
-<img src="https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/images/chipset.png" width="480"/>
+<img src="https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/images/chipset.png" width=320"/>
 </div>
 
 ## Requirements
