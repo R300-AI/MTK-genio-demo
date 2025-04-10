@@ -25,16 +25,17 @@
   $ python armnn_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
   ```
 
-> `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model<br>
-> `device` options: `CpuAcc` (for Cortex-A),  `GpuAcc` (for Mali-G)
+  > `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model<br>
+  > `device` options: `CpuAcc` (for Cortex-A),  `GpuAcc` (for Mali-G)
 
 ### NeuronRT Benchmarks
-  **NeuronRT** is a runtime library for NPUs inference. You can use the following command to preliminarily test the computation speed of your model on MDLA. (**Note**: Internet access may be required to compile the tflite model into dla format)
+  **NeuronRT** is a runtime library for NPUs inference. You can use the following command to preliminarily test the computation speed of your model on MDLA. (**Note**: )
   ```bash
   $ python neuronrt_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device mdla3.0 --iteration 10
   ```
-  > * **Genio-510/700 Supported Device**: `mdla3.0`, `vpu`
-  > * **Genio-1200 Supported Device**: `mdla2.0`, `vpu`
+  > Internet access may be required to compile the tflite model into dla format.<br>
+  > `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model<br>
+  > `device` options: `mdla3.0` (for DLA, G510/700 only),  `mdla2.0` (for DLA, 1200 only), `vpu` (for VPU)*
 
 ## Others 
 By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects.
