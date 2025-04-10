@@ -20,12 +20,15 @@
   ```
 
 ### ArmNN Benchmarks
-  **ArmNN** is a neural network inference library optimized for Arm CPU and GPU. You can use the following command to test the computation speed of your model on Cortex-A(device=`CpuAcc`) or Mali-G(device=`GpuAcc`).
+  **ArmNN** is a neural network inference library optimized for Arm CPU and GPU. You can use the following command to test the computation speed of your model.
   ```bash
   $ python armnn_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
   ```
 
 > `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model
+> `device` options:
+> `CpuAcc` Cortex-A 
+> `GpuAcc` Mali-G
 
 ### NeuronRT Benchmarks
   **NeuronRT** is a runtime library for NPUs inference. You can use the following command to preliminarily test the computation speed of your model on MDLA. (**Note**: Internet access may be required to compile the tflite model into dla format)
