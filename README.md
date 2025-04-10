@@ -29,7 +29,7 @@
   > `--device` options: `CpuAcc` (for Cortex-A),  `GpuAcc` (for Mali-G)
 
 ### NeuronRT Benchmarks
-  **NeuronRT** is a runtime library for NPUs inference. You can use the following command to preliminarily test the computation speed of your model on MDLA. (**Note**: )
+  **NeuronRT** is a runtime library for NPUs inference. You can use the following command to preliminarily test the computation speed of your model on MDLA.
   ```bash
   $ python neuronrt_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device mdla3.0 --iteration 10
   ```
@@ -38,9 +38,7 @@
   > `--device` options: `mdla3.0` (for DLA, G510/700 only),  `mdla2.0` (for DLA, 1200 only), `vpu` (for VPU)*
 
 ## Others 
-By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects.
-
-The available applications and models are listed below, and it is recommended to start with similar functionality to your scenarios.
+By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects. The available applications and models are listed below, and it is recommended to start with similar functionality to your scenarios.
 
 ### Tutorial List
 * **[Deploy Computer Vision Applications Using Ultralytics YOLO](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ultralytics_tutorial.md)**
