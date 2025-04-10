@@ -7,18 +7,18 @@
 
 
 ## How to Use This?
-  Genio provides acceleration options for TLite models using Mali GPU and MDLA, while other operations are executed on the Cortex-A CPU.
-
-<div align="center">
-<img src="https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/images/chipset.png" width=360"/>
-</div>
-
-  **NeuronRT** is a runtime library for neural network inference, and **ArmNN** is a neural network inference library optimized for Arm CPUs and GPUs. If you are interested in porting your TLite model to these chips, you can follow the instructions below to download this example repository to your Genio board and set up the necessary environment (Python=`3.12`).
+  Genio provides acceleration options for TLite models using Mali GPU and MDLA, while other operations are executed on the Cortex-A CPU. If you are interested in porting your TLite model to these chips, you can follow the instructions below to download this example repository to your Genio board and set up the necessary environment (Python=`3.12`).
   ```bash
   $ git clone https://github.com/R300-AI/MTK-genio-demo.git
   $ cd MTK-genio-demo
   $ pip install -r requirements.txt
   ```
+
+<div align="center">
+<img src="https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/images/chipset.png" width=360"/>
+</div>
+
+  **NeuronRT** is a runtime library for neural network inference, and **ArmNN** is a neural network inference library optimized for Arm CPUs and GPUs. 
 
 ### NeuronRT Benchmarks
   You can use the following command to preliminarily test the computation speed of your model on MDLA. (**Note**: Internet access may be required to compile the tflite model into dla format)
