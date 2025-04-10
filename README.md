@@ -19,7 +19,13 @@
   $ pip install -r requirements.txt
   ```
 
-  
+### ArmNN Benchmarks
+  **ArmNN** is a neural network inference library optimized for Arm CPU and GPU. You can use the following command to test the computation speed of your model on Cortex-A(device=`CpuAcc`) or Mali-G(device=`GpuAcc`).
+  ```bash
+  $ python armnn_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
+  ```
+
+> `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model
 
 ### NeuronRT Benchmarks
   **NeuronRT** is a runtime library for NPUs inference. You can use the following command to preliminarily test the computation speed of your model on MDLA. (**Note**: Internet access may be required to compile the tflite model into dla format)
@@ -28,14 +34,6 @@
   ```
   > * **Genio-510/700 Supported Device**: `mdla3.0`, `vpu`
   > * **Genio-1200 Supported Device**: `mdla2.0`, `vpu`
-
-### ArmNN Benchmarks
-  **ArmNN** is a neural network inference library optimized for Arm CPU and GPU. You can use the following command to test the computation speed of your model on Cortex-A(device=`CpuAcc`) or Mali-G(device=`GpuAcc`).
-  ```bash
-  $ python armnn_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
-  ```
-
-> `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model
 
 ## Others 
 By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects.
