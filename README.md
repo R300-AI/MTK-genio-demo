@@ -27,7 +27,8 @@
   > `--device` options:
   > `CpuAcc` (for Cortex-A)
   > `GpuAcc` (for Mali-G)
-  `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model<br>
+  
+  *`./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model<br>
 
 
 ### NeuronRT Benchmarks
@@ -36,8 +37,9 @@
   $ python neuronrt_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device mdla3.0 --iteration 10
   ```
   > `--device` options: `mdla3.0` (for DLA, G510/700 only),  `mdla2.0` (for DLA, 1200 only), `vpu` (for VPU)*
-  Internet access may be required to compile the tflite model into dla format via [NeuronPilot Online](https://app-aihub-neuronpilot.azurewebsites.net/).<br>
-  `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model<br>
+
+  * Internet access may be required to compile the tflite model into dla format via [NeuronPilot Online](https://app-aihub-neuronpilot.azurewebsites.net/).<br>
+  * `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model<br>
 
 ## Others 
 By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects. The available applications and models are listed below, and it is recommended to start with similar functionality to your scenarios.
