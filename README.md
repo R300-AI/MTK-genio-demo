@@ -2,7 +2,7 @@
 
 
 ## Requirements
-* A **Genio Evaluation Kit**.
+* A **Genio 510/700/1200 Evaluation Kit**.
 * Follow the Developer's [Document](https://r300-ai.github.io/ITRI-AI-Hub/docs/genio-evk.html) to build the **Ubuntu** and **Packages** to your Genio board.
 
 
