@@ -36,7 +36,10 @@
   ```bash
   $ python neuronrt_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device mdla3.0 --iteration 10
   ```
-  > `--device` options: `mdla3.0` (for DLA, G510/700 only),  `mdla2.0` (for DLA, 1200 only), `vpu` (for VPU)*
+  > `--device` options:
+  > -  `mdla3.0` (for DLA, G510/700 only)
+  > -  `mdla2.0` (for DLA, 1200 only)
+  > -  `vpu` (for VPU)
 
   **【NOTE】**Internet access may be required to compile the tflite model into dla format via [NeuronPilot Online](https://app-aihub-neuronpilot.azurewebsites.net/).<br>
   **【NOTE】**`./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model<br>
