@@ -24,11 +24,11 @@
   ```bash
   $ python armnn_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
   ```
-  > `--device` options:
-  > `CpuAcc` (for Cortex-A)
+  > `--device` options:<br>
+  > `CpuAcc` (for Cortex-A)<br>
   > `GpuAcc` (for Mali-G)
   
-  *`./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model<br>
+  * `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model<br>
 
 
 ### NeuronRT Benchmarks
