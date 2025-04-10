@@ -25,10 +25,8 @@
   $ python armnn_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
   ```
 
-> `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model
-> `device` options:
->   `CpuAcc` Cortex-A 
->   `GpuAcc` Mali-G
+> `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model<br>
+> `device` options: `CpuAcc` (for Cortex-A),  `GpuAcc` (for Mali-G)
 
 ### NeuronRT Benchmarks
   **NeuronRT** is a runtime library for NPUs inference. You can use the following command to preliminarily test the computation speed of your model on MDLA. (**Note**: Internet access may be required to compile the tflite model into dla format)
