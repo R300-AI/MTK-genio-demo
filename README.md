@@ -19,7 +19,7 @@
   $ pip install -r requirements.txt
   ```
 
-You can use the following command to test the computation speed of your model.
+You can use the following tools to test the computation speed of your model.
 
 ### ArmNN Benchmarks
   **ArmNN** is a neural network inference library optimized for Arm CPU and GPU. where `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model
