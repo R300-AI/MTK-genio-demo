@@ -24,24 +24,25 @@
   ```bash
   $ python armnn_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
   ```
-  > `--device` options:<br>
-  > -  `CpuAcc` (for Cortex-A)<br>
-  > -  `GpuAcc` (for Mali-G)
+  > `--device`<br>
+  > | Option   | Description                                   |
+  > |----------|-----------------------------------------------|
+  > | `CpuAcc` | Optimizes TFLite inference for Cortex-A CPUs  |
+  > | `GpuAcc` | Accelerating TFLite inference for Mali-G GPUs |
   
-**【NOTE】**`./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model<br>
-
 
 ### NeuronRT Benchmarks
-  **NeuronRT** is a runtime library for NPUs inference. You can use the following command to preliminarily test the computation speed of your model on MDLA.
+  **NeuronRT** is a runtime library designed for NPU inference. It automatically compiles TFLite models into the DLA format using the [NeuronPilot Online](https://app-aihub-neuronpilot.azurewebsites.net/) API and saves them to the `./models` directory. Please note that this process requires an active internet connection.
   ```bash
   $ python neuronrt_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device mdla3.0 --iteration 10
   ```
-  > `--device` options:
-  > -  `mdla3.0` (for DLA, G510/700 only)
-  > -  `mdla2.0` (for DLA, 1200 only)
-  > -  `vpu` (for VPU)
+  > `--device`:
+  > | Option    | Description                          |
+  > |-----------|--------------------------------------|
+  > | `mdla3.0` | Accelerating TFLite inference DLA, supported on G510/700 only |
+  > | `mdla2.0` | Accelerating TFLite inference DLA, supported on 1200 only     |
+  > | `vpu`     |Accelerating TFLite inference VPU                             |
 
-**【NOTE】** Internet access may be required to compile the tflite model into dla format via [NeuronPilot Online](https://app-aihub-neuronpilot.azurewebsites.net/).<br>
 **【NOTE】** `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model<br>
 
 ## Others 
