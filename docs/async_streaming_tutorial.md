@@ -1,65 +1,81 @@
 # Optimizing TFLite Inference Performance with Asynchronous Streaming
-## 什麼是Asynchronous
 
-Asynchronous (非同步) 是一種程式設計模型，允許多個任務同時執行，而不需要等待其他任務完成。這種方式特別適合處理 I/O 密集型任務，例如影像處理中的資料讀取、模型推論和結果顯示。以下程式展示了如何使用 Python 的 asyncio 模組來實現非同步的 TFLite 推論。
+## What is Asynchronous?
 
-## 程式分段說明
-### 1. 資料預處理 (preprocess)
-這個函式負責從影片中讀取影像幀並將其放入輸入佇列 (`input_queue`) 中。
+Asynchronous processing is a method of optimizing task distribution, allowing multiple tasks to execute simultaneously without waiting for each other to complete. In asynchronous streaming inference, the core idea is to divide the process into independent tasks such as data preprocessing, model inference, and result postprocessing. Each task focuses on handling its own input and output, passing data through queues, without needing to worry about the implementation or state of other tasks. This design avoids bottlenecks in the data flow, significantly improving streaming efficiency.
+
+## Implementation of Asynchronous Streaming Inference
+
+### 1. Data Preprocessing (preprocess)
+
+This module is designed as the starting point of the asynchronous process, responsible for reading video frames one by one.
+
 ```python
 async def preprocess(input_queue, cap):
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
-            await input_queue.put(None)  # 當影片結束時，放入 None 作為結束標記
+            await input_queue.put(None)  # Insert None as an end marker when the video ends
             break
-        await input_queue.put(frame)  # 將每一幀放入輸入佇列
-    cap.release()  # 釋放影片資源
+        await input_queue.put(frame)  # Add each frame to the input queue
+    cap.release()  # Release video resources
 ```
-### 2. 模型推論 (predict)
-這個函式負責從輸入佇列中取出影像幀，進行模型推論，並將結果放入輸出佇列 (`output_queue) 中。
+
+### 2. Model Inference (predict)
+
+This function module is designed as the intermediate step in the asynchronous process, responsible for retrieving video frames and performing model inference using TFLite.
+
 ```python
 async def predict(input_queue, output_queue, model):
     while True:
-        frame = await input_queue.get()  # 從輸入佇列中取出影像幀
+        frame = await input_queue.get()  # Retrieve a frame from the input queue
         if frame is None:
-            await output_queue.put(None)  # 當接收到結束標記時，放入 None 作為結束標記
+            await output_queue.put(None)  # Insert None as an end marker when receiving the end signal
             break
-        results = model.predict(frame, verbose=False)  # 使用模型進行推論
-        await output_queue.put(results[0].plot())  # 將推論結果放入輸出佇列
+        results = model.predict(frame, verbose=False)  # Perform inference using the model
+        await output_queue.put(results[0].plot())  # Add the inference result to the output queue
 ```
-### 3. 結果後處理 (postprocess)
-這個函式負責從輸出佇列中取出推論結果，顯示影像並計算處理速度。
+
+### 3. Result Postprocessing (postprocess)
+
+This function module is designed as the endpoint of the asynchronous process, responsible for presenting the inference results to the user and providing real-time processing speed information.
+
 ```python
 async def postprocess(output_queue):
     while True:
-        start_time = time.time()  # 記錄開始時間
-        result = await output_queue.get()  # 從輸出佇列中取出推論結果
+        start_time = time.time()  # Record the start time
+        result = await output_queue.get()  # Retrieve the inference result from the output queue
         if result is None:
             break
-        cv2.imshow('streaming', result)  # 顯示推論結果
-        print('Streaming Speed:', (time.time() - start_time) * 1000, 'ms')  # 計算處理速度
-        if cv2.waitKey(1) == ord('q'):  # 按下 'q' 鍵退出
+        cv2.imshow('streaming', result)  # Display the inference result
+        print('Streaming Speed:', (time.time() - start_time) * 1000, 'ms')  # Calculate processing speed
+        if cv2.waitKey(1) == ord('q'):  # Exit when the 'q' key is pressed
             break
-    cv2.destroyAllWindows()  # 關閉所有 OpenCV 視窗
+    cv2.destroyAllWindows()  # Close all OpenCV windows
 ```
-### 主程式 (main)
-主程式負責初始化佇列、影片資源和模型，並啟動所有非同步任務。
+
+### Main Program (main)
+
+Define the above functions as an asynchronous process with three modules: data preprocessing, model inference, and result display. These modules communicate through queues, are decoupled from each other, and execute independently, enabling an efficient asynchronous streaming inference process.
+
 ```python
 async def main():
-    input_queue = asyncio.Queue()  # 初始化輸入佇列
-    output_queue = asyncio.Queue()  # 初始化輸出佇列
-    cap = cv2.VideoCapture("./data/serve.mp4")  # 打開影片檔案
-    model = YOLO("./models/yolov8n_float32.tflite", task='detect')  # 加載 YOLO 模型
+    input_queue = asyncio.Queue()  # Initialize the input queue
+    output_queue = asyncio.Queue()  # Initialize the output queue
+    cap = cv2.VideoCapture("./data/serve.mp4")  # Open the video file
+    model = YOLO("./models/yolov8n_float32.tflite", task='detect')  # Load the YOLO model
     
     await asyncio.gather(
-        preprocess(input_queue, cap),  # 啟動資料預處理任務
-        predict(input_queue, output_queue, model),  # 啟動模型推論任務
-        postprocess(output_queue)  # 啟動結果後處理任務
+        preprocess(input_queue, cap),  # Start the data preprocessing task
+        predict(input_queue, output_queue, model),  # Start the model inference task
+        postprocess(output_queue)  # Start the result postprocessing task
     )
 ```
 
 ## Run the Asynchronous Inference
+
+By splitting data preprocessing, model inference, and result display into independent tasks and passing data through queues, asynchronous streaming inference achieves efficient parallel processing. This design fully utilizes hardware resources. You can run the asynchronous streaming inference with the following command:
+
 ```bash
 python ultralytics_async.py
 ```
