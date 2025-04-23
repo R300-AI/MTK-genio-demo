@@ -2,7 +2,7 @@
 
 ## What is Asynchronous?
 
-Asynchronous processing is a method of optimizing task distribution, allowing multiple tasks to execute simultaneously without waiting for each other to complete. In asynchronous streaming inference, the core idea is to divide the process into independent tasks such as data preprocessing, model inference, and result postprocessing. Each task focuses on handling its own input and output, passing data through queues, without needing to worry about the implementation or state of other tasks. This design avoids bottlenecks in the data flow, significantly improving streaming efficiency.
+Asynchronous processing is a method of optimizing task distribution on processors and memory, allowing multiple tasks to execute simultaneously without waiting for each other to complete. In asynchronous streaming inference, the core idea is to divide the process into independent tasks such as data preprocessing, model inference, and result postprocessing. Each task focuses on handling its own input and output, passing data through queues, without needing to worry about the implementation or state of other tasks. This design avoids bottlenecks in the data flow, significantly improving streaming efficiency.
 
 ## Implementation of Asynchronous Streaming Inference
 
