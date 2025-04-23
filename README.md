@@ -45,13 +45,12 @@ You can use the following tools to test the computation speed of your model.
   > | `mdla2.0` | Accelerating TFLite inference DLA, supported on 1200 only     |
   > | `vpu`     |Accelerating TFLite inference VPU                             |
 
-**【NOTE】** <br>
 
 ## Others 
-By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects. The available applications and models are listed below, and it is recommended to start with similar functionality to your scenarios.
+
+Through the following Python examples, you will gain a comprehensive understanding of the fundamentals involved in deploying AI models on these chips, including application deployment, accelerated model inference, and data streaming. This will help you quickly grasp the full potential of Genio chips. It is recommended to start exploring features similar to your use case.
 
 ### Tutorial List
 * **[Deploy Computer Vision Applications Using Ultralytics YOLO](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ultralytics_tutorial.md)**
-* **[Deploy Language Process Applications Using Ollama](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ollama_tutorial.md)**
-* **[Deploy Whisper Applications Using OpenAI Library](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/whisper_tutorial.md)**
-* **[Optimizing Streaming Speed through Asynchronous TFLite Streaming](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/nnstreamer_tutorial.md)**
+* **[Deploy Language Process Applications Using Ollama and OpenAI Library](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ollama_tutorial.md)**
+* **[Optimizing TFLite Inference Performance with Asynchronous Streaming](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/nnstreamer_tutorial.md)**
