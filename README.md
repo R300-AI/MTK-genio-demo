@@ -19,8 +19,10 @@
   $ pip install -r requirements.txt
   ```
 
+You can use the following command to test the computation speed of your model.
+
 ### ArmNN Benchmarks
-  **ArmNN** is a neural network inference library optimized for Arm CPU and GPU. You can use the following command to test the computation speed of your model.
+  **ArmNN** is a neural network inference library optimized for Arm CPU and GPU. where `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model
   ```bash
   $ python armnn_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
   ```
@@ -32,7 +34,7 @@
   
 
 ### NeuronRT Benchmarks
-  **NeuronRT** is a runtime library designed for NPU inference. It automatically compiles TFLite models into the DLA format using the [NeuronPilot Online](https://app-aihub-neuronpilot.azurewebsites.net/) API and saves them to the `./models` directory. Please note that this process requires an active internet connection.
+  **NeuronRT** is a runtime library designed for NPU inference. It automatically compiles TFLite models into the DLA format using the [NeuronPilot Online](https://app-aihub-neuronpilot.azurewebsites.net/) API, and saves them to the `./models` directory. Please note that this process requires an active internet connection.
   ```bash
   $ python neuronrt_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device mdla3.0 --iteration 10
   ```
@@ -43,7 +45,7 @@
   > | `mdla2.0` | Accelerating TFLite inference DLA, supported on 1200 only     |
   > | `vpu`     |Accelerating TFLite inference VPU                             |
 
-**【NOTE】** `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model<br>
+**【NOTE】** <br>
 
 ## Others 
 By exploring these Python examples, you will be able to fully understand the fundamental steps involved in deploying AI models on these chips, including preprocessing, inference computation, post-processing, and visualization. This will help you quickly grasp the complex workflows and apply them to your own projects. The available applications and models are listed below, and it is recommended to start with similar functionality to your scenarios.
