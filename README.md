@@ -51,4 +51,4 @@ By exploring these Python examples, you will be able to fully understand the fun
 * **[Deploy Computer Vision Applications Using Ultralytics YOLO](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ultralytics_tutorial.md)**
 * **[Deploy Language Process Applications Using Ollama](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ollama_tutorial.md)**
 * **[Deploy Whisper Applications Using OpenAI Library](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/whisper_tutorial.md)**
-* **[透過NNStreamer Pipeline實現Asynchronous TFLite AI影像串流**](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/nnstreamer_tutorial.md)
+* **[透過NNStreamer Pipeline實現Asynchronous TFLite AI影像串流](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/nnstreamer_tutorial.md)**
