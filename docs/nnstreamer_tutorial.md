@@ -1,7 +1,7 @@
 ### Requirements
 * Ubuntu
 * TFLite
-* 
+
 ### Step 1. Install Gstreamer
 ```
 $ sudo apt update && sudo apt upgrade
