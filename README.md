@@ -22,7 +22,7 @@
 You can use the following tools to test the computation speed of your model.
 
 ### ArmNN Benchmarks
-  **ArmNN** is a neural network inference library optimized for Arm CPU and GPU. where `./models/yolov8n_float32.tflite` is for example purposes, you can replace it with your custom tflite model
+  **ArmNN** is a neural network inference library optimized for Arm CPUs and GPUs. The file `./models/yolov8n_float32.tflite` is provided as an example and can be replaced with your own custom TFLite model.
   ```bash
   $ python armnn_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
   ```
