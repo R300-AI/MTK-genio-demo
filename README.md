@@ -54,3 +54,4 @@ Through the following Python examples, you will gain a comprehensive understandi
 * **[Deploy Computer Vision Applications Using Ultralytics YOLO](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ultralytics_tutorial.md)**
 * **[Deploy Language Process Applications Using Ollama and OpenAI Library](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ollama_tutorial.md)**
 * **[Optimizing TFLite Inference Performance with Asynchronous Streaming](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/nnstreamer_tutorial.md)**
+* **[How to Manually Compile a TFLite Model into DLA Format? (TODO)]()**
