@@ -1,0 +1,3 @@
+export TEMPLATECONF=${PWD}/meta/meta-innocomm/conf/base/sb52
+source meta/poky/oe-init-build-env
+
