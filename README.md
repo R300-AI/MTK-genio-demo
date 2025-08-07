@@ -52,13 +52,13 @@ Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與
     <th>GPU<sub>Mali-G</sub></th>
     <th>DLA</th>
     <th>VPU</th>
-    <th>LPDDR</th>
+    <th>Memory</th>
   </tr>
   <tr>
     <td style="vertical-align: middle; text-align: center; font-weight: bold; background: #f6f8fa;">Provider</td>
     <td colspan="2" style="text-align: center; font-weight: bold;">ArmNN</td>
     <td colspan="2" style="text-align: center; font-weight: bold;">MediaTek NeuronRT</td>
-    <td rowspan="2" style="background: #f6f8fa;"></td>
+    <td style="background: #f6f8fa;"></td>
   </tr>
   <tr>
     <td><b>Genio 510</b></td>
