@@ -461,8 +461,39 @@ class AutoBackend(nn.Module):
                 )
                 device = "cpu"  # Required, otherwise PyTorch will try to use the wrong device
             else:  # TFLite
+                else:  # TFLite
                 LOGGER.info(f"Loading {w} for TensorFlow Lite inference...")
-                interpreter = Interpreter(model_path=w)  # load TFLite model
+                # === 原始 TFLite 解釋器 ===
+                interpreter = Interpreter(model_path=w)
+                
+                # === 錯誤提示：需要手動配置後端 ===
+                raise RuntimeError(
+                    f"Genio Backend not configured! Please edit {__file__} and uncomment one of the backend options above. Please see the tutorial at docs/ultralytics_streaming_tutorial.md for detailed instructions."
+                )
+                # === 選項 A: 使用 ArmNN 加速 (CPU/ GPU) ===
+                # import tensorflow as tf
+                #
+                # interpreter = tf.lite.Interpreter(
+                #     model_path=w,
+                #     experimental_delegates=[
+                #         armnn_delegate = tf.lite.experimental.load_delegate(
+                #             library="<path to libarmnnDelegate.so>",
+                #             options={"backends": "<CpuAcc or GpuAcc>", "logging-severity": "fatal"}
+                #         )
+                #     ]
+                # )
+                # LOGGER.info("Successfully loaded ArmNN delegate for TFLite inference")
+    
+                # === 選項 B: 使用 NeuronRT 加速(MDLA/ VPU) ===
+                # from utils.neuronpilot.neuronrt import Interpreter
+                # 
+                # interpreter = Interpreter(
+                #     tflite_path=w, 
+                #     dla_path="<path to your dla model>",       
+                #     device= "<mdla3.0, mdla2.0 or vpu>"
+                # )
+                # LOGGER.info("Successfully loaded NeuronRT delegate for DLA inference")
+
             interpreter.allocate_tensors()  # allocate
             input_details = interpreter.get_input_details()  # inputs
             output_details = interpreter.get_output_details()  # outputs

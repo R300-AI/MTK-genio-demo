@@ -137,13 +137,8 @@ $ uv run --with jupyter jupyter lab
 透過此平台的驗證機制，開發者能夠在設計階段就確認模型架構是否適合 MediaTek 的專用 AI 加速器，避免在後續部署過程中遇到相容性問題，有效提升開發效率。
 
 
-## 進階教學
+## 經典使用案例
 
-透過以下 Python 範例，您將全面了解在這些晶片上部署 AI 模型的基礎知識，包括應用程式部署、加速模型推論和資料串流。這將幫助您快速掌握 Genio 晶片的全部潛能。建議從與您使用案例相似的功能開始探索：
+透過以下 Python 範例，您將全面了解在這些晶片上部署 AI 模型的基礎知識，包括應用程式部署、加速模型推論和資料串流。這將幫助您快速掌握 Genio 晶片的全部潛能。
 
-### 教學清單
-
-* **[使用 Ultralytics YOLO 部署電腦視覺應用](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/demo/ultralytics_tutorial.md)**
-* **[使用 Ollama 和 OpenAI 函式庫部署語言處理應用](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/demo/ollama_and_openai_whisper_tutorial.md)**
-* **[透過非同步串流最佳化 TFLite 推論效能](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/demo/async_streaming_tutorial.md)**
-* **手動將 TFLite 模型編譯為 DLA 格式的方法 (待完成)**
+* **[使用 Ultralytics YOLO 部署電腦視覺應用]()**
