@@ -59,14 +59,15 @@ MediaTek Genio 系列採用先進的異質整合封裝技術，透過小晶片�
 在開始之前，請確保您已完成以下準備工作：
 
 1. **硬體設備**：MediaTek Genio EVK 開發板（支援型號：510/700/1200）
-2. **系統環境**：透過 [Getting Start 指南](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/getting_start_with_ubuntu_zh.md) 燒錄 Ubuntu 作業系統，並安裝BSPs軟體（`ArmNN`、`NeuronRT`）
+2. **系統環境**：透過 [Getting Start 指南](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/getting_start_with_ubuntu_zh.md) 燒錄 Ubuntu 作業系統，並安裝BSPs（`ArmNN`、`NeuronRT`）
 
 ### 環境設定
 
-為了在 Genio 平台上順利執行 AI 模型的效能測試與部署工作，您需要先設定好 Python 開發環境並安裝必要的相依套件。請按照以下步驟進行環境配置：
+MTK-genio-demo 專案提供了完整的 AI 模型部署示範環境。請按照以下步驟進行環境配置：
 
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh  # 安裝 Python 套件管理工具（使用 Python 3.12）
+# 安裝 Python 套件管理工具（需使用 Python 3.12）
+curl -LsSf https://astral.sh/uv/install.sh | sh  
 ```
 ```bash
 # 下載專案並安裝相依套件
@@ -78,7 +79,18 @@ $ uv add -r requirements.txt
 
 ### 效能測試工具
 
-完成環境設定後，您可以使用以下工具來測試模型的運算效能：
+完成環境設定後，您可以使用以下工具來測試模型的運算效能。專案提供了詳細的 Jupyter Notebook 教學範例，建議透過互動式筆記本來學習和實作：
+
+**啟動 Jupyter Lab 環境**
+```bash
+$ uv run --with jupyter jupyter lab
+```
+
+> 📚 **Notebook 教學範例**
+> - **[ArmNN 效能測試教學](./notebook/armnn_benchmark.ipynb)** - 完整的 ArmNN 使用指南與效能評測
+> - **[NeuronRT 效能測試教學](./notebook/neuronrt_benchmark.ipynb)** - NeuronRT 部署流程與最佳化技巧
+
+**或者，您也可以直接使用命令列工具進行快速測試：**
 
 #### ArmNN 效能測試
 
