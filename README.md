@@ -54,7 +54,7 @@ Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與
     <th>VPU</th>
   </tr>
   <tr>
-    <td rowspan="2" style="vertical-align: middle; text-align: center; font-weight: bold; background: #f6f8fa;">Provider</td>
+    <td style="vertical-align: middle; text-align: center; font-weight: bold; background: #f6f8fa;">Provider</td>
     <td colspan="2" style="text-align: center; font-weight: bold;">ArmNN</td>
     <td colspan="2" style="text-align: center; font-weight: bold;">MediaTek NeuronRT</td>
   </tr>
