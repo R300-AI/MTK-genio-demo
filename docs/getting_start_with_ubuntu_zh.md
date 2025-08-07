@@ -144,23 +144,3 @@ $ cmake --build ./build && cd ~
 1. **轉換模型格式**：將您的TensorFlow/PyTorch模型轉換為TensorFlow Lite格式
 2. **效能測試**：使用專案中的benchmark工具測試不同硬體加速選項
 3. **部署應用**：開發您的邊緣AI應用程式
-
-## 🔗 相關資源
-
-- [模型轉換教學](https://github.com/R300-AI/ITRI-AI-Hub/tree/main/Model-Zoo)
-- [效能基準測試指南](../demo/ultralytics_tutorial.md)
-- [常見問題排解](../demo/async_streaming_tutorial.md)
-
-## 💡 給AI學生的實用提醒
-
-**從雲端到邊緣的關鍵差異**：
-- ⏱️ **延遲優先**：邊緣AI注重推論速度，而非訓練吞吐量
-- 💾 **資源受限**：記憶體和運算能力有限，需要模型量化和優化
-- 🔋 **功耗考量**：電池供電設備需要考慮能源效率
-- 📱 **即時性**：許多應用需要毫秒級的回應時間
-
-**成功的關鍵**：
-1. 先在雲端/PC完成模型訓練和驗證
-2. 使用TensorFlow Lite進行模型轉換和量化
-3. 在Genio上進行效能測試和優化
-4. 根據硬體特性調整模型架構
