@@ -90,13 +90,13 @@ $ uv run --with jupyter jupyter lab
 
 ### 模型測試工具
 
-在進行實際部署前，開發者可以透過NeuronPilot AI Porting Platform 線上平台預先驗證模型與MTK加速器（DLA/VPU）的相容性。
+在進行實際部署前，開發者可以透過[NeuronPilot AI Porting Platform](https://neuronpilot-porting-platform.azurewebsites.net/) 線上平台預先驗證模型與MTK加速器（DLA/VPU）的相容性。
 
 #### NeuronPilot AI Porting Platform
 
 **NeuronPilot Porting Platform** 是工研院提供的線上模型轉換平台，專門用於將 TensorFlow Lite 模型編譯為 DLA 格式，以便在 MediaTek Genio 系列的 MDLA 加速器上運行。
 
-🌐 **平台網址**：[https://neuronpilot-porting-platform.azurewebsites.net/](https://neuronpilot-porting-platform.azurewebsites.net/)
+🌐 **平台網址**：[](https://neuronpilot-porting-platform.azurewebsites.net/)
 
 **使用流程**：
 1. **Upload Prebuilt Model** - 上傳您的 TFLite 模型檔案
