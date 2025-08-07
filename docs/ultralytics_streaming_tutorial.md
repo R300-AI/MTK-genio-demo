@@ -45,25 +45,25 @@ else:  # TFLite
 
 ### 第二步：手動配置推論後端（修改 autobackend.py，選擇 ArmNN 或 NeuronRT）
 
-1. 根據您的硬體與需求，選擇下方其中一種加速方式，將對應區塊的程式碼取消註解，並填入正確參數：
+根據您的硬體與需求，選擇下方其中一種加速方式，將對應區塊的程式碼取消註解，並填入正確參數：
 
 **選項 A：使用 ArmNN delegate（CPU/GPU 加速**
 
-    - 取消註解 ArmNN 相關程式碼。
-    - 將 `library` 參數改為您系統上 `libarmnnDelegate.so` 的實際路徑。
-    - `options` 的 `backends` 可設為 `"CpuAcc"` 或 `"GpuAcc"`，依照您的硬體選擇。
+- 取消註解 ArmNN 相關程式碼。
+- 將 `library` 參數改為您系統上 `libarmnnDelegate.so` 的實際路徑。
+- `options` 的 `backends` 可設為 `"CpuAcc"` 或 `"GpuAcc"`，依照您的硬體選擇。
 
 **選項 B：使用 NeuronRT delegate（MDLA/VPU 加速）**
 
-    - 取消註解 NeuronRT 相關程式碼。
-    - 將 `dla_path` 改為您的 DLA model 路徑。
-    - `device` 參數請依照您的硬體設為 `"mdla3.0"`、`"mdla2.0"` 或 `"vpu"`。
+- 取消註解 NeuronRT 相關程式碼。
+- 將 `dla_path` 改為您的 DLA model 路徑。
+- `device` 參數請依照您的硬體設為 `"mdla3.0"`、`"mdla2.0"` 或 `"vpu"`。
 
-2. 請務必將「原生 TFLite 解譯器」那一行（`interpreter = Interpreter(model_path=w)`）以及 `raise RuntimeError(...)` 這一行註解掉，避免重複執行或出現錯誤。
-
-完成上述步驟後，Ultralytics 就會使用您選擇的推論後端進行加速推論。
+請務必將「原生 TFLite 解譯器」的（`interpreter = Interpreter(model_path=w)`）以及 `raise RuntimeError(...)` 這註解掉，避免重複執行或出現錯誤。
 
 #### 驗證配置
+
+完成上述步驟後，Ultralytics 就會使用您選擇的推論後端進行加速推論。
 
 ```python
 from ultralytics import YOLO
