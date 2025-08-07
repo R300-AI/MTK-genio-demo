@@ -1,10 +1,15 @@
-# Ultralytics YOLO 即時串流推論教學
 
-本教學將指導您如何在 MediaTek Genio 平台上配置並運行 Ultralytics YOLO 的高效能串流推論系統。
+# Ultralytics YOLO 即時串流推論完整教學
 
-### 第一步：理解Ultralytics 執行模型推論的運算機制
+本文件將詳細說明如何在 MediaTek Genio 平台上配置並運行 Ultralytics YOLO 的高效能即時串流推論系統。
 
-開啟 `ultralytics/nn/autobackend.py`，在 TFLite 區段（約第 465-490 行）您會看到以下程式碼：
+---
+
+## 系統配置與前置作業
+
+### 第一步：理解 Ultralytics 推論後端機制
+
+請開啟 `ultralytics/nn/autobackend.py`，在 TFLite 區段（約第 465-490 行）您會看到以下程式碼：
 
 ```python
 else:  # TFLite
@@ -44,25 +49,27 @@ else:  # TFLite
 ```
 
 
-### 第二步：手動配置推論後端（修改 autobackend.py，選擇 ArmNN 或 NeuronRT）
+
+### 第二步：手動配置推論後端
 
 根據您的硬體與需求選擇加速方案，並將對應區塊的程式碼取消註解並填入正確參數：
 
-#### 選項 A：使用 ArmNN delegate（CPU/GPU 加速）
+### 2.1 ArmNN delegate（CPU/GPU 加速）
 
-1. 取消註解 ArmNN 相關程式碼。
+1. 取消註解 **選項 A** 相關的程式碼。
 2. 將 `<path to libarmnnDelegate.so>` 參數改為您系統上 ArmNN `libarmnnDelegate.so` 的實際路徑。
 3. 將 `<CpuAcc or GpuAcc>` 參數設為 `"CpuAcc"` 或 `"GpuAcc"`。
 
-#### 選項 B：使用 NeuronRT delegate（MDLA/VPU 加速）
+### 2.2 NeuronRT delegate（MDLA/VPU 加速）
 
-1. 取消註解 NeuronRT 相關程式碼。
+1. 取消註解 **選項 B** 相關的程式碼。
 2. 將 `<path to your dla model>` 改為您的 DLA model 路徑。
 3. `<mdla3.0, mdla2.0 or vpu>` 參數請依照您的硬體設為 `"mdla3.0"`、`"mdla2.0"` 或 `"vpu"`。
 
 > **請務必將「原生 TFLite 解譯器」的 `interpreter = Interpreter(model_path=w)` 以及 `raise RuntimeError(...)` 這兩行註解掉，避免重複執行或出現錯誤。**
 
-#### 驗證配置
+
+### 第三步：驗證推論後端配置
 
 完成上述步驟後，Ultralytics 就會使用您選擇的推論後端進行加速推論。
 
@@ -73,3 +80,10 @@ model = YOLO("./models/yolov8n_float32.tflite")
 results = model.predict(["./data/bus.jpg"])
 results[0].show()
 ```
+
+
+---
+
+## 非同步化串流推論
+
+接下來會示範如何透過 Ultralytics 對 `data/video.mp4` 進行非同步化串流。
