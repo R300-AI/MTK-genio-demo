@@ -90,30 +90,12 @@ $ uv run --with jupyter jupyter lab
 
 ### 模型測試工具
 
-如果開發者想針對 MTK 加速器（DLA/VPU）進行模型設計，在實際進行部署前可以預先透過 [**NeuronPilot AI Porting Platform**](https://neuronpilot-porting-platform.azurewebsites.net/) 線上平台驗證模型的相容性。這個平台提供多種模型格式的支援：對於 PyTorch 和 TensorFlow 模型，可透過程式碼執行來檢測模型對各處理器的支援性；對於已經訓練完成的 ONNX 和 TensorFlow Lite 模型，則可直接上傳模型檔以進行相容性驗證及模型編譯/下載。
+如果開發者想針對 MTK 加速器（DLA/VPU）設計可部署的模型，在實際進行開發前可以預先透過 [**NeuronPilot AI Porting Platform**](https://neuronpilot-porting-platform.azurewebsites.net/) 線上平台驗證模型的相容性。這個平台提供兩種不同的驗證方案：
+
+1. **SDK 整合驗證** - 透過執行程式來檢測模型對各處理器的支援度，支援 PyTorch 和 TensorFlow 框架。
+2. **模型檔案驗證** - 直接提交模型檔案進行相容性驗證、模型編譯及下載，支援 ONNX 和 TensorFlow Lite 格式。
 
 透過此平台的驗證機制，開發者能夠在設計階段的早期就確認模型架構是否適合 MediaTek 的專用 AI 加速器，避免在後續部署過程中遇到相容性問題，有效提升開發效率。
-
-#### NeuronPilot AI Porting Platform
-
-**NeuronPilot Porting Platform** 是工研院提供的線上模型轉換平台，專門用於將 TensorFlow Lite 模型編譯為 DLA 格式，以便在 MediaTek Genio 系列的 MDLA 加速器上運行。
-
-🌐 **平台網址**：[https://neuronpilot-porting-platform.azurewebsites.net/](https://neuronpilot-porting-platform.azurewebsites.net/)
-
-**使用流程**：
-1. **Upload Prebuilt Model** - 上傳您的 TFLite 模型檔案
-2. **選擇 TFLite 模型** - 確認模型格式和參數
-3. **Upload and Verify Model** - 驗證模型的相容性
-4. **選擇開發板與 Device** - 選擇對應的 Genio 型號和加速器類型
-5. **Download DLA** - 下載轉換完成的 DLA 格式模型
-
-> ⚠️ **重要提醒**
-> - 轉換過程需要網路連線
-> - 請確認選擇正確的開發板型號（G510/700 使用 mdla3.0，G1200 使用 mdla2.0）
-> - 轉換完成的 DLA 檔案建議存放在 `./models/` 目錄下
-
-完成模型轉換與相容性驗證後，建議參考上述的
-
 
 ## 進階教學
 
