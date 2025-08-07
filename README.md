@@ -48,8 +48,8 @@ Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與
 <table>
   <tr>
     <td style="vertical-align: middle; text-align: center; font-weight: bold; background: #f6f8fa;">Provider</td>
-    <td colspan="2" style="text-align: center; font-weight: bold;">ArmNN</td>
-    <td colspan="2" style="text-align: center; font-weight: bold;">MediaTek NeuronRT</td>
+    <td colspan="2" style="text-align: center; font-weight: bold;">ArmNN<br>Sea of Cores</td>
+    <td colspan="2" style="text-align: center; font-weight: bold;">MediaTek NeuronRT<br>Customized Chipsets</td>
   </tr>
   <tr>
     <th>型號</th>
@@ -83,12 +83,6 @@ Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與
     <td>2x MDLA v2.0</td>
     <td>2x VPU</td>
     <td>8GB LPDDR4X</td>
-  </tr>
-  <tr>
-    <td></td>
-    <td colspan="2" style="text-align: center; font-size: 90%; background: #f6f8fa;">Sea of Cores</td>
-    <td colspan="2" style="text-align: center; font-size: 90%; background: #f6f8fa;">Customized Chipsets</td>
-    <td style="background: #f6f8fa;"></td>
   </tr>
 </table>
 </div>
