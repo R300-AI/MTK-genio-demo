@@ -141,4 +141,4 @@ $ uv run --with jupyter jupyter lab
 
 透過以下 Python 範例，您將全面了解在這些晶片上部署 AI 模型的基礎知識，包括應用程式部署、加速模型推論和資料串流。這將幫助您快速掌握 Genio 晶片的全部潛能。
 
-* **[使用 Ultralytics YOLO 部署電腦視覺應用]()**
+* **[Ultralytics YOLO 即時串流推論教學](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ultralytics_streaming_tutorial.md)**
