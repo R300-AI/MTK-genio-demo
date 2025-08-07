@@ -61,17 +61,17 @@ MediaTek Genio 系列採用先進的異質整合封裝技術，透過小晶片�
 1. **硬體設備**：MediaTek Genio EVK 開發板（支援型號：510/700/1200）
 2. **系統安裝**：透過 [Getting Start 指南](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/getting_start_with_ubuntu_zh.md) 燒錄 Ubuntu 作業系統，並安裝BSPs（`ArmNN`、`NeuronRT`）
 3. **環境設定**：開機並依照以下步驟安裝MTK-genio-demo
-  ```bash
-  # 安裝 Python 套件管理工具（需使用 Python 3.12）
-  curl -LsSf https://astral.sh/uv/install.sh | sh  
-  ```
-  ```bash
-  # 下載專案並安裝相依套件
-  $ git clone https://github.com/R300-AI/MTK-genio-demo.git
-  $ cd MTK-genio-demo
+    ```bash
+    # 安裝 Python 套件管理工具（需使用 Python 3.12）
+    curl -LsSf https://astral.sh/uv/install.sh | sh  
+    ```
+    ```bash
+    # 下載專案並安裝相依套件
+    $ git clone https://github.com/R300-AI/MTK-genio-demo.git
+    $ cd MTK-genio-demo
 
-  $ uv add -r requirements.txt  
-  ```
+    $ uv add -r requirements.txt  
+    ```
 
 ## 快速開始
 
@@ -86,11 +86,11 @@ $ uv run --with jupyter jupyter lab
 這些 Notebook 範例需要您事先準備好 TensorFlow Lite 格式（.tflite）的 AI 模型檔案。本專案已在 `./models/` 目錄中預先提供範例模型(`./models/yolov8n_float32.tflite`)，開發者可直接使用這些模型進行測試。
 
 > - **[ArmNN 模型推論教學](./notebook/armnn_benchmark.ipynb)** - 使用 ArmNN 推論引擎在Arm的 CPU 和 GPU 上執行模型推論與效能評估
-> - **[NeuronRT 模型推論教學](./notebook/neuronrt_benchmark.ipynb)** - 使用 NeuronRT 推論引擎在專用 AI 加速器（DLA/VPU）上執行模型推論與效能評估 
+> - **[NeuronRT 模型推論教學](./notebook/neuronrt_benchmark.ipynb)** - 使用 NeuronRT 推論引擎在MTK加速器（DLA/VPU）上執行模型推論與效能評估 
 
 ### 模型測試工具
 
-為了快速測試和驗證 AI 模型在 Genio 平台上的運行效果，您需要先透過線上平台將 TFLite 模型轉換為適合的格式，再使用 Jupyter Notebook 進行詳細的效能測試和分析：
+在進行實際部署前，開發者可以透過NeuronPilot AI Porting Platform 線上平台預先驗證模型與MTK加速器（DLA/VPU）的相容性。
 
 #### NeuronPilot AI Porting Platform
 
