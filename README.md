@@ -61,9 +61,7 @@ MediaTek Genio 系列採用先進的異質整合封裝技術，透過小晶片�
 1. **硬體設備**：MediaTek Genio EVK 開發板（支援型號：510/700/1200）
 2. **系統環境**：透過 [Getting Start 指南](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/getting_start_with_ubuntu_zh.md) 燒錄 Ubuntu 作業系統，並安裝BSPs（`ArmNN`、`NeuronRT`）
 
-### 環境設定
-
-MTK-genio-demo 專案提供了完整的 AI 模型部署示範環境。請按照以下步驟進行環境配置：
+MTK-genio-demo 專案提供了完整的 AI 模型部署示範環境。請按照以下步驟進行環境設定：
 
 ```bash
 # 安裝 Python 套件管理工具（需使用 Python 3.12）
@@ -87,41 +85,32 @@ $ uv run --with jupyter jupyter lab
 ```
 
 > 📚 **Notebook 教學範例**
-> - **[ArmNN 效能測試教學](./notebook/armnn_benchmark.ipynb)** - 完整的 ArmNN 使用指南與效能評測
-> - **[NeuronRT 效能測試教學](./notebook/neuronrt_benchmark.ipynb)** - NeuronRT 部署流程與最佳化技巧
+> - **[ArmNN 效能測試教學](./notebook/armnn_benchmark.ipynb)** -  ArmNN 的使用指南與效能評測
+> - **[NeuronRT 效能測試教學](./notebook/neuronrt_benchmark.ipynb)** - NeuronRT 的使用指南與效能評測
 
-**或者，您也可以直接使用命令列工具進行快速測試：**
+### 模型測試工具
 
-#### ArmNN 效能測試
+為了快速測試和驗證 AI 模型在 Genio 平台上的運行效果，您需要先透過線上平台將 TFLite 模型轉換為適合的格式，再使用 Jupyter Notebook 進行詳細的效能測試和分析：
 
-**ArmNN** 是針對 Arm CPU 和 GPU 最佳化的神經網路推論函式庫。我們提供 `./models/yolov8n_float32.tflite` 作為測試範例，您也可以替換為自己的 TFLite 模型：
+#### NeuronPilot AI Porting Platform
 
-```bash
-$ python armnn_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
-```
+**NeuronPilot Porting Platform** 是工研院提供的線上模型轉換平台，專門用於將 TensorFlow Lite 模型編譯為 DLA 格式，以便在 MediaTek Genio 系列的 MDLA 加速器上運行。
 
-> **參數說明**：`--device` 選項
-> | 參數選項   | 說明                                    |
-> |----------|-----------------------------------------|
-> | `CpuAcc` | 針對 Cortex-A CPU 最佳化 TFLite 推論     |
-> | `GpuAcc` | 針對 Mali-G GPU 加速 TFLite 推論        |
-#### NeuronRT 效能測試
+🌐 **平台網址**：[https://neuronpilot-porting-platform.azurewebsites.net/](https://neuronpilot-porting-platform.azurewebsites.net/)
 
-**NeuronRT** 是專為 NPU 推論設計的執行時期函式庫。它會自動透過 [NeuronPilot Online](https://app-aihub-neuronpilot.azurewebsites.net/) API 將 TFLite 模型編譯為 DLA 格式，並儲存至 `./models` 目錄。
+**使用流程**：
+1. **Upload Prebuilt Model** - 上傳您的 TFLite 模型檔案
+2. **選擇 TFLite 模型** - 確認模型格式和參數
+3. **Upload and Verify Model** - 驗證模型的相容性
+4. **選擇開發板與 Device** - 選擇對應的 Genio 型號和加速器類型
+5. **Download DLA** - 下載轉換完成的 DLA 格式模型
 
-> ⚠️ **注意**：此過程需要網路連線
+> ⚠️ **重要提醒**
+> - 轉換過程需要網路連線
+> - 請確認選擇正確的開發板型號（G510/700 使用 mdla3.0，G1200 使用 mdla2.0）
+> - 轉換完成的 DLA 檔案建議存放在 `./models/` 目錄下
 
-```bash
-$ python neuronrt_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device mdla3.0 --iteration 10
-```
-
-> **參數說明**：`--device` 選項
-> | 參數選項    | 說明                                          | 支援型號      |
-> |-----------|----------------------------------------------|-------------|
-> | `mdla3.0` | 透過 DLA 加速 TFLite 推論                      | G510/700    |
-> | `mdla2.0` | 透過 DLA 加速 TFLite 推論                      | G1200       |
-> | `vpu`     | 透過 VPU 加速 TFLite 推論                      | 全系列       |
-
+完成模型轉換後，請參考上述的 **Notebook 教學範例** 來進行詳細的效能測試和最佳化分析。
 
 ## 進階教學
 
