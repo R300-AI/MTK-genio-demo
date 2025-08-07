@@ -1,3 +1,7 @@
+# development
+jupyter
+tqdm
+
 # interpreter
 matplotlib
 opencv-python
