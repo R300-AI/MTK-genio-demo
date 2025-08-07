@@ -45,6 +45,7 @@ Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與
 
 | 型號         | CPU                                 | GPU                | MDLA (DLA)         | VPU         |
 |--------------|-------------------------------------|--------------------|--------------------|-------------|
+| **Provider** | **ArmNN**                           | **ArmNN**          | **MediaTek NeuronRT** | **MediaTek NeuronRT** |
 | **Genio 510**| 4x Arm Cortex-A73 + 4x Cortex-A53   | Arm Mali-G57 MC2   | 1x MDLA v3.0       | 1x VPU      |
 | **Genio 700**| 2x Arm Cortex-A78 + 6x Cortex-A55   | Arm Mali-G57 MC3   | 1x MDLA v3.0       | 1x VPU      | 
 | **Genio 1200**| 4x Arm Cortex-A78 + 4x Cortex-A55  | Arm Mali-G57 MC5   | 2x MDLA v2.0       | 2x VPU      |
