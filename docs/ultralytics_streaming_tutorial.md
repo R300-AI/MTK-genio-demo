@@ -101,6 +101,7 @@ T_sync = Σᵢ₌₁ⁿ (t_read_i + t_infer_i + t_display_i)
 我們引入基於生產者-消費者模式的三階段並發處理框架：
 
 **階段 1（生產者）**：影格擷取與預處理
+
     ```python
     async def preprocess(input_queue, cap):
         while cap.isOpened():
@@ -110,6 +111,7 @@ T_sync = Σᵢ₌₁ⁿ (t_read_i + t_infer_i + t_display_i)
         cap.release()
     ```
 **階段 2（處理）**：YOLO 推論計算  
+
     ```python
     async def predict(input_queue, output_queue, model):
         while True:
@@ -120,6 +122,7 @@ T_sync = Σᵢ₌₁ⁿ (t_read_i + t_infer_i + t_display_i)
             await output_queue.put(results[0].plot())
     ```
 **階段 3（消費者）**：結果視覺化與顯示
+
     ```python
     async def postprocess(output_queue):
         while True:
