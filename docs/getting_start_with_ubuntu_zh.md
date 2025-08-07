@@ -52,21 +52,12 @@ $ ./bootstrap && make && sudo make install && cd ~
 
 ### 📚 步驟2：安裝NeuronRT函式庫
 
-**重要概念**：NeuronRT包含硬體驅動程式和Python API，讓您能：
+NeuronRT包含硬體驅動程式和Python API，讓您能：
+
 - 將`.tflite`模型轉換為`.dla`格式（DLA = Deep Learning Accelerator格式）
 - 在MDLA上執行高速推論
 - 存取VPU進行電腦視覺加速
-
-```bash
-# 按照MediaTek官方指南安裝
-```
-請遵循[MediaTek官方安裝指南](https://mediatek.gitlab.io/genio/doc/ubuntu/bsp-installation/neuropilot.html#)完成安裝。
-
-**安裝完成後測試**：
-```bash
-# 檢查是否能正常匯入
-$ python3 -c "import neuronrt; print('NeuronRT安裝成功！')"
-```
+請遵循[MediaTek官方安裝指南](https://mediatek.gitlab.io/genio/doc/ubuntu/bsp-installation/neuropilot.html#)完成安裝及測試。
 
 ---
 
