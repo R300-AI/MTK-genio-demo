@@ -137,8 +137,9 @@ $ uv run --with jupyter jupyter lab
 透過此平台的驗證機制，開發者能夠在設計階段就確認模型架構是否適合 MediaTek 的專用 AI 加速器，避免在後續部署過程中遇到相容性問題，有效提升開發效率。
 
 
-## 經典使用案例
 
-透過以下 Python 範例，您將全面了解在這些晶片上部署 AI 模型的基礎知識，包括應用程式部署、加速模型推論和資料串流。這將幫助您快速掌握 Genio 晶片的全部潛能。
+## AI 推論實戰：記憶體共享與非同步優化
 
-* **[Ultralytics YOLO 即時串流推論教學](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ultralytics_streaming_tutorial.md)**
+本節以 Ultralytics YOLO 為例，帶領讀者實作協程驅動的非同步即時影像推論，並深入體驗 Genio 平台記憶體共享與零複製傳輸的效能優勢。
+
+**[Ultralytics YOLO 即時串流推論教學](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ultralytics_streaming_tutorial.md)**

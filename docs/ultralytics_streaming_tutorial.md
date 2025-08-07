@@ -1,5 +1,5 @@
 
-# Ultralytics YOLO 即時串流推論完整教學
+# Ultralytics YOLO 即時串流推論教學
 
 本文件將詳細說明如何在 MediaTek Genio 平台上配置並運行 Ultralytics YOLO 的高效能即時串流推論系統。
 
