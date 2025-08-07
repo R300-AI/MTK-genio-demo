@@ -3,7 +3,6 @@
 
 本文件將詳細說明如何在 MediaTek Genio 平台上配置並運行 Ultralytics YOLO 的高效能即時串流推論系統。
 
----
 
 ## 系統配置與前置作業
 
@@ -54,13 +53,13 @@ else:  # TFLite
 
 根據您的硬體與需求選擇加速方案，並將對應區塊的程式碼取消註解並填入正確參數：
 
-### 2.1 ArmNN delegate（CPU/GPU 加速）
+### 選擇ArmNN Delegate（CPU/GPU 加速）
 
 1. 取消註解 **選項 A** 相關的程式碼。
 2. 將 `<path to libarmnnDelegate.so>` 參數改為您系統上 ArmNN `libarmnnDelegate.so` 的實際路徑。
 3. 將 `<CpuAcc or GpuAcc>` 參數設為 `"CpuAcc"` 或 `"GpuAcc"`。
 
-### 2.2 NeuronRT delegate（MDLA/VPU 加速）
+### 選擇NeuronRT Delegate（MDLA/VPU 加速）
 
 1. 取消註解 **選項 B** 相關的程式碼。
 2. 將 `<path to your dla model>` 改為您的 DLA model 路徑。
@@ -80,7 +79,6 @@ model = YOLO("./models/yolov8n_float32.tflite")
 results = model.predict(["./data/bus.jpg"])
 results[0].show()
 ```
-
 
 ---
 
