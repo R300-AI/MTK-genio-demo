@@ -59,22 +59,22 @@ MediaTek Genio 系列採用先進的異質整合封裝技術，透過小晶片�
 在開始之前，請確保您已完成以下準備工作：
 
 1. **硬體設備**：MediaTek Genio EVK 開發板（支援型號：510/700/1200）
-2. **系統環境**：透過 [Getting Start 指南](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/getting_start_with_ubuntu_zh.md) 燒錄 Ubuntu 作業系統，並安裝 Board Support Packages（`ArmNN`、`NeuronRT`）
+2. **系統環境**：透過 [Getting Start 指南](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/getting_start_with_ubuntu_zh.md) 燒錄 Ubuntu 作業系統，並安裝BSPs軟體（`ArmNN`、`NeuronRT`）
 
 ### 環境設定
 
-Genio 平台透過 TFLite Runtime 為 Mali GPU 提供加速選項，其他運算則在 Cortex-A CPU 上執行。如果您想將 TFLite 模型移植到這些晶片上，請按照以下步驟設定開發環境（Python 版本建議為 `3.12`）：
+為了在 Genio 平台上順利執行 AI 模型的效能測試與部署工作，您需要先設定好 Python 開發環境並安裝必要的相依套件。請按照以下步驟進行環境配置：
 
 ```bash
-# 下載範例程式碼
+curl -LsSf https://astral.sh/uv/install.sh | sh  # 安裝 Python 套件管理工具（使用 Python 3.12）
+```
+```bash
+# 下載專案並安裝相依套件
 $ git clone https://github.com/R300-AI/MTK-genio-demo.git
 $ cd MTK-genio-demo
 
-# 安裝相依套件
-$ pip install -r requirements.txt
+$ uv add -r requirements.txt  
 ```
-
----
 
 ### 效能測試工具
 
