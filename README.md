@@ -140,6 +140,8 @@ $ uv run --with jupyter jupyter lab
 
 ## AI 推論實戰：記憶體共享與非同步優化
 
-本節以 Ultralytics YOLO 為例，帶領讀者實作協程驅動的非同步即時影像推論，並深入體驗 Genio 平台記憶體共享與零複製傳輸的效能優勢。
+本節以 Ultralytics YOLO 為例，帶領讀者實作協程驅動的非同步即時影像推論，深入體驗 Genio 平台在記憶體共享與零複製傳輸上的效能優勢。
 
 * **[Ultralytics YOLO 即時串流推論教學](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ultralytics_streaming_tutorial.md)**
+
+你將學會如何將影像串流資料直接映射至共享記憶體，省略冗餘的資料複製，使資料在擷取、前處理、推論與後處理等階段間順暢流動。這些處理步驟透過 Python 的協程（`asyncio`)拆分為獨立任務，讓多核心能夠並行運作，大幅提升整體吞吐量與即時處理效能。
