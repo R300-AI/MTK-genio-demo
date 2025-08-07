@@ -50,20 +50,13 @@ Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與
     <th>型號</th>
     <th>CPU<sub>Cortex-A</sub></th>
     <th>GPU<sub>Mali-G</sub></th>
-    <th>MDLA (DLA)</th>
+    <th>DLA</th>
     <th>VPU</th>
   </tr>
   <tr>
-    <td rowspan="3" style="vertical-align: middle; text-align: center; font-weight: bold; background: #f6f8fa;">Provider</td>
+    <td rowspan="2" style="vertical-align: middle; text-align: center; font-weight: bold; background: #f6f8fa;">Provider</td>
     <td colspan="2" style="text-align: center; font-weight: bold;">ArmNN</td>
     <td colspan="2" style="text-align: center; font-weight: bold;">MediaTek NeuronRT</td>
-  </tr>
-  <tr>
-    <td colspan="2" style="text-align: center; font-size: 90%; background: #f6f8fa;">Sea of Cores</td>
-    <td colspan="2" style="text-align: center; font-size: 90%; background: #f6f8fa;">Customized Chipsets</td>
-  </tr>
-  <tr>
-    <td colspan="5" style="padding:0; border:none;"></td>
   </tr>
   <tr>
     <td><b>Genio 510</b></td>
@@ -85,6 +78,11 @@ Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與
     <td>G57 MC5</td>
     <td>2x MDLA v2.0</td>
     <td>2x VPU</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td colspan="2" style="text-align: center; font-size: 90%; background: #f6f8fa;">Sea of Cores</td>
+    <td colspan="2" style="text-align: center; font-size: 90%; background: #f6f8fa;">Customized Chipsets</td>
   </tr>
 </table>
 </div>
