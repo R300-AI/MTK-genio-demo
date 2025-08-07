@@ -28,7 +28,9 @@ AI部署的核心目標，是將已訓練完成的模型最佳化並移植到目
 
 MediaTek Genio 系列採用先進的異質整合封裝技術，透過小晶片（chiplet）互聯，將 CPU、GPU、MDLA、VPU 等多種運算處理器高效整合於單一晶片內。與雲端平台的單一加速器架構不同，Genio 提供了多元化的運算資源選擇，開發者必須理解這種異質運算架構的特性，才能針對不同 AI 模型的特性與效能需求，選擇最適合的部署策略。
 
-![UCIe異質整合封裝示意圖](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/images/UCIe-diagram.jpg)
+<div align="center">
+<img src="https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/images/UCIe-diagram.jpg" width="360"/>
+</div>
 
 ### 記憶體共享機制
 
@@ -48,56 +50,65 @@ MediaTek Genio 系列採用先進的異質整合封裝技術，透過小晶片�
 | **Genio 700**| 2x Arm Cortex-A78 + 6x Cortex-A55   | Arm Mali-G57 MC3   | 1x MDLA v3.0       | 1x VPU      | 
 | **Genio 1200**| 4x Arm Cortex-A78 + 4x Cortex-A55  | Arm Mali-G57 MC5   | 2x MDLA v2.0       | 2x VPU      | 
 
-## 事前準備
 
-1. **硬體**：MediaTek Genio EVK (350/510/700/1200)
-2. **系統安裝**：透過 [Getting Start 指南](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/getting_start_with_ubuntu_zh.md) 燒錄 Ubuntu 作業系統，並安裝 Board Support Packages (`ArmNN`, `NeuronRT`)
 
 ## 快速開始
 
-<div align="center">
-<img src="https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/images/chipset.png" width="360"/>
-</div>
+### 事前準備
 
-Genio 平台是透過 TFLite Runtime為 Mali GPU提供加速選項，其他運算則在 Cortex-A CPU 上執行。如果您想將 TFLite 模型移植到這些晶片上，請按照以下指示將範例程式庫下載到您的 Genio 開發板，並設定必要的環境 (Python=`3.12`)：
+在開始之前，請確保您已完成以下準備工作：
+
+1. **硬體設備**：MediaTek Genio EVK 開發板（支援型號：510/700/1200）
+2. **系統環境**：透過 [Getting Start 指南](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/getting_start_with_ubuntu_zh.md) 燒錄 Ubuntu 作業系統，並安裝 Board Support Packages（`ArmNN`、`NeuronRT`）
+
+### 環境設定
+
+Genio 平台透過 TFLite Runtime 為 Mali GPU 提供加速選項，其他運算則在 Cortex-A CPU 上執行。如果您想將 TFLite 模型移植到這些晶片上，請按照以下步驟設定開發環境（Python 版本建議為 `3.12`）：
 
 ```bash
+# 下載範例程式碼
 $ git clone https://github.com/R300-AI/MTK-genio-demo.git
 $ cd MTK-genio-demo
+
+# 安裝相依套件
 $ pip install -r requirements.txt
 ```
 
-您可以使用以下工具來測試模型的運算速度：
+---
 
-### ArmNN 效能測試
+### 效能測試工具
 
-**ArmNN** 是針對 Arm CPU 和 GPU 最佳化的神經網路推論函式庫。提供的檔案 `./models/yolov8n_float32.tflite` 作為範例，您可以替換為自己的 TFLite 模型：
+完成環境設定後，您可以使用以下工具來測試模型的運算效能：
+
+#### ArmNN 效能測試
+
+**ArmNN** 是針對 Arm CPU 和 GPU 最佳化的神經網路推論函式庫。我們提供 `./models/yolov8n_float32.tflite` 作為測試範例，您也可以替換為自己的 TFLite 模型：
 
 ```bash
 $ python armnn_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device GpuAcc --iteration 10
 ```
 
-> `--device` 參數選項：
-> | 選項     | 說明                                   |
-> |----------|----------------------------------------|
-> | `CpuAcc` | 針對 Cortex-A CPU 最佳化 TFLite 推論    |
-> | `GpuAcc` | 針對 Mali-G GPU 加速 TFLite 推論       |
-  
+> **參數說明**：`--device` 選項
+> | 參數選項   | 說明                                    |
+> |----------|-----------------------------------------|
+> | `CpuAcc` | 針對 Cortex-A CPU 最佳化 TFLite 推論     |
+> | `GpuAcc` | 針對 Mali-G GPU 加速 TFLite 推論        |
+#### NeuronRT 效能測試
 
-### NeuronRT 效能測試
+**NeuronRT** 是專為 NPU 推論設計的執行時期函式庫。它會自動透過 [NeuronPilot Online](https://app-aihub-neuronpilot.azurewebsites.net/) API 將 TFLite 模型編譯為 DLA 格式，並儲存至 `./models` 目錄。
 
-**NeuronRT** 是專為 NPU 推論設計的執行時期函式庫。它會自動透過 [NeuronPilot Online](https://app-aihub-neuronpilot.azurewebsites.net/) API 將 TFLite 模型編譯為 DLA 格式，並儲存至 `./models` 目錄。請注意此過程需要網路連線：
+> ⚠️ **注意**：此過程需要網路連線
 
 ```bash
 $ python neuronrt_benchmark.py --tflite_model ./models/yolov8n_float32.tflite --device mdla3.0 --iteration 10
 ```
 
-> `--device` 參數選項：
-> | 選項      | 說明                                         |
-> |-----------|----------------------------------------------|
-> | `mdla3.0` | 透過 DLA 加速 TFLite 推論，僅支援 G510/700   |
-> | `mdla2.0` | 透過 DLA 加速 TFLite 推論，僅支援 1200       |
-> | `vpu`     | 透過 VPU 加速 TFLite 推論                    |
+> **參數說明**：`--device` 選項
+> | 參數選項    | 說明                                          | 支援型號      |
+> |-----------|----------------------------------------------|-------------|
+> | `mdla3.0` | 透過 DLA 加速 TFLite 推論                      | G510/700    |
+> | `mdla2.0` | 透過 DLA 加速 TFLite 推論                      | G1200       |
+> | `vpu`     | 透過 VPU 加速 TFLite 推論                      | 全系列       |
 
 
 ## 進階教學
