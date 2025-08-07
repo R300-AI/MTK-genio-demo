@@ -77,27 +77,29 @@ MediaTek Genio 系列採用先進的異質整合封裝技術，透過小晶片�
 
 ### 效能測試工具
 
-完成環境設定後，您可以透過Jupyter Lab了解如何在 Genio 平台上進行 AI 模型的推論與效能評估。
+完成環境設定後，您可以透過 Jupyter Lab 了解如何在 Genio 平台上進行 AI 模型的推論與效能評估。
 
 ```bash
 $ uv run --with jupyter jupyter lab
 ```
 
-這些 Notebook 範例需要您事先準備好 TensorFlow Lite 格式（.tflite）的 AI 模型檔案。本專案已在 `./models/` 目錄中預先提供範例模型(`./models/yolov8n_float32.tflite`)，開發者可直接使用這些模型進行測試。
+這些 Notebook 範例需要您事先準備好 TensorFlow Lite 格式（.tflite）的 AI 模型檔案。本專案已在 `./models/` 目錄中預先提供範例模型（`./models/yolov8n_float32.tflite`），開發者可直接使用這些模型進行測試。
 
-> - **[ArmNN 模型推論教學](./notebook/armnn_benchmark.ipynb)** - 使用 ArmNN 推論引擎在Arm的 CPU 和 GPU 上執行模型推論與效能評估
-> - **[NeuronRT 模型推論教學](./notebook/neuronrt_benchmark.ipynb)** - 使用 NeuronRT 推論引擎在MTK加速器（DLA/VPU）上執行模型推論與效能評估 
+> - **[ArmNN 模型推論教學](./notebook/armnn_benchmark.ipynb)** - 使用 ArmNN 推論引擎在 Arm 的 CPU 和 GPU 上執行模型推論與效能評估
+> - **[NeuronRT 模型推論教學](./notebook/neuronrt_benchmark.ipynb)** - 使用 NeuronRT 推論引擎在 MTK 加速器（DLA/VPU）上執行模型推論與效能評估
 
-### 模型測試工具
+### 模型相容性驗證工具
 
-如果開發者想針對 MTK 加速器（DLA/VPU）設計可部署的模型，在實際進行開發前可以預先透過 **NeuronPilot AI Porting Platform** 線上平台驗證模型的相容性。這個平台提供兩種不同的驗證方案：
-
-1. **SDK 整合驗證** - 透過執行程式來檢測模型對各處理器的支援度，支援 PyTorch 和 TensorFlow 框架。
-2. **模型檔案驗證** - 直接提交模型檔案進行相容性驗證、模型編譯及下載，支援 ONNX 和 TensorFlow Lite 格式。
-
-透過此平台的驗證機制，開發者能夠在設計階段的早期就確認模型架構是否適合 MediaTek 的專用 AI 加速器，避免在後續部署過程中遇到相容性問題，有效提升開發效率。
+如果開發者想針對 MTK 加速器（DLA/VPU）設計可部署的模型，在實際進行開發前可以預先透過 **NeuronPilot AI Porting Platform** 線上平台驗證模型的相容性。
 
 🌐 **平台網址**：[https://neuronpilot-porting-platform.azurewebsites.net/](https://neuronpilot-porting-platform.azurewebsites.net/)
+
+該平台提供兩種不同的驗證方案：
+
+1. **SDK 整合驗證** - 透過執行程式來檢測模型對各處理器的支援度，支援 PyTorch 和 TensorFlow 框架
+2. **模型檔案驗證** - 直接提交模型檔案進行相容性驗證、模型編譯及下載，支援 ONNX 和 TensorFlow Lite 格式
+
+透過此平台的驗證機制，開發者能夠在設計階段就確認模型架構是否適合 MediaTek 的專用 AI 加速器，避免在後續部署過程中遇到相容性問題，有效提升開發效率。
 
 
 ## 進階教學
