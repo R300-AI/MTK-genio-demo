@@ -84,17 +84,11 @@ results[0].show()
 
 ## 非同步化串流推論
 
-### 背景與動機
+即時物件偵測應用在傳統同步架構下存在顯著的效能限制。序列化的處理流程包含影格讀取、模型推論與結果輸出，各階段間的依賴關係導致計算資源在等待期間處於閒置狀態。設影片序列 $\tau = \{\tau_1, \tau_2, ..., \tau_n\}$ 包含 $n$ 個連續影格，在傳統同步處理模式下，系統總執行時間可表示為：
 
-即時物件偵測應用在傳統同步架構下存在顯著的效能限制。序列化的處理流程包含影格讀取、模型推論與結果輸出，各階段間的依賴關係導致計算資源在等待期間處於閒置狀態。為提升系統整體吞吐量並最大化硬體資源使用效率，本章節提出基於協程的非同步流水線處理架構。
+$$T_{sync} = \sum_{i=1}^{n} (t_{read,i} + t_{infer,i} + t_{display,i})$$
 
-### 問題表述
-
-設影片序列 τ = {τ₁, τ₂, ..., τₙ} 包含 n 個連續影格。在傳統同步處理模式下，系統總執行時間可表示為：
-
-T_sync = Σᵢ₌₁ⁿ (t_read_i + t_infer_i + t_display_i)
-
-其中 t_read_i、t_infer_i、t_display_i 分別代表第 i 個影格的讀取時間、推論時間與顯示時間。同步執行模式要求各階段嚴格依序完成，造成計算單元在非關鍵路徑上的等待，進而限制系統整體處理能力。
+其中 $t_{read,i}$、$t_{infer,i}$、$t_{display,i}$ 分別代表第 $i$ 個影格的讀取時間、推論時間與顯示時間。同步執行模式要求各階段嚴格依序完成，造成計算單元在非關鍵路徑上的等待，進而限制系統整體處理能力。為提升系統整體吞吐量並最大化硬體資源使用效率，本章節提出基於協程的非同步流水線處理架構。
 
 ### 非同步流水線架構設計
 
@@ -104,11 +98,19 @@ T_sync = Σᵢ₌₁ⁿ (t_read_i + t_infer_i + t_display_i)
 負責影格讀取與初步預處理，將處理後的影格數據置入輸入佇列等待後續處理。
 
 ```python
-async def preprocess(input_queue, cap):
+async def preprocess(input_queue: asyncio.Queue, cap: cv2.VideoCapture) -> None:
+    """
+    影格讀取與預處理協程函數
+    
+    Args:
+        input_queue (asyncio.Queue): 影格數據輸入佇列
+        cap (cv2.VideoCapture): OpenCV 視訊捕獲物件
+    """
     while cap.isOpened():
         ret, frame = cap.read()
         await input_queue.put(frame if ret else None)
-        if not ret: break
+        if not ret:
+            break
     cap.release()
 ```
 
@@ -116,11 +118,20 @@ async def preprocess(input_queue, cap):
 從輸入佇列提取影格數據，執行 YOLO 物件偵測推論，並將標註結果輸出至結果佇列。
 
 ```python
-async def predict(input_queue, output_queue, model):
+async def predict(input_queue: asyncio.Queue, output_queue: asyncio.Queue, model) -> None:
+    """
+    YOLO 物件偵測推論協程函數
+    
+    Args:
+        input_queue (asyncio.Queue): 影格數據輸入佇列
+        output_queue (asyncio.Queue): 推論結果輸出佇列
+        model: YOLO 模型物件
+    """
     while True:
         frame = await input_queue.get()
         if frame is None: 
-            await output_queue.put(None); break
+            await output_queue.put(None)
+            break
         results = model.predict(frame, verbose=False)
         await output_queue.put(results[0].plot())
 ```
@@ -129,12 +140,20 @@ async def predict(input_queue, output_queue, model):
 從結果佇列取得推論輸出，執行視覺化渲染與螢幕顯示功能。
 
 ```python
-async def postprocess(output_queue):
+async def postprocess(output_queue: asyncio.Queue) -> None:
+    """
+    結果處理與顯示協程函數
+    
+    Args:
+        output_queue (asyncio.Queue): 推論結果輸出佇列
+    """
     while True:
         result = await output_queue.get()
-        if result is None: break
+        if result is None:
+            break
         cv2.imshow('YOLO Detection Stream', result)
-        if cv2.waitKey(1) == ord('q'): break
+        if cv2.waitKey(1) == ord('q'):
+            break
     cv2.destroyAllWindows()
 ```
 
@@ -148,14 +167,21 @@ async def postprocess(output_queue):
 import asyncio
 from ultralytics import YOLO
 import cv2
+from typing import Optional
 
-async def main():
+async def main() -> None:
+    """
+    非同步串流推論主函數
+    
+    整合三個協程模組：資料讀取、模型推論、結果顯示
+    透過 asyncio.Queue 實現模組間的非同步通訊
+    """
     # 建立模組間通訊佇列
-    input_queue = asyncio.Queue(maxsize=10)
-    output_queue = asyncio.Queue(maxsize=10)
+    input_queue: asyncio.Queue = asyncio.Queue(maxsize=10)
+    output_queue: asyncio.Queue = asyncio.Queue(maxsize=10)
     
     # 初始化系統元件
-    video_source = cv2.VideoCapture("./data/serve.mp4")
+    video_source: cv2.VideoCapture = cv2.VideoCapture("./data/serve.mp4")
     detection_model = YOLO("./models/yolov8n_float32.tflite", task='detect')
     
     # 並發執行三個處理模組
