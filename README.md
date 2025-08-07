@@ -90,12 +90,15 @@ $ uv run --with jupyter jupyter lab
 
 ### 模型測試工具
 
-如果開發者想針對 MTK 加速器（DLA/VPU）設計可部署的模型，在實際進行開發前可以預先透過 [**NeuronPilot AI Porting Platform**](https://neuronpilot-porting-platform.azurewebsites.net/) 線上平台驗證模型的相容性。這個平台提供兩種不同的驗證方案：
+如果開發者想針對 MTK 加速器（DLA/VPU）設計可部署的模型，在實際進行開發前可以預先透過 **NeuronPilot AI Porting Platform** 線上平台驗證模型的相容性。這個平台提供兩種不同的驗證方案：
 
 1. **SDK 整合驗證** - 透過執行程式來檢測模型對各處理器的支援度，支援 PyTorch 和 TensorFlow 框架。
 2. **模型檔案驗證** - 直接提交模型檔案進行相容性驗證、模型編譯及下載，支援 ONNX 和 TensorFlow Lite 格式。
 
 透過此平台的驗證機制，開發者能夠在設計階段的早期就確認模型架構是否適合 MediaTek 的專用 AI 加速器，避免在後續部署過程中遇到相容性問題，有效提升開發效率。
+
+🌐 **平台網址**：[https://neuronpilot-porting-platform.azurewebsites.net/](https://neuronpilot-porting-platform.azurewebsites.net/)
+
 
 ## 進階教學
 
