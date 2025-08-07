@@ -84,4 +84,67 @@ results[0].show()
 
 ## 非同步化串流推論
 
-接下來會示範如何透過 Ultralytics 對 `data/video.mp4` 進行非同步化串流。
+### 背景與動機
+
+物件偵測的即時影片串流處理在傳統同步架構中面臨顯著效能瓶頸。影格擷取、推論計算與結果視覺化的序列性質造成運算資源未充分利用的閒置期間。本研究提出非同步流水線架構以最大化吞吐量與資源效率。
+
+### 問題定義
+
+設 τ = {τ₁, τ₂, ..., τₙ} 代表具有 n 個影格的影片序列。傳統同步處理表現出時間複雜度：
+
+T_sync = Σᵢ₌₁ⁿ (t_read_i + t_infer_i + t_display_i)
+
+其中 t_read_i、t_infer_i 與 t_display_i 分別表示影格擷取、推論與視覺化時間。同步依賴關係造成資源閒置時間，限制整體系統吞吐量。
+
+### 提出的非同步流水線架構
+
+我們引入基於生產者-消費者模式的三階段並發處理框架：
+
+**階段 1（生產者）**：影格擷取與預處理
+    ```python
+    async def preprocess(input_queue, cap):
+        while cap.isOpened():
+            ret, frame = cap.read()
+            await input_queue.put(frame if ret else None)
+            if not ret: break
+        cap.release()
+    ```
+**階段 2（處理）**：YOLO 推論計算  
+    ```python
+    async def predict(input_queue, output_queue, model):
+        while True:
+            frame = await input_queue.get()
+            if frame is None: 
+                await output_queue.put(None); break
+            results = model.predict(frame, verbose=False)
+            await output_queue.put(results[0].plot())
+    ```
+**階段 3（消費者）**：結果視覺化與顯示
+    ```python
+    async def postprocess(output_queue):
+        while True:
+            result = await output_queue.get()
+            if result is None: break
+            cv2.imshow('Stream', result)
+            if cv2.waitKey(1) == ord('q'): break
+        cv2.destroyAllWindows()
+    ```
+
+各階段透過 FIFO 佇列進行通訊，實現平行執行並消除同步依賴關係。
+
+### 實作
+
+```python
+async def main():
+    queues = [asyncio.Queue() for _ in range(2)]
+    cap = cv2.VideoCapture("./data/serve.mp4")
+    model = YOLO("./models/yolov8n_float32.tflite")
+
+    await asyncio.gather(
+        preprocess(queues[0], cap),
+        predict(queues[0], queues[1], model),
+        postprocess(queues[1])
+    )
+
+asyncio.run(main())
+```
