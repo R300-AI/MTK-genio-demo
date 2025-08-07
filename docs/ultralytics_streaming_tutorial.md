@@ -92,20 +92,13 @@ $$T_{sync} = \sum_{i=1}^{n} (t_{read,i} + t_{infer,i} + t_{display,i})$$
 
 ### 非同步流水線架構設計
 
-本研究採用生產者-消費者並發模式，將處理流程分解為三個獨立運行的協程模組：
+本系統將影像串流處理分解為三個獨立運作的異步任務，每個任務可以同時並行執行，不需要等待其他任務完成。這種方式類似於工廠的流水線作業，當第一個影格正在進行物件偵測時，第二個影格已經開始讀取，第三個影格的結果正在顯示，大幅提升整體處理效率。
 
-**模組一：資料生產階段**
-負責影格讀取與初步預處理，將處理後的影格數據置入輸入佇列等待後續處理。
+**模組一：影格讀取**
+負責從影片檔案或攝影機連續讀取影格，並透過佇列傳遞給後續的推論模組。當影片結束時會發送結束信號。
 
 ```python
 async def preprocess(input_queue: asyncio.Queue, cap: cv2.VideoCapture) -> None:
-    """
-    影格讀取與預處理協程函數
-    
-    Args:
-        input_queue (asyncio.Queue): 影格數據輸入佇列
-        cap (cv2.VideoCapture): OpenCV 視訊捕獲物件
-    """
     while cap.isOpened():
         ret, frame = cap.read()
         await input_queue.put(frame if ret else None)
@@ -114,19 +107,11 @@ async def preprocess(input_queue: asyncio.Queue, cap: cv2.VideoCapture) -> None:
     cap.release()
 ```
 
-**模組二：推論計算階段**
-從輸入佇列提取影格數據，執行 YOLO 物件偵測推論，並將標註結果輸出至結果佇列。
+**模組二：物件偵測推論**
+從影格佇列取出影格進行 YOLO 物件偵測，將偵測結果繪製在影像上，然後送到輸出佇列準備顯示。
 
 ```python
 async def predict(input_queue: asyncio.Queue, output_queue: asyncio.Queue, model) -> None:
-    """
-    YOLO 物件偵測推論協程函數
-    
-    Args:
-        input_queue (asyncio.Queue): 影格數據輸入佇列
-        output_queue (asyncio.Queue): 推論結果輸出佇列
-        model: YOLO 模型物件
-    """
     while True:
         frame = await input_queue.get()
         if frame is None: 
@@ -136,17 +121,11 @@ async def predict(input_queue: asyncio.Queue, output_queue: asyncio.Queue, model
         await output_queue.put(results[0].plot())
 ```
 
-**模組三：結果處理階段**
-從結果佇列取得推論輸出，執行視覺化渲染與螢幕顯示功能。
+**模組三：結果顯示**
+從結果佇列取得已標註的影像並顯示在螢幕上。使用者可以按 'q' 鍵退出程式。
 
 ```python
 async def postprocess(output_queue: asyncio.Queue) -> None:
-    """
-    結果處理與顯示協程函數
-    
-    Args:
-        output_queue (asyncio.Queue): 推論結果輸出佇列
-    """
     while True:
         result = await output_queue.get()
         if result is None:
@@ -161,21 +140,14 @@ async def postprocess(output_queue: asyncio.Queue) -> None:
 
 ### 系統實現
 
-完整的非同步處理系統整合如下：
+完整的非同步串流系統整合三個模組，使用佇列在模組間傳遞資料，實現真正的並行處理：
 
 ```python
 import asyncio
 from ultralytics import YOLO
 import cv2
-from typing import Optional
 
 async def main() -> None:
-    """
-    非同步串流推論主函數
-    
-    整合三個協程模組：資料讀取、模型推論、結果顯示
-    透過 asyncio.Queue 實現模組間的非同步通訊
-    """
     # 建立模組間通訊佇列
     input_queue: asyncio.Queue = asyncio.Queue(maxsize=10)
     output_queue: asyncio.Queue = asyncio.Queue(maxsize=10)
