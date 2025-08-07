@@ -1,7 +1,7 @@
 # Genio EVK 最佳實作指南
 
 
-## AI 部署工作流程概觀
+## AI 部署工作流程概述
 
 隨著人工智慧（AI）技術的快速發展，深度學習模型已廣泛應用於影像辨識、語音處理、智慧監控等多種場域。傳統上，AI模型的開發與訓練大多在資源充足的雲端平台或高效能個人電腦上進行，開發者可專注於提升模型的準確度與泛化能力。然而，將這些模型實際應用於終端設備（如邊緣裝置、嵌入式系統）時，往往會面臨運算資源有限、功耗受限、即時性要求高等挑戰。因此，AI部署（AI Deployment）成為連結模型開發與實際應用的關鍵橋樑。
 
@@ -90,13 +90,15 @@ $ uv run --with jupyter jupyter lab
 
 ### 模型測試工具
 
-在進行實際部署前，開發者可以透過[NeuronPilot AI Porting Platform](https://neuronpilot-porting-platform.azurewebsites.net/) 線上平台預先驗證模型與MTK加速器（DLA/VPU）的相容性。
+如果開發者想針對 MTK 加速器（DLA/VPU）進行模型設計，在實際進行部署前可以預先透過 [**NeuronPilot AI Porting Platform**](https://neuronpilot-porting-platform.azurewebsites.net/) 線上平台驗證模型的相容性。這個平台提供多種模型格式的支援：對於 PyTorch 和 TensorFlow 模型，可透過程式碼執行來檢測模型對各處理器的支援性；對於已經訓練完成的 ONNX 和 TensorFlow Lite 模型，則可直接上傳模型檔以進行相容性驗證及模型編譯/下載。
+
+透過此平台的驗證機制，開發者能夠在設計階段的早期就確認模型架構是否適合 MediaTek 的專用 AI 加速器，避免在後續部署過程中遇到相容性問題，有效提升開發效率。
 
 #### NeuronPilot AI Porting Platform
 
 **NeuronPilot Porting Platform** 是工研院提供的線上模型轉換平台，專門用於將 TensorFlow Lite 模型編譯為 DLA 格式，以便在 MediaTek Genio 系列的 MDLA 加速器上運行。
 
-🌐 **平台網址**：[](https://neuronpilot-porting-platform.azurewebsites.net/)
+🌐 **平台網址**：[https://neuronpilot-porting-platform.azurewebsites.net/](https://neuronpilot-porting-platform.azurewebsites.net/)
 
 **使用流程**：
 1. **Upload Prebuilt Model** - 上傳您的 TFLite 模型檔案
@@ -110,7 +112,8 @@ $ uv run --with jupyter jupyter lab
 > - 請確認選擇正確的開發板型號（G510/700 使用 mdla3.0，G1200 使用 mdla2.0）
 > - 轉換完成的 DLA 檔案建議存放在 `./models/` 目錄下
 
-完成模型轉換後，請參考上述的 **Notebook 教學範例** 來進行詳細的效能測試和最佳化分析。
+完成模型轉換與相容性驗證後，建議參考上述的
+
 
 ## 進階教學
 
