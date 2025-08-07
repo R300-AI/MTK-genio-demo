@@ -52,11 +52,13 @@ Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與
     <th>GPU<sub>Mali-G</sub></th>
     <th>DLA</th>
     <th>VPU</th>
+    <th>LPDDR</th>
   </tr>
   <tr>
     <td style="vertical-align: middle; text-align: center; font-weight: bold; background: #f6f8fa;">Provider</td>
     <td colspan="2" style="text-align: center; font-weight: bold;">ArmNN</td>
     <td colspan="2" style="text-align: center; font-weight: bold;">MediaTek NeuronRT</td>
+    <td rowspan="2" style="background: #f6f8fa;"></td>
   </tr>
   <tr>
     <td><b>Genio 510</b></td>
@@ -64,10 +66,7 @@ Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與
     <td>G57 MC2</td>
     <td>1x MDLA v3.0</td>
     <td>1x VPU</td>
-  </tr>
-  <tr>
-    <td style="background: #f6f8fa; font-weight: bold;">LPDDR</td>
-    <td colspan="4" style="text-align: left;">4GB LPDDR4X (Genio 510) / 8GB LPDDR4X (Genio 700) / 8GB LPDDR4X (Genio 1200)</td>
+    <td>4GB LPDDR4X</td>
   </tr>
   <tr>
     <td><b>Genio 700</b></td>
@@ -75,6 +74,7 @@ Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與
     <td>G57 MC3</td>
     <td>1x MDLA v3.0</td>
     <td>1x VPU</td>
+    <td>8GB LPDDR4X</td>
   </tr>
   <tr>
     <td><b>Genio 1200</b></td>
@@ -82,11 +82,13 @@ Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與
     <td>G57 MC5</td>
     <td>2x MDLA v2.0</td>
     <td>2x VPU</td>
+    <td>8GB LPDDR4X</td>
   </tr>
   <tr>
     <td></td>
     <td colspan="2" style="text-align: center; font-size: 90%; background: #f6f8fa;">Sea of Cores</td>
     <td colspan="2" style="text-align: center; font-size: 90%; background: #f6f8fa;">Customized Chipsets</td>
+    <td style="background: #f6f8fa;"></td>
   </tr>
 </table>
 </div>
