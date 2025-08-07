@@ -41,14 +41,53 @@ Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與
 - **零複製傳輸**：模型權重和推論資料在 CPU 與 AI 加速器間傳遞時無需重複複製，實現 pipeline 並行處理，提升推論效率並降低延遲。
 - **統一位址空間**：AI 加速器與 CPU 使用相同記憶體位址映射，簡化軟體開發複雜度，降低總體記憶體需求。
 
+
 這種架構設計為開發者帶來更短的模型載入時間、更低的推論延遲、更少的記憶體佔用，在處理高解析度影像或複雜 AI 工作流時優勢更加明顯。MediaTek Genio 系列針對不同應用場景推出多款 AI SoC：
 
-| 型號         | CPU<sub>(Cortex-A)                      | GPU<sub>(Mali-G)       | MDLA (DLA)         | VPU         |
-|--------------|-------------------------------------|--------------------|--------------------|-------------|
-| **Provider** | **ArmNN**                           | **ArmNN**          | **MediaTek NeuronRT** | **MediaTek NeuronRT** |
-| **Genio 510**| 4x A73 + 4x A53                     | G57 MC2            | 1x MDLA v3.0       | 1x VPU      |
-| **Genio 700**| 2x A78 + 6x A55                     | G57 MC3            | 1x MDLA v3.0       | 1x VPU      | 
-| **Genio 1200**| 4x A78 + 4x A55                    | G57 MC5            | 2x MDLA v2.0       | 2x VPU      |
+<div style="overflow-x:auto;">
+<table>
+  <tr>
+    <th>型號</th>
+    <th>CPU<sub>Cortex-A</sub></th>
+    <th>GPU<sub>Mali-G</sub></th>
+    <th>MDLA (DLA)</th>
+    <th>VPU</th>
+  </tr>
+  <tr>
+    <td rowspan="3" style="vertical-align: middle; text-align: center; font-weight: bold; background: #f6f8fa;">Provider</td>
+    <td colspan="2" style="text-align: center; font-weight: bold;">ArmNN</td>
+    <td colspan="2" style="text-align: center; font-weight: bold;">MediaTek NeuronRT</td>
+  </tr>
+  <tr>
+    <td colspan="2" style="text-align: center; font-size: 90%; background: #f6f8fa;">Sea of Cores</td>
+    <td colspan="2" style="text-align: center; font-size: 90%; background: #f6f8fa;">Customized Chipsets</td>
+  </tr>
+  <tr>
+    <td colspan="5" style="padding:0; border:none;"></td>
+  </tr>
+  <tr>
+    <td><b>Genio 510</b></td>
+    <td>4x A73 + 4x A53</td>
+    <td>G57 MC2</td>
+    <td>1x MDLA v3.0</td>
+    <td>1x VPU</td>
+  </tr>
+  <tr>
+    <td><b>Genio 700</b></td>
+    <td>2x A78 + 6x A55</td>
+    <td>G57 MC3</td>
+    <td>1x MDLA v3.0</td>
+    <td>1x VPU</td>
+  </tr>
+  <tr>
+    <td><b>Genio 1200</b></td>
+    <td>4x A78 + 4x A55</td>
+    <td>G57 MC5</td>
+    <td>2x MDLA v2.0</td>
+    <td>2x VPU</td>
+  </tr>
+</table>
+</div>
 
 
 ## 事前準備
