@@ -43,12 +43,12 @@ Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與
 
 這種架構設計為開發者帶來更短的模型載入時間、更低的推論延遲、更少的記憶體佔用，在處理高解析度影像或複雜 AI 工作流時優勢更加明顯。MediaTek Genio 系列針對不同應用場景推出多款 AI SoC：
 
-| 型號         | CPU                                 | GPU                | MDLA (DLA)         | VPU         |
+| 型號         | CPU<sub>(Cortex-A)                      | GPU<sub>(Mali-G)       | MDLA (DLA)         | VPU         |
 |--------------|-------------------------------------|--------------------|--------------------|-------------|
 | **Provider** | **ArmNN**                           | **ArmNN**          | **MediaTek NeuronRT** | **MediaTek NeuronRT** |
-| **Genio 510**| 4x Arm Cortex-A73 + 4x Cortex-A53   | Arm Mali-G57 MC2   | 1x MDLA v3.0       | 1x VPU      |
-| **Genio 700**| 2x Arm Cortex-A78 + 6x Cortex-A55   | Arm Mali-G57 MC3   | 1x MDLA v3.0       | 1x VPU      | 
-| **Genio 1200**| 4x Arm Cortex-A78 + 4x Cortex-A55  | Arm Mali-G57 MC5   | 2x MDLA v2.0       | 2x VPU      |
+| **Genio 510**| 4x A73 + 4x A53                     | G57 MC2            | 1x MDLA v3.0       | 1x VPU      |
+| **Genio 700**| 2x A78 + 6x A55                     | G57 MC3            | 1x MDLA v3.0       | 1x VPU      | 
+| **Genio 1200**| 4x A78 + 4x A55                    | G57 MC5            | 2x MDLA v2.0       | 2x VPU      |
 
 
 ## 事前準備
