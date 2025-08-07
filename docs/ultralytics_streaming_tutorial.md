@@ -97,72 +97,47 @@ $$T_{sync} = \sum_{i=1}^{n} (t_{read,i} + t_{infer,i} + t_{display,i})$$
 **模組一：影格讀取**
 負責從影片檔案或攝影機連續讀取影格，並透過佇列傳遞給後續的推論模組。當影片結束時會發送結束信號。
 
-```python
-async def preprocess(input_queue: asyncio.Queue, cap: cv2.VideoCapture) -> None:
-    while cap.isOpened():
-        ret, frame = cap.read()
-        await input_queue.put(frame if ret else None)
-        if not ret:
-            break
-    cap.release()
-```
+    ```python
+    async def preprocess(input_queue: asyncio.Queue, cap: cv2.VideoCapture) -> None:
+        while cap.isOpened():
+            ret, frame = cap.read()
+            await input_queue.put(frame if ret else None)
+            if not ret:
+                break
+        cap.release()
+    ```
 
 **模組二：物件偵測推論**
 從影格佇列取出影格進行 YOLO 物件偵測，將偵測結果繪製在影像上，然後送到輸出佇列準備顯示。
 
-```python
-async def predict(input_queue: asyncio.Queue, output_queue: asyncio.Queue, model) -> None:
-    while True:
-        frame = await input_queue.get()
-        if frame is None: 
-            await output_queue.put(None)
-            break
-        results = model.predict(frame, verbose=False)
-        await output_queue.put(results[0].plot())
-```
+    ```python
+    async def predict(input_queue: asyncio.Queue, output_queue: asyncio.Queue, model) -> None:
+        while True:
+            frame = await input_queue.get()
+            if frame is None: 
+                await output_queue.put(None)
+                break
+            results = model.predict(frame, verbose=False)
+            await output_queue.put(results[0].plot())
+    ```
 
 **模組三：結果顯示**
 從結果佇列取得已標註的影像並顯示在螢幕上。使用者可以按 'q' 鍵退出程式。
 
-```python
-async def postprocess(output_queue: asyncio.Queue) -> None:
-    while True:
-        result = await output_queue.get()
-        if result is None:
-            break
-        cv2.imshow('YOLO Detection Stream', result)
-        if cv2.waitKey(1) == ord('q'):
-            break
-    cv2.destroyAllWindows()
-```
+    ```python
+    async def postprocess(output_queue: asyncio.Queue) -> None:
+        while True:
+            result = await output_queue.get()
+            if result is None:
+                break
+            cv2.imshow('YOLO Detection Stream', result)
+            if cv2.waitKey(1) == ord('q'):
+                break
+        cv2.destroyAllWindows()
+    ```
 
-各處理模組透過先進先出（FIFO）訊息佇列實現解耦通訊，消除模組間的同步等待依賴，達成真正的並行處理效果。
+各處理模組透過先進先出（FIFO）訊息佇列實現解耦通訊，消除模組間的同步等待。完整的非同步串流推論系統已整合在 `ultralytics_demo.py` 中，您可以直接執行以下指令來體驗非同步影像串流推論：
 
-### 系統實現
-
-完整的非同步串流系統整合三個模組，使用佇列在模組間傳遞資料，實現真正的並行處理：
-
-```python
-import asyncio
-from ultralytics import YOLO
-import cv2
-
-async def main() -> None:
-    # 建立模組間通訊佇列
-    input_queue: asyncio.Queue = asyncio.Queue(maxsize=10)
-    output_queue: asyncio.Queue = asyncio.Queue(maxsize=10)
-    
-    # 初始化系統元件
-    video_source: cv2.VideoCapture = cv2.VideoCapture("./data/serve.mp4")
-    detection_model = YOLO("./models/yolov8n_float32.tflite", task='detect')
-    
-    # 並發執行三個處理模組
-    await asyncio.gather(
-        preprocess(input_queue, video_source),
-        predict(input_queue, output_queue, detection_model),
-        postprocess(output_queue)
-    )
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
+    ```bash
+    python ultralytics_demo.py --video_path ./data/serve.mp4
+    ```
