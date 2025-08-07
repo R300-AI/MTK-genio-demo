@@ -60,18 +60,18 @@ MTK-genio-demo 專案提供了完整的 AI 模型部署示範環境。在開始�
 
 1. **硬體設備**：MediaTek Genio EVK 開發板（支援型號：510/700/1200）
 2. **系統環境**：透過 [Getting Start 指南](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/getting_start_with_ubuntu_zh.md) 燒錄 Ubuntu 作業系統，並安裝BSPs（`ArmNN`、`NeuronRT`）
-3. 按照以下步驟進行環境設定：
-  ```bash
-  # 安裝 Python 套件管理工具（需使用 Python 3.12）
-  curl -LsSf https://astral.sh/uv/install.sh | sh  
-  ```
-  ```bash
-  # 下載專案並安裝相依套件
-  $ git clone https://github.com/R300-AI/MTK-genio-demo.git
-  $ cd MTK-genio-demo
+3. **環境設定**：按照以下步驟安裝MTK-genio-demo
+    ```bash
+    # 安裝 Python 套件管理工具（需使用 Python 3.12）
+    curl -LsSf https://astral.sh/uv/install.sh | sh  
+    ```
+    ```bash
+    # 下載專案並安裝相依套件
+    $ git clone https://github.com/R300-AI/MTK-genio-demo.git
+    $ cd MTK-genio-demo
 
-  $ uv add -r requirements.txt  
-  ```
+    $ uv add -r requirements.txt  
+    ```
 
 ## 快速開始
 
