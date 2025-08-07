@@ -142,4 +142,4 @@ $ uv run --with jupyter jupyter lab
 
 本節以 Ultralytics YOLO 為例，帶領讀者實作協程驅動的非同步即時影像推論，並深入體驗 Genio 平台記憶體共享與零複製傳輸的效能優勢。
 
-**[Ultralytics YOLO 即時串流推論教學](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ultralytics_streaming_tutorial.md)**
+* **[Ultralytics YOLO 即時串流推論教學](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/ultralytics_streaming_tutorial.md)**
