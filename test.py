@@ -79,9 +79,9 @@ async def postprocess(output_queue: asyncio.Queue, num_sentinels: int, show_fps=
 # ----------------------------
 async def main():
     parser = argparse.ArgumentParser(description='Ultralytics YOLO 非同步並行推論')
-    parser.add_argument('--video_path', default='./data/serve.mp4')
-    parser.add_argument('--model', default='./models/yolov8n_float32.tflite')
-    parser.add_argument('--async_workers', default='1', help='並行推論 worker 數')
+    parser.add_argument('--video_path', type=str, default='./data/serve.mp4')
+    parser.add_argument('--tflite_model', type=str, default='./models/yolov8n_float32.tflite')
+    parser.add_argument('--async_workers', type=int, default=1, help='並行推論 worker 數')
     args = parser.parse_args()
 
     video_capture = cv2.VideoCapture(args.video_path)
@@ -96,7 +96,7 @@ async def main():
     # Build tasks
     producers = [asyncio.create_task(preprocess(input_queue, video_capture, args.async_workers))]
     predictors = [
-        asyncio.create_task(predict_worker(i, input_queue, output_queue, args.model))
+        asyncio.create_task(predict_worker(i, input_queue, output_queue, args.tflite_model))
         for i in range(args.async_workers)
     ]
     consumers = [asyncio.create_task(postprocess(output_queue, args.async_workers))]
