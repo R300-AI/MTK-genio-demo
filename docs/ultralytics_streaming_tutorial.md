@@ -49,38 +49,33 @@ else:  # TFLite
     # LOGGER.info("Successfully loaded NeuronRT delegate for DLA inference")
 ```
 
-### 第二步：手動配置推論後端
+#### ArmNN Delegate（CPU/GPU 加速）
 
-根據您的硬體與需求選擇加速方案，並將對應區塊的程式碼取消註解並填入正確參數：
+適用於：希望利用 ARM CPU 或 Mali GPU 進行推論加速的情境。
 
-#### 選擇 ArmNN Delegate（CPU/GPU 加速）
+設定步驟：
+1. 註解掉原本的解譯器設定（`interpreter = Interpreter(model_path=w)` 和 `raise RuntimeError(...)`）。
+2. 取消註解「選項 A」區塊的所有程式碼（移除每行前的 `#`）。
+3. 將 `<path to libarmnnDelegate.so>` 替換為您系統上 ArmNN delegate 的實際路徑，例如 `/usr/lib/aarch64-linux-gnu/libarmnnDelegate.so`。
+4. 將 `<CpuAcc or GpuAcc>` 設為：
+   - `"CpuAcc"`：使用 ARM CPU 加速
+   - `"GpuAcc"`：使用 Mali GPU 加速
 
-**適用情況：** 當您希望使用 ARM CPU 或 Mali GPU 進行加速時
+---
 
-**配置步驟：**
-1. **註解掉原始解釋器：** 將 `interpreter = Interpreter(model_path=w)` 和 `raise RuntimeError(...)` 這兩行加上 `#` 註解
-2. **取消註解選項 A：** 移除選項 A 區塊所有行前面的 `#`
-3. **填入正確路徑：** 將 `<path to libarmnnDelegate.so>` 替換為您系統上 ArmNN delegate 的實際路徑
-   ```
-   例如："/usr/lib/aarch64-linux-gnu/libarmnnDelegate.so"
-   ```
-4. **選擇後端類型：** 將 `<CpuAcc or GpuAcc>` 設為：
-   - `"CpuAcc"` - 使用 ARM CPU 加速
-   - `"GpuAcc"` - 使用 Mali GPU 加速
+#### NeuronRT Delegate（MDLA/VPU 加速）
 
-#### 選擇 NeuronRT Delegate（MDLA/VPU 加速）
+適用於：希望利用 MediaTek 專用的 MDLA 或 VPU 進行推論加速的情境。
 
-**適用情況：** 當您希望使用 MediaTek 專用的 MDLA 或 VPU 進行加速時
-
-**配置步驟：**
-1. **註解掉原始解釋器：** 將 `interpreter = Interpreter(model_path=w)` 和 `raise RuntimeError(...)` 這兩行加上 `#` 註解
-2. **取消註解選項 B：** 移除選項 B 區塊所有行前面的 `#`
-3. **填入模型路徑：** 將 `<path_to_your_dla_model>` 替換為您的 DLA 模型檔案路徑
-4. **選擇裝置類型：** 將 `<mdla3.0, mdla2.0 or vpu>` 設為：
-   - `"mdla3.0"` - 使用 MDLA 3.0
-   - `"mdla2.0"` - 使用 MDLA 2.0  
-   - `"vpu"` - 使用 VPU
-5. **設定管理員密碼：** 將 `<enter_your_admin_password_here>` 替換為系統管理員密碼
+設定步驟：
+1. 註解掉原本的解譯器設定（`interpreter = Interpreter(model_path=w)` 和 `raise RuntimeError(...)`）。
+2. 取消註解「選項 B」區塊的所有程式碼（移除每行前的 `#`）。
+3. 將 `<path_to_your_dla_model>` 替換為您的 DLA 模型檔案路徑。
+4. 將 `<mdla3.0, mdla2.0 or vpu>` 設為：
+   - `"mdla3.0"`：使用 MDLA 3.0
+   - `"mdla2.0"`：使用 MDLA 2.0
+   - `"vpu"`：使用 VPU
+5. 將 `<enter_your_admin_password_here>` 替換為您的系統管理員密碼。
 
 ### 第三步：驗證推論後端配置
 
@@ -123,7 +118,7 @@ $$T_{sync} = \sum_{i=1}^{n} (t_{read,i} + t_{infer,i} + t_{display,i})$$
 
 ### 消費者-工作者模式
 
-這四個角色透過資料佇列協作，讓每個階段都能獨立且高效地運作，實現即時且穩定的推論服務。
+生產線讓生產者、工作者、消費者透過資料佇列彼此交換資料，讓每個階段都能獨立且高效地運作，實現即時且穩定的推論服務。
 
 **模組一：影格生產者（Frame Producer）**  
 負責從影片檔案或攝影機連續讀取影格，並將每個影格（含 frame_id）放入 frame_queue。生產者同時會記錄隊列長度等統計資訊，供管理器參考。當影片結束時，會自動發送結束信號給所有工作者。
