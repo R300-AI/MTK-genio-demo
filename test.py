@@ -48,7 +48,7 @@ async def main():
     parser = argparse.ArgumentParser(description="YOLO Async Inference with asyncio")
     parser.add_argument("--video_path", type=str, default="./data/video.mp4")
     parser.add_argument("--tflite_model", type=str, default="./models/yolov8n_float32.tflite")
-    parser.add_argument("--max_workers", type=int, default=2, help="線程池最大工作線程數")
+    parser.add_argument("--max_workers", type=int, default=4, help="線程池最大工作線程數")
     args = parser.parse_args()
 
     print("[階段] 初始化視頻捕獲和模型")
