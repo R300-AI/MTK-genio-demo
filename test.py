@@ -58,7 +58,7 @@ class AdaptiveYOLOInference:
             return dummy_thread_id, model
         
         # 預載入最大工作者數量的模型
-        with ThreadPoolExecutor(max_workers=4) as preload_executor:
+        with ThreadPoolExecutor(max_workers=self.max_workers) as preload_executor:
             futures = [preload_executor.submit(load_model, i) for i in range(self.max_workers)]
             for future in futures:
                 thread_id, model = future.result()
@@ -138,20 +138,18 @@ class AdaptiveYOLOInference:
             await self.frame_queue.put(None)
     
     async def inference_worker(self, worker_id):
-        """推理工作者"""
-        idle_start = None
+        """推理工作者 - 移除空閒超時退出邏輯"""
         consecutive_errors = 0
         
         try:
             while not self.should_stop:
                 try:
-                    frame_data = await asyncio.wait_for(self.frame_queue.get(), timeout=2.0)
+                    frame_data = await asyncio.wait_for(self.frame_queue.get(), timeout=5.0)
                     
                     if frame_data is None:
                         break
                     
                     frame, frame_id = frame_data
-                    idle_start = None
                     consecutive_errors = 0
                     
                     loop = asyncio.get_event_loop()
@@ -163,14 +161,13 @@ class AdaptiveYOLOInference:
                     self.frame_queue.task_done()
                     
                 except asyncio.TimeoutError:
-                    if idle_start is None:
-                        idle_start = time.time()
-                    elif time.time() - idle_start > 10.0:  # 增加空閒超時時間
-                        break
+                    # 移除空閒退出邏輯，工作者會一直等待
+                    continue
                         
                 except Exception as e:
                     consecutive_errors += 1
-                    if consecutive_errors > 5:  # 連續錯誤太多就退出
+                    if consecutive_errors > 10:  # 增加容錯次數
+                        print(f"Worker {worker_id} exiting due to consecutive errors")
                         break
                     continue
                     
@@ -179,9 +176,10 @@ class AdaptiveYOLOInference:
                 if worker_id in self.workers:
                     del self.workers[worker_id]
                     self.current_workers -= 1
+                    print(f"Worker {worker_id} terminated, remaining workers: {self.current_workers}")
     
     async def adaptive_worker_manager(self):
-        """改進的動態工作者管理器"""
+        """改進的動態工作者管理器 - 只增不減模式"""
         while not self.should_stop:
             await asyncio.sleep(2.0)
             
@@ -202,20 +200,12 @@ class AdaptiveYOLOInference:
                 continue
             
             async with self.workers_lock:
-                # 更智能的調整邏輯
-                if avg_queue_length > 8.0 and self.current_workers < self.max_workers:
-                    # 只有在隊列真的很滿時才增加工作者
+                # 只增加工作者的邏輯
+                if avg_queue_length > 5.0 and self.current_workers < self.max_workers:
+                    # 降低閾值，更積極地增加工作者
                     await self._add_worker()
                     self.performance_stats['last_adjustment'] = current_time
-                elif avg_queue_length < 2.0 and self.current_workers > self.min_workers:
-                    # 減少工作者的邏輯
-                    self._request_worker_shutdown()
-                    self.performance_stats['last_adjustment'] = current_time
-    
-    def _request_worker_shutdown(self):
-        """請求關閉一個工作者"""
-        # 這裡只是標記，實際的關閉由工作者的空閒超時處理
-        pass
+                    print(f"Added worker, current workers: {self.current_workers}")
     
     async def _add_worker(self):
         """添加新的工作者"""
@@ -270,7 +260,6 @@ class AdaptiveYOLOInference:
                 if self.frame_queue.empty() and self.result_queue.empty() and self.should_stop:
                     break
 
-    # run_inference 方法保持不變
     async def run_inference(self, video_path):
         """主要的推理流程"""
         cap = cv2.VideoCapture(video_path)
@@ -306,7 +295,6 @@ class AdaptiveYOLOInference:
             cv2.destroyAllWindows()
             self.executor.shutdown(wait=True)
 
-# main 函數保持不變
 async def main():
     parser = argparse.ArgumentParser(description="自適應 YOLO 並發推理")
     parser.add_argument("--video_path", type=str, default="./data/video.mp4")
