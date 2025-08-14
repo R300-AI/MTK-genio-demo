@@ -1,7 +1,5 @@
-import asyncio
-import time
-import cv2
 from ultralytics import YOLO
+import cv2, asyncio, time, argparse
 
 # ---------- 協程區 ----------
 async def preprocess(cap, input_queue):
@@ -53,6 +51,11 @@ async def postprocess(output_queue):
 
 # ---------- 主程式 ----------
 def main():
+    parser = argparse.ArgumentParser(description='Ultralytics YOLO 非同步串流推論')
+    parser.add_argument('--video_path', type=str, default='./data/video.mp4')
+    parser.add_argument('--tflite_model', type=str, default='./models/yolov8n_float32.tflite')
+    args = parser.parse_args()
+    
     cap = cv2.VideoCapture(args.video_path)
     if not cap.isOpened():
         raise RuntimeError(f'Cannot open video: {args.video_path}')
