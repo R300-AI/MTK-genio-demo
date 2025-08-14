@@ -1,7 +1,7 @@
 from utils.neuronpilot.data import convert_to_binary, conert_to_numpy
 import numpy as np
 import tensorflow as tf
-import os, shutil, subprocess, uuid
+import os, shutil, subprocess, uuid, queue
 
 class Interpreter():
     def __init__(self, tflite_path, dla_path, device):
@@ -11,22 +11,19 @@ class Interpreter():
         interpreter = tf.lite.Interpreter(model_path=tflite_path)
         self.input_details = interpreter.get_input_details()
         self.output_details = interpreter.get_output_details()
+        self.input_handlers = queue.Queue()
+        self.output_handlers = queue.Queue()
         
     def allocate_tensors(self):
         self.current_seed = str(uuid.uuid4())
-        bin_dir = f'./bin/{self.current_seed}'
+        bin_dir = f'./bin'
         
         print(f"Load DLA model: {self.dla_path}")
         commands = ["sudo", "neuronrt", "-a", self.dla_path, "-d"]
         results = subprocess.run(commands, capture_output=True, text=True)
-        
-        if not os.path.exists('./bin'):
-            os.makedirs('./bin')
         if os.path.exists(bin_dir):
            shutil.rmtree(bin_dir)
         os.mkdir(bin_dir)
-        self.input_handlers = [f'{bin_dir}/input{i}.bin' for i, input in enumerate(self.input_details)]
-        self.output_handlers_with_shape = {f'{bin_dir}/output{i}.bin': tuple([1] + output['shape'].tolist()) for i, output in enumerate(self.output_details)}
 
     def get_input_details(self):
         return self.input_details
@@ -35,20 +32,28 @@ class Interpreter():
         return self.output_details
    
     def set_tensor(self, _, inputs):
-        for input, binary_path in zip(inputs, self.input_handlers):
+        handler = str(uuid.uuid4())
+        input_handlers = [f'./bin/input{self.handler}_{i}.bin' for i, input in enumerate(self.input_details)]
+        output_handlers_with_shape = {f'./bin/output{self.handler}_{i}.bin': tuple([1] + output['shape'].tolist()) for i, output in enumerate(self.output_details)}
+
+        for input, binary_path in zip(inputs, input_handlers):
             input_data = np.array([input]).astype(self.input_details[0]['dtype'])
-            self.bin_path = convert_to_binary(input_data, binary_path)
+            convert_to_binary(input_data, binary_path)
+        self.input_handlers.put((handler, input_handlers, output_handlers_with_shape))
 
     def invoke(self):
+        handler, input_handlers, output_handlers_with_shape = self.input_handlers.get()
         commands = ["sudo", "neuronrt",  
                 "-m",  "hw",  
                 "-a",  self.dla_path,
                 "-c",  "1",         # Repeat the inference <num> times. It can be used for profiling.
                 "-b",  "100",     
-                "-i",  ' -i '.join(self.input_handlers),  
-                "-o",  ' -o '.join(list(self.output_handlers_with_shape.keys()))]
+                "-i",  ' -i '.join(input_handlers),  
+                "-o",  ' -o '.join(list(output_handlers_with_shape.keys()))]
         p = subprocess.Popen(commands, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        p.wait()
+        self.output_handlers.put((handler, output_handlers_with_shape, p))
         
     def get_tensor(self, _):
-        return conert_to_numpy(self.output_handlers_with_shape, dtype = np.float32)[0]
+        handler, output_handlers_with_shape, p = self.output_handlers.get()
+        p.wait()
+        return convert_to_numpy(output_handlers_with_shape, dtype = np.float32)[0]
