@@ -6,7 +6,7 @@ parser = argparse.ArgumentParser(description="YOLO Async Inference with asyncio"
 
 parser.add_argument("--video_path", type=str, default="./data/video.mp4")
 parser.add_argument("--tflite_model", type=str, default="./models/yolov8n_float32.tflite")
-parser.add_argument("--num_workers", type=int, default=2, help="Number of inference workers")
+parser.add_argument("--num_workers", type=int, default=6, help="Number of inference workers")
 args = parser.parse_args()
 
 cap = cv2.VideoCapture(args.video_path)
