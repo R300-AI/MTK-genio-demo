@@ -6,8 +6,10 @@ from concurrent.futures import ThreadPoolExecutor
 import time
 import threading
 from collections import deque
+import numpy as np
+import logging
 
-class AdaptiveYOLOInference:
+class InferencePipeline:
     def __init__(self, model_path, min_workers=1, max_workers=8, queue_size=10):
         self.model_path = model_path
         self.min_workers = min_workers
@@ -32,16 +34,34 @@ class AdaptiveYOLOInference:
         self.worker_counter = 0
         self.workers_lock = asyncio.Lock()
         
-        # 性能監控
-        self.performance_stats = {
-            'queue_lengths': deque(maxlen=50),
-            'processing_times': deque(maxlen=50),
-            'worker_utilization': {},
-            'last_adjustment': time.time(),
-            'adjustment_cooldown': 3.0  # 增加調整冷卻時間
-        }
+        # 設置性能日誌
+        self._setup_performance_logger()
         
         self.should_stop = False
+        
+    def _setup_performance_logger(self):
+        """設置性能統計日誌記錄器"""
+        # 明確刪除舊的日誌文件
+        if os.path.exists('performance_stats.txt'):
+            os.remove('performance_stats.txt')
+        
+        self.perf_logger = logging.getLogger('performance_stats')
+        self.perf_logger.setLevel(logging.INFO)
+        
+        # 如果已經有處理器，先清除
+        if self.perf_logger.handlers:
+            self.perf_logger.handlers.clear()
+        
+        # 創建文件處理器
+        handler = logging.FileHandler('performance_stats.txt', mode='w', encoding='utf-8')
+        formatter = logging.Formatter('%(asctime)s - %(message)s')
+        handler.setFormatter(formatter)
+        self.perf_logger.addHandler(handler)
+        
+        # 記錄開始信息
+        self.perf_logger.info(f"=== Performance Stats Started ===")
+        self.perf_logger.info(f"Model: {self.model_path}")
+        self.perf_logger.info(f"Min Workers: {self.min_workers}, Max Workers: {self.max_workers}")
         
     def _preload_models(self):
         """預載入模型池以避免運行時載入延遲"""
@@ -52,7 +72,6 @@ class AdaptiveYOLOInference:
             dummy_thread_id = f"preload_{i}"
             model = YOLO(self.model_path, task="detect")
             # 預熱模型
-            import numpy as np
             dummy_input = np.random.randint(0, 255, (640, 640, 3), dtype=np.uint8)
             model.predict(dummy_input, verbose=False)
             return dummy_thread_id, model
@@ -95,14 +114,14 @@ class AdaptiveYOLOInference:
         end_time = time.time()
         processing_time = end_time - start_time
         
-        self.performance_stats['processing_times'].append(processing_time)
+        # 記錄處理時間
+        self.perf_logger.info(f"PROCESSING_TIME,{frame_id},{worker_id},{processing_time:.4f}")
         
         return result, frame_id, processing_time
 
-    async def frame_producer(self, cap):
+    async def producer(self, cap):
         """生產者：讀取視頻幀並放入隊列"""
         frame_id = 0
-        frame_skip = 0  # 動態跳幀
         
         while not self.should_stop:
             ret, frame = cap.read()
@@ -112,21 +131,14 @@ class AdaptiveYOLOInference:
             
             frame_id += 1
             
-            # 動態跳幀邏輯
-            queue_size = self.frame_queue.qsize()
-            if queue_size > self.frame_queue.maxsize * 0.8:
-                frame_skip = min(frame_skip + 1, 3)
-            else:
-                frame_skip = max(frame_skip - 1, 0)
-            
-            if frame_skip > 0 and frame_id % frame_skip == 0:
-                continue  # 跳過此幀
-            
             try:
-                self.performance_stats['queue_lengths'].append(queue_size)
+                queue_size = self.frame_queue.qsize()
+                # 記錄隊列長度
+                self.perf_logger.info(f"QUEUE_LENGTH,{frame_id},{queue_size}")
                 await self.frame_queue.put((frame, frame_id))
                 
             except asyncio.QueueFull:
+                self.perf_logger.info(f"QUEUE_FULL,{frame_id}")
                 continue
                 
             # 減少讓出頻率
@@ -137,7 +149,7 @@ class AdaptiveYOLOInference:
         for _ in range(self.max_workers):
             await self.frame_queue.put(None)
     
-    async def inference_worker(self, worker_id):
+    async def worker(self, worker_id):
         """推理工作者 - 移除空閒超時退出邏輯"""
         consecutive_errors = 0
         
@@ -161,11 +173,13 @@ class AdaptiveYOLOInference:
                     self.frame_queue.task_done()
                     
                 except asyncio.TimeoutError:
-                    # 移除空閒退出邏輯，工作者會一直等待
+                    # 記錄超時
+                    self.perf_logger.info(f"WORKER_TIMEOUT,{worker_id}")
                     continue
                         
                 except Exception as e:
                     consecutive_errors += 1
+                    self.perf_logger.info(f"WORKER_ERROR,{worker_id},{consecutive_errors},{str(e)}")
                     if consecutive_errors > 10:  # 增加容錯次數
                         print(f"Worker {worker_id} exiting due to consecutive errors")
                         break
@@ -176,35 +190,33 @@ class AdaptiveYOLOInference:
                 if worker_id in self.workers:
                     del self.workers[worker_id]
                     self.current_workers -= 1
+                    self.perf_logger.info(f"WORKER_TERMINATED,{worker_id},{self.current_workers}")
                     print(f"Worker {worker_id} terminated, remaining workers: {self.current_workers}")
     
-    async def adaptive_worker_manager(self):
-        """改進的動態工作者管理器 - 只增不減模式"""
+    async def workers_manager(self):
+        """改進的動態工作者管理器 - 只增不減模式，無冷卻限制"""
+        queue_stats = deque(maxlen=5)  # 減少統計窗口，更快響應
+        
         while not self.should_stop:
-            await asyncio.sleep(2.0)
+            await asyncio.sleep(0.5)  # 更頻繁檢查
             
-            queue_lengths = list(self.performance_stats['queue_lengths'])
-            processing_times = list(self.performance_stats['processing_times'])
+            current_queue_size = self.frame_queue.qsize()
+            queue_stats.append(current_queue_size)
             
-            if len(queue_lengths) < 10:
+            if len(queue_stats) < 3:  # 減少最小統計數量
                 continue
             
-            avg_queue_length = sum(queue_lengths[-10:]) / len(queue_lengths[-10:])
-            avg_processing_time = sum(processing_times[-10:]) / len(processing_times[-10:]) if processing_times else 0
+            avg_queue_length = sum(queue_stats) / len(queue_stats)
             
-            current_time = time.time()
-            time_since_last_adjustment = current_time - self.performance_stats['last_adjustment']
-            
-            # 使用冷卻時間避免頻繁調整
-            if time_since_last_adjustment < self.performance_stats['adjustment_cooldown']:
-                continue
+            # 記錄管理器狀態
+            self.perf_logger.info(f"MANAGER_STATUS,{self.current_workers},{avg_queue_length:.2f}")
             
             async with self.workers_lock:
-                # 只增加工作者的邏輯
-                if avg_queue_length > 5.0 and self.current_workers < self.max_workers:
-                    # 降低閾值，更積極地增加工作者
+                # 只增加工作者的邏輯 - 移除冷卻時間限制
+                if avg_queue_length > 0.5 and self.current_workers < self.max_workers:
+                    # 降低閾值到2.0，更積極地增加工作者
                     await self._add_worker()
-                    self.performance_stats['last_adjustment'] = current_time
+                    self.perf_logger.info(f"WORKER_ADDED,{self.current_workers}")
                     print(f"Added worker, current workers: {self.current_workers}")
     
     async def _add_worker(self):
@@ -212,15 +224,14 @@ class AdaptiveYOLOInference:
         self.worker_counter += 1
         worker_id = self.worker_counter
         
-        worker_task = asyncio.create_task(self.inference_worker(worker_id))
+        worker_task = asyncio.create_task(self.worker(worker_id))
         self.workers[worker_id] = worker_task
         self.current_workers += 1
     
-    async def result_consumer(self):
+    async def consumer(self):
         """消費者：顯示推理結果"""
         processed_frames = {}
         next_display_frame = 1
-        display_skip = 0  # 顯示跳幀
         
         while not self.should_stop:
             try:
@@ -232,21 +243,15 @@ class AdaptiveYOLOInference:
                 result, frame_id, original_frame, processing_time = result_data
                 processed_frames[frame_id] = (result, original_frame)
                 
-                # 按順序顯示結果，但允許跳幀
+                # 記錄結果佇列狀態
+                self.perf_logger.info(f"RESULT_RECEIVED,{frame_id},{len(processed_frames)}")
+                
+                # 按順序顯示結果
                 while next_display_frame in processed_frames:
                     display_result, display_frame = processed_frames.pop(next_display_frame)
                     
-                    # 動態顯示跳幀
-                    if len(processed_frames) > 10:
-                        display_skip = 2
-                    elif len(processed_frames) > 5:
-                        display_skip = 1
-                    else:
-                        display_skip = 0
-                    
-                    if display_skip == 0 or next_display_frame % (display_skip + 1) == 0:
-                        display_img = cv2.resize(display_result.plot(), (720, 480))
-                        cv2.imshow("Adaptive YOLO Inference", display_img)
+                    display_img = cv2.resize(display_result.plot(), (720, 480))
+                    cv2.imshow("Adaptive YOLO Inference", display_img)
                     
                     if cv2.waitKey(1) & 0xFF == 27:
                         self.should_stop = True
@@ -260,21 +265,22 @@ class AdaptiveYOLOInference:
                 if self.frame_queue.empty() and self.result_queue.empty() and self.should_stop:
                     break
 
-    async def run_inference(self, video_path):
+    async def run(self, video_path):
         """主要的推理流程"""
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             return
-        
         try:
+            self.perf_logger.info(f"PIPELINE_STARTED,{video_path}")
+            
             async with self.workers_lock:
                 for i in range(self.min_workers):
                     await self._add_worker()
             
             tasks = [
-                asyncio.create_task(self.frame_producer(cap)),
-                asyncio.create_task(self.result_consumer()),
-                asyncio.create_task(self.adaptive_worker_manager())
+                asyncio.create_task(self.producer(cap)),
+                asyncio.create_task(self.consumer()),
+                asyncio.create_task(self.workers_manager())
             ]
             
             async with self.workers_lock:
@@ -291,9 +297,10 @@ class AdaptiveYOLOInference:
             
         finally:
             self.should_stop = True
+            self.perf_logger.info("PIPELINE_STOPPED")
+            self.executor.shutdown(wait=True)
             cap.release()
             cv2.destroyAllWindows()
-            self.executor.shutdown(wait=True)
 
 async def main():
     parser = argparse.ArgumentParser(description="自適應 YOLO 並發推理")
@@ -309,14 +316,14 @@ async def main():
         shutil.rmtree(bin_dir)
     os.mkdir(bin_dir)
     
-    inference_system = AdaptiveYOLOInference(
+    pipeline = InferencePipeline(
         model_path=args.tflite_model,
         min_workers=args.min_workers,
         max_workers=args.max_workers,
         queue_size=args.queue_size
     )
     
-    await inference_system.run_inference(args.video_path)
+    await pipeline.run(args.video_path)
 
 if __name__ == "__main__":
     asyncio.run(main())
