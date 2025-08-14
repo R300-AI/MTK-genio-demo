@@ -1,7 +1,7 @@
 from utils.neuronpilot.data import convert_to_binary, conert_to_numpy
 import numpy as np
 import tensorflow as tf
-import os, shutil, subprocess
+import os, shutil, subprocess, uuid
 
 class Interpreter():
     def __init__(self, tflite_path, dla_path, device):
@@ -13,7 +13,8 @@ class Interpreter():
         self.output_details = interpreter.get_output_details()
         
     def allocate_tensors(self):
-        self.seed = int(np.random.rand() * 10e12)
+        self.current_seed = str(uuid.uuid4())
+        bin_dir = f'./bin/{self.current_seed}'
         
         print(f"Load DLA model: {self.dla_path}")
         commands = ["sudo", "neuronrt", "-a", self.dla_path, "-d"]
@@ -21,11 +22,11 @@ class Interpreter():
         
         if not os.path.exists('./bin'):
             os.makedirs('./bin')
-        if os.path.exists(f'./bin/{self.seed}'):
-           shutil.rmtree(f'./bin/{self.seed}')
-        os.mkdir(f'./bin/{self.seed}') 
-        self.input_handlers = [f'./bin/{self.seed}/input{i}.bin' for i, input in enumerate(self.input_details)]
-        self.output_handlers_with_shape = {f'./bin/{self.seed}/output{i}.bin': tuple([1] + output['shape'].tolist()) for i, output in enumerate(self.output_details)}
+        if os.path.exists(bin_dir):
+           shutil.rmtree(bin_dir)
+        os.mkdir(bin_dir)
+        self.input_handlers = [f'{bin_dir}/input{i}.bin' for i, input in enumerate(self.input_details)]
+        self.output_handlers_with_shape = {f'{bin_dir}/output{i}.bin': tuple([1] + output['shape'].tolist()) for i, output in enumerate(self.output_details)}
 
     def get_input_details(self):
         return self.input_details
