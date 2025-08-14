@@ -68,7 +68,7 @@ async def postprocess(output_queue: asyncio.Queue, num_sentinels: int, show_fps=
             fps = 1.0 / dt
             cv2.putText(result, f'Worker{worker_id}  FPS:{fps:.1f}  Frame:{index}',
                         (10, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
-        cv2.imshow('YOLO Detection Stream (concurrent)', result)
+        cv2.imshow('YOLO Detection Stream (concurrent)', cv2.resize(result , (720, 480)))
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     cv2.destroyAllWindows()
