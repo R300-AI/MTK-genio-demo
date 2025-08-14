@@ -34,26 +34,26 @@ class Interpreter():
     def set_tensor(self, _, inputs):
         handler = str(uuid.uuid4())
         input_handlers = [f'./bin/input{handler}_{i}.bin' for i, input in enumerate(self.input_details)]
-        output_handlers_with_shape = {f'./bin/output{handler}_{i}.bin': tuple([1] + output['shape'].tolist()) for i, output in enumerate(self.output_details)}
+        output_handlers = {f'./bin/output{handler}_{i}.bin': tuple([1] + output['shape'].tolist()) for i, output in enumerate(self.output_details)}
 
         for input, binary_path in zip(inputs, input_handlers):
             input_data = np.array([input]).astype(self.input_details[0]['dtype'])
             convert_to_binary(input_data, binary_path)
-        self.input_handlers.put((handler, input_handlers, output_handlers_with_shape))
+        self.input_handlers.put((handler, input_handlers, output_handlers))
 
     def invoke(self):
-        handler, input_handlers, output_handlers_with_shape = self.input_handlers.get()
+        handler, input_handlers, output_handlers = self.input_handlers.get()
         commands = ["sudo", "neuronrt",  
                 "-m",  "hw",  
                 "-a",  self.dla_path,
                 "-c",  "1",         # Repeat the inference <num> times. It can be used for profiling.
                 "-b",  "100",     
                 "-i",  ' -i '.join(input_handlers),  
-                "-o",  ' -o '.join(list(output_handlers_with_shape.keys()))]
+                "-o",  ' -o '.join(list(output_handlers.keys()))]
         p = subprocess.Popen(commands, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        self.output_handlers.put((handler, output_handlers_with_shape, p))
+        self.output_handlers.put((handler, output_handlers, p))
         
     def get_tensor(self, _):
-        handler, output_handlers_with_shape, p = self.output_handlers.get()
+        handler, output_handlers, p = self.output_handlers.get()
         p.wait()
-        return convert_to_numpy(output_handlers_with_shape, dtype = np.float32)[0]
+        return convert_to_numpy(output_handlers, dtype = np.float32)[0]
