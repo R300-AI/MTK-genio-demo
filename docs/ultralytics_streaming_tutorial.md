@@ -8,6 +8,8 @@
 
 ### 第一步：理解 Ultralytics 推論後端機制
 
+Ultralytics YOLO 框架支援多種推論後端，但預設的 TFLite 解釋器並未針對 MediaTek Genio 平台優化。為了獲得最佳效能，您需要手動配置適合的推論後端。
+
 請開啟 `ultralytics/nn/autobackend.py`，在 TFLite 區段（約第 465-490 行）您會看到以下程式碼：
 
 ```python
@@ -47,208 +49,129 @@ else:  # TFLite
     # LOGGER.info("Successfully loaded NeuronRT delegate for DLA inference")
 ```
 
-
-
 ### 第二步：手動配置推論後端
 
 根據您的硬體與需求選擇加速方案，並將對應區塊的程式碼取消註解並填入正確參數：
 
-### 選擇ArmNN Delegate（CPU/GPU 加速）
+#### 選擇 ArmNN Delegate（CPU/GPU 加速）
 
-1. 取消註解 **選項 A** 相關的程式碼。
-2. 將 `<path to libarmnnDelegate.so>` 參數改為您系統上 ArmNN `libarmnnDelegate.so` 的實際路徑。
-3. 將 `<CpuAcc or GpuAcc>` 參數設為 `"CpuAcc"` 或 `"GpuAcc"`。
+**適用情況：** 當您希望使用 ARM CPU 或 Mali GPU 進行加速時
 
-### 選擇NeuronRT Delegate（MDLA/VPU 加速）
+**配置步驟：**
+1. **註解掉原始解釋器：** 將 `interpreter = Interpreter(model_path=w)` 和 `raise RuntimeError(...)` 這兩行加上 `#` 註解
+2. **取消註解選項 A：** 移除選項 A 區塊所有行前面的 `#`
+3. **填入正確路徑：** 將 `<path to libarmnnDelegate.so>` 替換為您系統上 ArmNN delegate 的實際路徑
+   ```
+   例如："/usr/lib/aarch64-linux-gnu/libarmnnDelegate.so"
+   ```
+4. **選擇後端類型：** 將 `<CpuAcc or GpuAcc>` 設為：
+   - `"CpuAcc"` - 使用 ARM CPU 加速
+   - `"GpuAcc"` - 使用 Mali GPU 加速
 
-1. 取消註解 **選項 B** 相關的程式碼。
-2. 將 `<path to your dla model>` 改為您的 DLA model 路徑。
-3. `<mdla3.0, mdla2.0 or vpu>` 參數請依照您的硬體設為 `"mdla3.0"`、`"mdla2.0"` 或 `"vpu"`。
+#### 選擇 NeuronRT Delegate（MDLA/VPU 加速）
 
-> **請務必將「原生 TFLite 解譯器」的 `interpreter = Interpreter(model_path=w)` 以及 `raise RuntimeError(...)` 這兩行註解掉，避免重複執行或出現錯誤。**
+**適用情況：** 當您希望使用 MediaTek 專用的 MDLA 或 VPU 進行加速時
 
+**配置步驟：**
+1. **註解掉原始解釋器：** 將 `interpreter = Interpreter(model_path=w)` 和 `raise RuntimeError(...)` 這兩行加上 `#` 註解
+2. **取消註解選項 B：** 移除選項 B 區塊所有行前面的 `#`
+3. **填入模型路徑：** 將 `<path_to_your_dla_model>` 替換為您的 DLA 模型檔案路徑
+4. **選擇裝置類型：** 將 `<mdla3.0, mdla2.0 or vpu>` 設為：
+   - `"mdla3.0"` - 使用 MDLA 3.0
+   - `"mdla2.0"` - 使用 MDLA 2.0  
+   - `"vpu"` - 使用 VPU
+5. **設定管理員密碼：** 將 `<enter_your_admin_password_here>` 替換為系統管理員密碼
 
 ### 第三步：驗證推論後端配置
 
-完成上述步驟後，Ultralytics 就會使用您選擇的推論後端進行加速推論。
+完成上述步驟後，您可以使用以下程式碼驗證配置是否正確：
 
 ```python
 from ultralytics import YOLO
 
+# 載入模型（會自動使用您配置的後端）
 model = YOLO("./models/yolov8n_float32.tflite")
+
+# 執行推論測試
 results = model.predict(["./data/bus.jpg"])
 results[0].show()
+
+# 如果成功顯示結果，表示後端配置正確
+```
+---
+
+
+## 非同步化串流推論架構
+
+即時物件偵測應用在傳統同步架構下存在顯著的效能限制。序列化的處理流程包含影格讀取、模型推論與結果輸出，各階段間的依賴關係導致計算資源在等待期間處於閒置狀態。
+
+設影片序列 $\tau = \{\tau_1, \tau_2, ..., \tau_n\}$ 包含 $n$ 個連續影格，在傳統同步處理模式下，系統總執行時間可表示為：
+
+$$T_{sync} = \sum_{i=1}^{n} (t_{read,i} + t_{infer,i} + t_{display,i})$$
+
+其中：
+- $t_{read,i}$：第 $i$ 個影格的讀取時間
+- $t_{infer,i}$：第 $i$ 個影格的推論時間  
+- $t_{display,i}$：第 $i$ 個影格的顯示時間
+
+為提升系統整體吞吐量並最大化硬體資源使用效率，這項教學將以**多工流水線**作為範例，將序列化處理流程分解為四個獨立且並行運作的組件，讓整個推論流程如同一條高效的自動化生產線，各環節協同合作、無縫接軌：
+
+* **Producer（生產者）**：如同生產線的進料員，負責持續將原料（影格）送入生產線，確保後續每個環節都能獲得穩定且充足的資料來源。
+* **Worker（工作者）**：類比於生產線上的多位技術員，負責對每一份原料（影格）進行 AI 推論。每位工作者一次只專注於處理一個影格，處理完畢後才會接手下一份，因此，多位工作者同時並行作業便能有效提升整體產能。
+* **Manager（工作管理者）**：就像現場主管，持續監控生產線上待處理原料的堆積狀況，並根據實際負載自動調整技術員（工作者）的人數，確保生產線順暢運作、不會塞車。
+* **Consumer（消費者）**：負責將已經加工完成的產品（推論結果）依照正確的順序包裝、展示或送出，最終呈現給使用者。
+
+### 消費者-工作者模式
+
+這四個角色透過資料佇列協作，讓每個階段都能獨立且高效地運作，實現即時且穩定的推論服務。
+
+**模組一：影格生產者（Frame Producer）**  
+負責從影片檔案或攝影機連續讀取影格，並將每個影格（含 frame_id）放入 frame_queue。生產者同時會記錄隊列長度等統計資訊，供管理器參考。當影片結束時，會自動發送結束信號給所有工作者。
+
+```python
+# 關鍵流程
+while not self.should_stop:
+    ret, frame = cap.read()
+    await self.frame_queue.put((frame, frame_id))
+    # ...記錄統計與結束信號...
 ```
 
 ---
 
-
-## 非同步化串流推論
-
-即時物件偵測應用在傳統同步架構下存在顯著的效能限制。序列化的處理流程包含影格讀取、模型推論與結果輸出，各階段間的依賴關係導致計算資源在等待期間處於閒置狀態。設影片序列 $\tau = \{\tau_1, \tau_2, ..., \tau_n\}$ 包含 $n$ 個連續影格，在傳統同步處理模式下，系統總執行時間可表示為：
-
-$$T_{sync} = \sum_{i=1}^{n} (t_{read,i} + t_{infer,i} + t_{display,i})$$
-
-其中 $t_{read,i}$, $t_{infer,i}$, $t_{display,i}$ 分別代表第 $i$ 個影格的讀取時間、推論時間與顯示時間。同步執行模式要求各階段嚴格依序完成，造成計算單元在非關鍵路徑上的等待，進而限制系統整體處理能力。
-
-為提升系統整體吞吐量並最大化硬體資源使用效率，本專案採用基於 Python asyncio 的非同步多工流水線架構。每個處理階段（Producer/推論/顯示）皆以協程方式獨立運作，並透過佇列（Queue）進行資料傳遞與解耦。
-
-### 自適應工作者管理架構
-
-本系統採用智能的自適應工作者管理機制，能夠根據隊列積壓情況自動增加推論工作者，實現真正的動態負載平衡。系統包含四個主要模組：
-
-**模組一：影格生產者（Frame Producer）**
-負責從影片檔案或攝影機連續讀取影格，並將 (frame, frame_id) 放入 frame_queue。同時記錄隊列長度統計，供工作者管理器參考。
+**模組二：智能推論工作者（Inference Worker）**  
+多個工作者並行從 frame_queue 取出影格進行 YOLO 推論，並將結果放入 result_queue。每位工作者同時只會處理一個影格，採用「只增不減」策略，啟動後持續運作直到程式結束，並具備錯誤容忍機制。
 
 ```python
-async def frame_producer(self, cap):
-    """生產者：讀取視頻幀並放入隊列"""
-    frame_id = 0
-    
-    while not self.should_stop:
-        ret, frame = cap.read()
-        if not ret:
-            self.should_stop = True
-            break
-        
-        frame_id += 1
-        
-        try:
-            queue_size = self.frame_queue.qsize()
-            # 記錄隊列長度
-            self.perf_logger.info(f"QUEUE_LENGTH,{frame_id},{queue_size}")
-            await self.frame_queue.put((frame, frame_id))
-            
-        except asyncio.QueueFull:
-            self.perf_logger.info(f"QUEUE_FULL,{frame_id}")
-            continue
-            
-        # 減少讓出頻率
-        if frame_id % 5 == 0:
-            await asyncio.sleep(0.001)
-    
-    # 發送結束信號
-    for _ in range(self.max_workers):
-        await self.frame_queue.put(None)
+# 關鍵流程
+while not self.should_stop:
+    frame, frame_id = await self.frame_queue.get()
+    result = ... # 執行推論
+    await self.result_queue.put((result, frame_id, ...))
 ```
 
-**模組二：智能推論工作者（Inference Worker）**
-每個工作者從 frame_queue 取出資料，進行 YOLO 推論，並將結果放入 result_queue。工作者採用「只增不減」策略，一旦啟動就會持續運作直到程序結束，避免頻繁創建/銷毀的開銷。
+---
+
+**模組三：自適應工作者管理器（Workers Manager）**  
+持續監控 frame_queue 的積壓情況，採用滑動窗口計算平均隊列長度。當平均值超過設定閾值時，會立即自動增加新的工作者，無冷卻時間限制，確保系統能即時因應負載變化。
 
 ```python
-async def inference_worker(self, worker_id):
-    """推理工作者 - 移除空閒超時退出邏輯"""
-    consecutive_errors = 0
-    
-    try:
-        while not self.should_stop:
-            try:
-                frame_data = await asyncio.wait_for(self.frame_queue.get(), timeout=5.0)
-                
-                if frame_data is None:
-                    break
-                
-                frame, frame_id = frame_data
-                consecutive_errors = 0
-                
-                loop = asyncio.get_event_loop()
-                result, result_frame_id, processing_time = await loop.run_in_executor(
-                    self.executor, self.predict_frame, (frame, frame_id, worker_id)
-                )
-                
-                await self.result_queue.put((result, result_frame_id, frame, processing_time))
-                self.frame_queue.task_done()
-                
-            except asyncio.TimeoutError:
-                # 記錄超時但不退出
-                self.perf_logger.info(f"WORKER_TIMEOUT,{worker_id}")
-                continue
-                    
-            except Exception as e:
-                consecutive_errors += 1
-                self.perf_logger.info(f"WORKER_ERROR,{worker_id},{consecutive_errors},{str(e)}")
-                if consecutive_errors > 10:
-                    break
-                continue
-                
-    finally:
-        # 工作者退出時更新計數
-        async with self.workers_lock:
-            if worker_id in self.workers:
-                del self.workers[worker_id]
-                self.current_workers -= 1
+# 關鍵流程
+while not self.should_stop:
+    avg_queue_length = ... # 計算滑動平均
+    if avg_queue_length > 1.0:
+        await self._add_worker()
 ```
 
-**模組三：自適應工作者管理器（Workers Manager）**
-這是系統的核心創新，負責監控隊列狀態並動態調整工作者數量。採用滑動窗口統計避免瞬間波動的影響，當平均隊列長度超過閾值時立即增加工作者，無冷卻時間限制。
+---
+
+**模組四：結果消費者（Result Consumer）**  
+從 result_queue 取得推論結果，並依照 frame_id 順序顯示或輸出。消費者會維護暫存區，確保多工作者並行下的結果能正確、有序地呈現給使用者。
 
 ```python
-async def workers_manager(self):
-    """改進的動態工作者管理器 - 只增不減模式，無冷卻限制"""
-    queue_stats = deque(maxlen=5)  # 統計窗口，保留最近5次的隊列長度
-    
-    while not self.should_stop:
-        await asyncio.sleep(0.5)  # 每0.5秒檢查一次
-        
-        current_queue_size = self.frame_queue.qsize()
-        queue_stats.append(current_queue_size)
-        
-        if len(queue_stats) < 3:  # 至少需要3個統計點
-            continue
-        
-        avg_queue_length = sum(queue_stats) / len(queue_stats)
-        
-        # 記錄管理器狀態
-        self.perf_logger.info(f"MANAGER_STATUS,{self.current_workers},{avg_queue_length:.2f}")
-        
-        async with self.workers_lock:
-            # 只增加工作者的邏輯 - 無冷卻時間限制
-            if avg_queue_length > 1.0 and self.current_workers < self.max_workers:
-                await self._add_worker()
-                self.perf_logger.info(f"WORKER_ADDED,{self.current_workers}")
-                print(f"Added worker, current workers: {self.current_workers}")
-```
-
-**模組四：結果消費者（Result Consumer）**
-從 result_queue 取得推論結果，確保按照影格順序顯示結果。維護一個暫存字典來處理亂序到達的結果，保證顯示的連續性。
-
-```python
-async def result_consumer(self):
-    """消費者：顯示推理結果"""
-    processed_frames = {}
-    next_display_frame = 1
-    
-    while not self.should_stop:
-        try:
-            result_data = await asyncio.wait_for(self.result_queue.get(), timeout=3.0)
-            
-            if result_data is None:
-                break
-            
-            result, frame_id, original_frame, processing_time = result_data
-            processed_frames[frame_id] = (result, original_frame)
-            
-            # 記錄結果佇列狀態
-            self.perf_logger.info(f"RESULT_RECEIVED,{frame_id},{len(processed_frames)}")
-            
-            # 按順序顯示結果
-            while next_display_frame in processed_frames:
-                display_result, display_frame = processed_frames.pop(next_display_frame)
-                
-                display_img = cv2.resize(display_result.plot(), (720, 480))
-                cv2.imshow("Adaptive YOLO Inference", display_img)
-                
-                if cv2.waitKey(1) & 0xFF == 27:
-                    self.should_stop = True
-                    return
-                
-                next_display_frame += 1
-            
-            self.result_queue.task_done()
-            
-        except asyncio.TimeoutError:
-            if self.frame_queue.empty() and self.result_queue.empty() and self.should_stop:
-                break
+# 關鍵流程
+while not self.should_stop:
+    result, frame_id, ... = await self.result_queue.get()
+    # ...依序顯示結果...
 ```
 
 ### 預載入模型池與性能優化
