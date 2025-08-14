@@ -461,7 +461,6 @@ class AutoBackend(nn.Module):
                 )
                 device = "cpu"  # Required, otherwise PyTorch will try to use the wrong device
             else:  # TFLite
-                else:  # TFLite
                 LOGGER.info(f"Loading {w} for TensorFlow Lite inference...")
                 # === 原始 TFLite 解釋器 ===
                 interpreter = Interpreter(model_path=w)
