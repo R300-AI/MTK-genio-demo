@@ -1,49 +1,48 @@
-from ultralytics import YOLO
+
 import cv2, argparse
-import asyncio
+import multiprocessing
+from ultralytics import YOLO
 
-parser = argparse.ArgumentParser(description="YOLO Async Inference with asyncio")
 
+parser = argparse.ArgumentParser(description="YOLO Multiprocessing Inference")
 parser.add_argument("--video_path", type=str, default="./data/video.mp4")
 parser.add_argument("--tflite_model", type=str, default="./models/yolov8n_float32.tflite")
-parser.add_argument("--num_workers", type=int, default=6, help="Number of inference workers")
+parser.add_argument("--max_workers", type=int, default=6, help="Number of inference workers")
 args = parser.parse_args()
 
-cap = cv2.VideoCapture(args.video_path)
-model = YOLO(args.tflite_model, task="detect")
+multiprocessing.set_start_method('spawn', force=True)
+frame_queue = multiprocessing.Queue(maxsize=100)
 
-frame_queue = asyncio.Queue(maxsize=100)
-
-async def preprocess():
+def preprocess(frame_queue):
     print("[讀取器] 啟動")
+    cap = cv2.VideoCapture(args.video_path)
     index = 0
     while True:
         ret, frame = cap.read()
         if not ret:
             break
-        await frame_queue.put((index, frame))
+        frame_queue.put((index, frame))
         index += 1
-    # 放入 None 給每個 inference worker
-    for _ in range(args.num_workers):
-        await frame_queue.put(None)
+    for _ in range(args.max_workers):
+        frame_queue.put((None, None))
     cap.release()
     print("[讀取器] 結束")
 
-async def inference(worker_id):
+def inference_worker(worker_id, frame_queue):
     print(f"[推理器-{worker_id}] 啟動")
+    model = YOLO(args.tflite_model, task="detect")
     while True:
-        index, frame = await frame_queue.get()
-        if frame is None:
-            await result_queue.put(None)
+        index, frame = frame_queue.get()
+        if index is None and frame is None:
+            print(f"[推理器-{worker_id}] 結束")
             break
         result = model.predict(frame, verbose=False)[0]
         print(f"[推理器-{worker_id}] {index} {result.plot().shape}")
 
-async def main():
-    tasks = [asyncio.create_task(preprocess())]
-    for i in range(args.num_workers):
-        tasks.append(asyncio.create_task(inference(i)))
-    await asyncio.gather(*tasks)
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    workers = [multiprocessing.Process(target=inference_worker, args=(i, frame_queue)) for i in range(args.max_workers)]
+    for w in workers:
+        w.start()
+    preprocess(frame_queue)
+    for w in workers:
+        w.join()
