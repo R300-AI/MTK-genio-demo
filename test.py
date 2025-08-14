@@ -27,26 +27,39 @@ async def preprocess(frame_queue: asyncio.Queue):
     cap.release()
     print("[讀取器] 結束")
 
-async def inference_worker(worker_id: int, frame_queue: asyncio.Queue):
+async def inference_worker(worker_id: int, frame_queue: asyncio.Queue, display_queue: asyncio.Queue):
     print(f"[推理器-{worker_id}] 啟動")
-    # YOLO 初始化也在執行緒避免阻塞
     model = await asyncio.to_thread(YOLO, args.tflite_model, task="detect")
     while True:
         index, frame = await frame_queue.get()
         if index is None and frame is None:
             print(f"[推理器-{worker_id}] 結束")
+            # 通知顯示 queue 結束
+            await display_queue.put((worker_id, None, None))
             break
-        # 推理與繪圖皆在執行緒
         result = (await asyncio.to_thread(model.predict, frame, verbose=False))[0]
         img = await asyncio.to_thread(result.plot)
-        await asyncio.to_thread(cv2.imshow, f"worker-{worker_id}", img)
-        await asyncio.to_thread(cv2.waitKey, 1)
+        await display_queue.put((worker_id, index, img))
+
+async def display_loop(display_queue: asyncio.Queue, num_workers: int):
+    finished_workers = 0
+    while finished_workers < num_workers:
+        worker_id, index, img = await display_queue.get()
+        if img is None:
+            finished_workers += 1
+            continue
+        cv2.imshow(f"worker-{worker_id}", img)
+        # waitKey 必須在主執行緒呼叫
+        cv2.waitKey(1)
 
 async def main():
     frame_queue = asyncio.Queue(maxsize=100)
-    workers = [asyncio.create_task(inference_worker(i, frame_queue)) for i in range(args.max_workers)]
+    display_queue = asyncio.Queue(maxsize=100)
+    workers = [asyncio.create_task(inference_worker(i, frame_queue, display_queue)) for i in range(args.max_workers)]
+    display_task = asyncio.create_task(display_loop(display_queue, args.max_workers))
     await preprocess(frame_queue)
     await asyncio.gather(*workers)
+    await display_task
 
 if __name__ == "__main__":
     asyncio.run(main())
