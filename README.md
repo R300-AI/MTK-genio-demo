@@ -147,5 +147,5 @@ $ uv run --with jupyter jupyter lab
 > 💡 **效能提示**：完成本教學後，您將能夠學會如何將處理步驟拆分為獨立任務，使多核心資源得以充分並行運作，進一步在 Genio 510及 Genio 700上實現流暢的即時物件偵測。
 > | 平台型號       | 基準模型    | 預期效能              |
 > |---------------|-------------|----------------------|
-> | **Genio 510** | **yolov8n_float32_mdla3.dla**  | **30 FPS** |
-> | **Genio 700** | **yolov8n_float32_mdla3.dla**  | **FPS** |
+> | **Genio 510** | [yolov8n_float32_mdla3.dla](https://github.com/R300-AI/MTK-genio-demo/blob/main/models/yolov8n_float32_mdla3.dla)  | **30 FPS** |
+> | **Genio 700** | [yolov8n_float32_mdla3.dla](https://github.com/R300-AI/MTK-genio-demo/blob/main/models/yolov8n_float32_mdla3.dla)  | **FPS** |
