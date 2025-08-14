@@ -91,7 +91,7 @@ async def postprocess(output_q: asyncio.Queue, display: bool, writer: cv2.VideoW
                 res, t0, t1 = buffer.pop(next_idx)
                 frame = render(res)
                 if display:
-                    cv2.imshow("YOLO Stream", frame)
+                    cv2.imshow("YOLO Stream", cv2.resize(frame, (720, 480)))
                     if cv2.waitKey(1) == 27:
                         print("[postprocess] ESC pressed，提前結束")
                         return
