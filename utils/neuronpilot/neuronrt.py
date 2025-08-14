@@ -11,19 +11,18 @@ class Interpreter():
         interpreter = tf.lite.Interpreter(model_path=tflite_path)
         self.input_details = interpreter.get_input_details()
         self.output_details = interpreter.get_output_details()
-        self.input_handlers = queue.Queue()
-        self.output_handlers = queue.Queue()
+        self.input_tensors = queue.Queue()
+        self.output_tensors = queue.Queue()
         
     def allocate_tensors(self):
-        seed = str(uuid.uuid4())
-        bin_dir = f'./bin/{seed}'
+        self.bin_dir = f'./bin'
         
         print(f"Load DLA model: {self.dla_path}")
         commands = ["sudo", "neuronrt", "-a", self.dla_path, "-d"]
         results = subprocess.run(commands, capture_output=True, text=True)
-        if os.path.exists(bin_dir):
-           shutil.rmtree(bin_dir)
-        os.mkdir(bin_dir)
+        if os.path.exists(self.bin_dir):
+           shutil.rmtree(self.bin_dir)
+        os.mkdir(self.bin_dir)
 
     def get_input_details(self):
         return self.input_details
@@ -33,16 +32,16 @@ class Interpreter():
    
     def set_tensor(self, _, inputs):
         handler = str(uuid.uuid4())
-        input_handlers = [f'./bin/input{handler}_{i}.bin' for i, input in enumerate(self.input_details)]
-        output_handlers = {f'./bin/output{handler}_{i}.bin': tuple([1] + output['shape'].tolist()) for i, output in enumerate(self.output_details)}
+        input_handlers = [f'{self.bin_dir}/input{handler}_{i}.bin' for i, input in enumerate(self.input_details)]
+        output_handlers = {f'{self.bin_dir}/output{handler}_{i}.bin': tuple([1] + output['shape'].tolist()) for i, output in enumerate(self.output_details)}
 
         for input, binary_path in zip(inputs, input_handlers):
             input_data = np.array([input]).astype(self.input_details[0]['dtype'])
             convert_to_binary(input_data, binary_path)
-        self.input_handlers.put((handler, input_handlers, output_handlers))
+        self.input_tensors.put((input_handlers, output_handlers))
 
     def invoke(self):
-        handler, input_handlers, output_handlers = self.input_handlers.get()
+        input_handlers, output_handlers = self.input_tensors.get()
         commands = ["sudo", "neuronrt",  
                 "-m",  "hw",  
                 "-a",  self.dla_path,
@@ -51,9 +50,9 @@ class Interpreter():
                 "-i",  ' -i '.join(input_handlers),  
                 "-o",  ' -o '.join(list(output_handlers.keys()))]
         p = subprocess.Popen(commands, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        self.output_handlers.put((handler, output_handlers, p))
+        p.wait()
+        self.output_tensors.put(output_handlers)
         
     def get_tensor(self, _):
-        handler, output_handlers, p = self.output_handlers.get()
-        p.wait()
+        output_handlers = self.output_tensors.get()
         return convert_to_numpy(output_handlers, dtype = np.float32)[0]
