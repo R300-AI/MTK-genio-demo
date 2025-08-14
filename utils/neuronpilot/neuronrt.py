@@ -1,4 +1,4 @@
-from utils.neuronpilot.data import convert_to_binary, conert_to_numpy
+from utils.neuronpilot.data import convert_to_binary, convert_to_numpy
 import numpy as np
 import tensorflow as tf
 import os, shutil, subprocess, uuid, queue
@@ -33,8 +33,8 @@ class Interpreter():
    
     def set_tensor(self, _, inputs):
         handler = str(uuid.uuid4())
-        input_handlers = [f'./bin/input{self.handler}_{i}.bin' for i, input in enumerate(self.input_details)]
-        output_handlers_with_shape = {f'./bin/output{self.handler}_{i}.bin': tuple([1] + output['shape'].tolist()) for i, output in enumerate(self.output_details)}
+        input_handlers = [f'./bin/input{handler}_{i}.bin' for i, input in enumerate(self.input_details)]
+        output_handlers_with_shape = {f'./bin/output{handler}_{i}.bin': tuple([1] + output['shape'].tolist()) for i, output in enumerate(self.output_details)}
 
         for input, binary_path in zip(inputs, input_handlers):
             input_data = np.array([input]).astype(self.input_details[0]['dtype'])
