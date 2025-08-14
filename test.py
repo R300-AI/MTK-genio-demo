@@ -16,7 +16,6 @@ async def preprocess(input_queue: asyncio.Queue, video_capture: cv2.VideoCapture
     video_capture.release()
     #print('[preprocess] end')
 
-
 async def predict(index, frame, capture_time):
     print(f'[predict] start: frame {index}')
     result = await asyncio.to_thread(lambda: model.predict(frame, verbose=False)[0])
