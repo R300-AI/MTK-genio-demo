@@ -7,7 +7,7 @@ from ultralytics import YOLO
 parser = argparse.ArgumentParser(description="YOLO Asyncio Inference")
 parser.add_argument("--video_path", type=str, default="./data/video.mp4")
 parser.add_argument("--tflite_model", type=str, default="./models/yolov8n_float32.tflite")
-parser.add_argument("--max_workers", type=int, default=6, help="Number of inference workers")
+parser.add_argument("--max_workers", type=int, default=5, help="Number of inference workers")
 args = parser.parse_args()
 
 async def preprocess(frame_queue: asyncio.Queue):
