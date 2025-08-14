@@ -1,72 +1,74 @@
 from ultralytics import YOLO
-import cv2, asyncio, time, argparse
-from typing import Tuple, Optional
+import cv2, asyncio, time, argparse, psutil
 
 # ----------------------------
 # Producer: read frames
 # ----------------------------
-async def preprocess(q_in: asyncio.Queue, cap: cv2.VideoCapture, n_sentinels: int):
+async def preprocess(input_queue: asyncio.Queue, video_capture: cv2.VideoCapture, num_sentinels: int):
     print('preprocess start')
     loop = asyncio.get_running_loop()
-    seq = 0
+    index = 0
     while True:
-        ret, frame = await loop.run_in_executor(None, cap.read)  # non-blocking for event loop
+        ret, frame = await loop.run_in_executor(None, video_capture.read)  # non-blocking for event loop
         if not ret:
             break
-        # put (sequence_id, frame, t_capture)
-        await q_in.put((seq, frame, time.time()))
-        seq += 1
-    cap.release()
+        # put (index, frame, capture_time)
+        await input_queue.put((index, frame, time.time()))
+        index += 1
+    video_capture.release()
     # send one sentinel per worker so each exits
-    for _ in range(n_sentinels):
-        await q_in.put(None)
+    for _ in range(num_sentinels):
+        await input_queue.put(None)
     print('preprocess end')
 
 # ----------------------------
 # Concurrent predictor workers
 # ----------------------------
-async def predictor_worker(worker_id: int,
-                           q_in: asyncio.Queue,
-                           q_out: asyncio.Queue,
+async def predict_worker(worker_id: int,
+                           input_queue: asyncio.Queue,
+                           output_queue: asyncio.Queue,
                            model_path: str):
+    mem = psutil.virtual_memory()
+    if mem.percent >= 90:
+        print(f"predictor[{worker_id}] 啟動時記憶體已超過 90%，自動跳過此 worker。")
+        return
     print(f'predictor[{worker_id}] start')
     model = YOLO(model_path, task='detect')  # own instance per worker
     while True:
-        item: Optional[Tuple[int, 'np.ndarray', float]] = await q_in.get()
+        item = await input_queue.get()
         if item is None:  # sentinel
-            await q_out.put(None)  # forward sentinel
+            await output_queue.put(None)  # forward sentinel
             break
-        seq, frame, t_cap = item
+        index, frame, capture_time = item
 
         # Offload blocking predict to a thread
         result = await asyncio.to_thread(
-            lambda: model.predict(frame, stream=False, verbose=False)[0]
+            lambda: model.predict(frame)[0]
         )
-        vis = result.plot()
-        await q_out.put((seq, vis, t_cap, worker_id, time.time()))
+        await output_queue.put((index, result, capture_time, worker_id, time.time()))
     print(f'predictor[{worker_id}] end')
 
 # ----------------------------
 # Consumer: display results
 # ----------------------------
-async def postprocess(q_out: asyncio.Queue, n_sentinels: int, show_fps=True):
+async def postprocess(output_queue: asyncio.Queue, num_sentinels: int, show_fps=True):
     print('postprocess start')
-    done = 0
+    num_finished = 0
     while True:
-        item = await q_out.get()
+        item = await output_queue.get()
         if item is None:
-            done += 1
-            if done >= n_sentinels:
+            num_finished += 1
+            if num_finished >= num_sentinels:
                 break
             continue
-
-        seq, img, t_cap, worker_id, t_pred = item
+        index, result, capture_time, worker_id, predict_time = item
+        result = result.plot()
         if show_fps:
-            dt = max(1e-6, time.time() - t_cap)
+            dt = max(1e-6, time.time() - capture_time)
             fps = 1.0 / dt
-            cv2.putText(img, f'W{worker_id}  FPS:{fps:.1f}  seq:{seq}',
+            cv2.putText(result, f'Worker{worker_id}  FPS:{fps:.1f}  Frame:{index}',
                         (10, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
-        cv2.imshow('YOLO Detection Stream (concurrent)', img)
+        cv2.imshow('YOLO Detection Stream (concurrent)', result)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     cv2.destroyAllWindows()
@@ -77,51 +79,27 @@ async def postprocess(q_out: asyncio.Queue, n_sentinels: int, show_fps=True):
 # ----------------------------
 async def main():
     parser = argparse.ArgumentParser(description='Ultralytics YOLO 非同步並行推論')
-    parser.add_argument('--video_path', type=str, default='./data/serve.mp4')
-    parser.add_argument('--model', type=str, default='./models/yolov8n_float32.tflite')
-    parser.add_argument('--predict_workers', type=int, default=2, help='並行推論 worker 數')
-    parser.add_argument('--queue_size', type=int, default=4, help='輸入佇列長度（背壓）')
-    parser.add_argument('--latest_only', action='store_true',
-                        help='若輸入佇列滿則丟棄最舊幀（降低延遲）')
+    parser.add_argument('--video_path', default='./data/serve.mp4')
+    parser.add_argument('--model', default='./models/yolov8n_float32.tflite')
+    parser.add_argument('--async_workers', default='1', help='並行推論 worker 數')
     args = parser.parse_args()
 
-    cap = cv2.VideoCapture(args.video_path)
-    if not cap.isOpened():
+    video_capture = cv2.VideoCapture(args.video_path)
+    if not video_capture.isOpened():
         raise RuntimeError(f'Cannot open video: {args.video_path}')
 
-    q_in  = asyncio.Queue(maxsize=args.queue_size)
-    q_out = asyncio.Queue(maxsize=args.queue_size * args.predict_workers)
+    input_queue  = asyncio.Queue()
+    output_queue = asyncio.Queue()
 
-    print(f"開始處理影片: {args.video_path}  | workers={args.predict_workers}")
-
-    # Optional: a small helper to push frames with "latest only" policy
-    async def preprocess_with_policy():
-        loop = asyncio.get_running_loop()
-        seq = 0
-        while True:
-            ret, frame = await loop.run_in_executor(None, cap.read)
-            if not ret:
-                break
-            item = (seq, frame, time.time())
-            if args.latest_only and q_in.full():
-                try:
-                    _ = q_in.get_nowait()   # drop oldest
-                    q_in.task_done()
-                except asyncio.QueueEmpty:
-                    pass
-            await q_in.put(item)
-            seq += 1
-        cap.release()
-        for _ in range(args.predict_workers):
-            await q_in.put(None)
+    print(f"開始處理影片: {args.video_path}  | workers={args.async_workers}")
 
     # Build tasks
-    producers = [asyncio.create_task(preprocess_with_policy())]
+    producers = [asyncio.create_task(preprocess(input_queue, video_capture, args.async_workers))]
     predictors = [
-        asyncio.create_task(predictor_worker(i, q_in, q_out, args.model))
-        for i in range(args.predict_workers)
+        asyncio.create_task(predict_worker(i, input_queue, output_queue, args.model))
+        for i in range(args.async_workers)
     ]
-    consumers = [asyncio.create_task(postprocess(q_out, args.predict_workers))]
+    consumers = [asyncio.create_task(postprocess(output_queue, args.async_workers))]
 
     # Run all
     await asyncio.gather(*producers, *predictors, *consumers)
