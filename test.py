@@ -2,19 +2,19 @@ from ultralytics import YOLO
 import cv2, asyncio, time, argparse
 
 async def preprocess(input_queue: asyncio.Queue, video_capture: cv2.VideoCapture):
-    print('[preprocess] start')
+    #print('[preprocess] start')
     loop = asyncio.get_running_loop()
     index = 0
     while True:
         ret, frame = await loop.run_in_executor(None, video_capture.read)
-        print(f'[preprocess] read frame {index}, ret={ret}')
+        #print(f'[preprocess] read frame {index}, ret={ret}')
         await input_queue.put((index, frame, time.time()) if ret else None)
         if not ret:
-            print('[preprocess] end of video')
+            #print('[preprocess] end of video')
             break
         index += 1
     video_capture.release()
-    print('[preprocess] end')
+    #print('[preprocess] end')
 
 
 async def predict(index, frame, capture_time):
@@ -41,12 +41,12 @@ async def inference(input_queue: asyncio.Queue, output_queue: asyncio.Queue, mod
     print('[inference] end')
 
 async def postprocess(output_queue: asyncio.Queue, show_fps=True):
-    print('[postprocess] start')
+    #print('[postprocess] start')
     while True:
         item = await output_queue.get()
-        print(f'[postprocess] got item from output_queue: {item[0] if item else None}')
+        #print(f'[postprocess] got item from output_queue: {item[0] if item else None}')
         if item is None:
-            print('[postprocess] output_queue end signal received')
+            #print('[postprocess] output_queue end signal received')
             break
         index, result, capture_time, predict_time = item
         result = result.plot()
@@ -60,7 +60,7 @@ async def postprocess(output_queue: asyncio.Queue, show_fps=True):
             print('[postprocess] user quit')
             break
     cv2.destroyAllWindows()
-    print('[postprocess] end')
+    #print('[postprocess] end')
 
 async def main():
     parser = argparse.ArgumentParser(description='Ultralytics YOLO 非同步串流推論')
