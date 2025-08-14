@@ -49,6 +49,11 @@ else:  # TFLite
     # LOGGER.info("Successfully loaded NeuronRT delegate for DLA inference")
 ```
 
+### 第二步：手動配置推論後端
+
+請根據您的硬體平台與需求，選擇合適的加速方案，並依下列步驟調整程式碼：
+
+---
 #### ArmNN Delegate（CPU/GPU 加速）
 
 適用於：希望利用 ARM CPU 或 Mali GPU 進行推論加速的情境。
@@ -76,6 +81,8 @@ else:  # TFLite
    - `"mdla2.0"`：使用 MDLA 2.0
    - `"vpu"`：使用 VPU
 5. 將 `<enter_your_admin_password_here>` 替換為您的系統管理員密碼。
+
+---
 
 ### 第三步：驗證推論後端配置
 
