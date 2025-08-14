@@ -160,11 +160,13 @@ $$T_{sync} = \sum_{i=1}^{n} (t_{read,i} + t_{infer,i} + t_{display,i})$$
 
 ## 執行範例與參數設定
 
+完成後端配置後，即可執行非同步串流推論系統。系統支援多種參數調整，讓您根據硬體規格與效能需求進行最佳化配置。
+
 ```bash
 python test.py --video_path ./data/video.mp4 \
                --tflite_model ./models/yolov8n_float32.tflite \
                --min_workers 1 \
-               --max_workers 6 \
+               --max_workers 8 \
                --queue_size 32
 ```
 
