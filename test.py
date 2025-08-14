@@ -38,18 +38,19 @@ async def inference_worker(worker_id: int, frame_queue: asyncio.Queue, display_q
             await display_queue.put((worker_id, None, None))
             break
         result = (await asyncio.to_thread(model.predict, frame, verbose=False))[0]
-        img = await asyncio.to_thread(result.plot)
-        await display_queue.put((worker_id, index, img))
+        # 將 result 物件直接傳給 display_queue，避免在子執行緒呼叫 plot()
+        await display_queue.put((worker_id, index, result))
 
 async def display_loop(display_queue: asyncio.Queue, num_workers: int):
     finished_workers = 0
     while finished_workers < num_workers:
-        worker_id, index, img = await display_queue.get()
-        if img is None:
+        worker_id, index, result = await display_queue.get()
+        if result is None:
             finished_workers += 1
             continue
+        # 在主執行緒呼叫 plot()
+        img = result.plot()
         cv2.imshow(f"worker-{worker_id}", img)
-        # waitKey 必須在主執行緒呼叫
         cv2.waitKey(1)
 
 async def main():
