@@ -1,6 +1,7 @@
 from ultralytics import YOLO
 import cv2, argparse
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 parser = argparse.ArgumentParser(description="YOLO Async Inference with asyncio")
 parser.add_argument("--video_path", type=str, default="./data/video.mp4")
