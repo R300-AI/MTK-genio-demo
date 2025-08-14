@@ -1,66 +1,93 @@
-
+from ultralytics import YOLO
 import cv2
 import argparse
 import asyncio
-from ultralytics import YOLO
+from concurrent.futures import ThreadPoolExecutor
+import time
 
-parser = argparse.ArgumentParser(description="YOLO Asyncio Inference")
-parser.add_argument("--video_path", type=str, default="./data/video.mp4")
-parser.add_argument("--tflite_model", type=str, default="./models/yolov8n_float32.tflite")
-parser.add_argument("--max_workers", type=int, default=5, help="Number of inference workers")
-args = parser.parse_args()
+async def async_predict(model, frame, executor):
+    """異步執行 YOLO 推理"""
+    print("[階段] 開始執行異步推理")
+    loop = asyncio.get_event_loop()
+    # 將 CPU 密集的推理任務放到線程池中執行
+    result = await loop.run_in_executor(executor, lambda: model.predict(frame, verbose=False)[0])
+    print("[階段] 推理結束")
+    return result
 
-async def preprocess(frame_queue: asyncio.Queue):
-    print("[讀取器] 啟動")
-    cap = cv2.VideoCapture(args.video_path)
-    index = 0
-    loop = asyncio.get_running_loop()
+async def async_frame_processing(cap, model, executor):
+    """異步處理視頻幀"""
+    print("[階段] 開始異步處理視頻幀")
     while True:
-        # OpenCV I/O is blocking, so run in thread
-        ret, frame = await asyncio.to_thread(cap.read)
+        # 讀取幀也可能是 I/O 操作，放到線程池中
+        loop = asyncio.get_event_loop()
+        print("[階段] 讀取視頻幀")
+        ret, frame = await loop.run_in_executor(executor, cap.read)
+        
         if not ret:
+            print("[階段] 視頻結束或讀取失敗，結束處理")
             break
-        await frame_queue.put((index, frame))
-        index += 1
-    for _ in range(args.max_workers):
-        await frame_queue.put((None, None))
-    cap.release()
-    print("[讀取器] 結束")
-
-async def inference_worker(worker_id: int, frame_queue: asyncio.Queue, display_queue: asyncio.Queue):
-    print(f"[推理器-{worker_id}] 啟動")
-    model = await asyncio.to_thread(YOLO, args.tflite_model, task="detect")
-    while True:
-        index, frame = await frame_queue.get()
-        if index is None and frame is None:
-            print(f"[推理器-{worker_id}] 結束")
-            # 通知顯示 queue 結束
-            await display_queue.put((worker_id, None, None))
+            
+        # 異步執行推理
+        result = await async_predict(model, frame, executor)
+        
+        # 顯示結果
+        print("[階段] 顯示推理結果")
+        display_frame = cv2.resize(result.plot(), (720, 480))
+        cv2.imshow("Ultralytics Async Inference", display_frame)
+        
+        # 檢查是否按下 ESC 鍵退出
+        if cv2.waitKey(1) & 0xFF == 27:  # ESC key
+            print("[階段] 偵測到 ESC 鍵，結束處理")
             break
-        result = (await asyncio.to_thread(model.predict, frame, verbose=False))[0]
-        # 將 result 物件直接傳給 display_queue，避免在子執行緒呼叫 plot()
-        await display_queue.put((worker_id, index, result))
-
-async def display_loop(display_queue: asyncio.Queue, num_workers: int):
-    finished_workers = 0
-    while finished_workers < num_workers:
-        worker_id, index, result = await display_queue.get()
-        if result is None:
-            finished_workers += 1
-            continue
-        # 在主執行緒呼叫 plot()
-        img = result.plot()
-        cv2.imshow(f"worker-{worker_id}", img)
-        cv2.waitKey(1)
+            
+        # 讓出控制權給事件循環
+        await asyncio.sleep(0.001)
 
 async def main():
-    frame_queue = asyncio.Queue(maxsize=100)
-    display_queue = asyncio.Queue(maxsize=100)
-    workers = [asyncio.create_task(inference_worker(i, frame_queue, display_queue)) for i in range(args.max_workers)]
-    display_task = asyncio.create_task(display_loop(display_queue, args.max_workers))
-    await preprocess(frame_queue)
-    await asyncio.gather(*workers)
-    await display_task
+    print("[階段] 解析命令列參數")
+    parser = argparse.ArgumentParser(description="YOLO Async Inference with asyncio")
+    parser.add_argument("--video_path", type=str, default="./data/video.mp4")
+    parser.add_argument("--tflite_model", type=str, default="./models/yolov8n_float32.tflite")
+    parser.add_argument("--max_workers", type=int, default=2, help="線程池最大工作線程數")
+    args = parser.parse_args()
+
+    print("[階段] 初始化視頻捕獲和模型")
+    cap = cv2.VideoCapture(args.video_path)
+    model = YOLO(args.tflite_model, task="detect")
+    
+    print("[階段] 創建線程池執行器")
+    executor = ThreadPoolExecutor(max_workers=args.max_workers)
+    
+    try:
+        print("[階段] 執行異步幀處理")
+        await async_frame_processing(cap, model, executor)
+    finally:
+        print("[階段] 清理資源")
+        cap.release()
+        cv2.destroyAllWindows()
+        executor.shutdown(wait=True)
 
 if __name__ == "__main__":
+    print("[階段] 啟動主程序")
     asyncio.run(main())
+"""
+from ultralytics import YOLO
+import cv2, argparse
+
+parser = argparse.ArgumentParser(description="YOLO Async Inference with Subprocess")
+parser.add_argument("--video_path", type=str, default="./data/video.mp4")
+parser.add_argument("--tflite_model", type=str, default="./models/yolov8n_float32.tflite")
+args = parser.parse_args()
+
+cap = cv2.VideoCapture(args.video_path)
+model = YOLO(args.tflite_model, task="detect")
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+    result = model.predict(frame, verbose=False)[0]
+    cv2.imshow("Ultralytics Async Inference", cv2.resize(result.plot(), (720, 480)))
+
+cap.release()
+"""
