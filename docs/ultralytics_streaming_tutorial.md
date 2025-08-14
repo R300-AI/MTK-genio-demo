@@ -49,11 +49,12 @@ else:  # TFLite
     # LOGGER.info("Successfully loaded NeuronRT delegate for DLA inference")
 ```
 
+---
+
 ### 第二步：手動配置推論後端
 
 請根據您的硬體平台與需求，選擇合適的加速方案，並依下列步驟調整程式碼：
 
----
 #### ArmNN Delegate（CPU/GPU 加速）
 
 適用於：希望利用 ARM CPU 或 Mali GPU 進行推論加速的情境。
@@ -65,8 +66,6 @@ else:  # TFLite
 4. 將 `<CpuAcc or GpuAcc>` 設為：
    - `"CpuAcc"`：使用 ARM CPU 加速
    - `"GpuAcc"`：使用 Mali GPU 加速
-
----
 
 #### NeuronRT Delegate（MDLA/VPU 加速）
 
@@ -100,12 +99,13 @@ results[0].show()
 
 # 如果成功顯示結果，表示後端配置正確
 ```
----
 
+---
 
 ## 非同步化串流推論架構
 
-即時物件偵測應用在傳統同步架構下存在顯著的效能限制。序列化的處理流程包含影格讀取、模型推論與結果輸出，各階段間的依賴關係導致計算資源在等待期間處於閒置狀態。
+### 同步架構的效能瓶頸
+即時物件偵測應用在傳統的同步架構下，存在顯著的效能瓶頸。其序列化的處理流程（影格讀取 → 模型推論 → 結果輸出）要求各階段依序完成，導致處理器、加速器等計算資源在等待 I/O 操作時處於閒置狀態，大幅限制了系統的整體吞吐量。
 
 設影片序列 $\tau = \{\tau_1, \tau_2, ..., \tau_n\}$ 包含 $n$ 個連續影格，在傳統同步處理模式下，系統總執行時間可表示為：
 
@@ -116,16 +116,22 @@ $$T_{sync} = \sum_{i=1}^{n} (t_{read,i} + t_{infer,i} + t_{display,i})$$
 - $t_{infer,i}$：第 $i$ 個影格的推論時間  
 - $t_{display,i}$：第 $i$ 個影格的顯示時間
 
-為提升系統整體吞吐量並最大化硬體資源使用效率，這項教學將以**多工流水線**作為範例，將序列化處理流程分解為四個獨立且並行運作的組件，讓整個推論流程如同一條高效的自動化生產線，各環節協同合作、無縫接軌：
 
-* **Producer（生產者）**：如同生產線的進料員，負責持續將原料（影格）送入生產線，確保後續每個環節都能獲得穩定且充足的資料來源。
-* **Worker（工作者）**：類比於生產線上的多位技術員，負責對每一份原料（影格）進行 AI 推論。每位工作者一次只專注於處理一個影格，處理完畢後才會接手下一份，因此，多位工作者同時並行作業便能有效提升整體產能。
-* **Manager（工作管理者）**：就像現場主管，持續監控生產線上待處理原料的堆積狀況，並根據實際負載自動調整技術員（工作者）的人數，確保生產線順暢運作、不會塞車。
-* **Consumer（消費者）**：負責將已經加工完成的產品（推論結果）依照正確的順序包裝、展示或送出，最終呈現給使用者。
+### 多工流水線設計
+
+為了解決上述瓶頸，本教學採用**多工流水線 (Asynchronous Multitasking Pipeline)** 架構。此架構將序列化流程分解為四個獨立且並行運作的組件，透過資料佇列進行解耦與協作，實現高效的推論流程：
+
+* **Producer（生產者）**：作為生產線的起點，負責持續從影片來源讀取原始資料（影格），並將其放入佇列，確保後續處理環節有穩定且充足的資料供應。
+
+* **Worker（工作者）**：如同產線上的多位並行運作的技術員，從佇列中取得影格進行核心的 AI 推論運算。每位工作者一次只專注處理一個影格，但允許多位工作者同時處理不同影格，藉此最大化推論產能。
+
+* **Manager（工作管理者）**：扮演現場主管的角色，持續監控佇列中待處理的影格數量。當偵測到負載增加（即佇列長度超過閾值）時，能動態增派新的工作者，確保生產線的流暢與高效。
+
+* **Consumer（消費者）**：位於生產線的終點，負責從佇列中取出已完成推論的結果。由於多位工作者並行處理，結果可能亂序抵達，因此消費者還需將結果依正確順序重組，最終呈現給使用者。
+
+---
 
 ### 消費者-工作者模式
-
-生產線讓生產者、工作者、消費者透過資料佇列彼此交換資料，讓每個階段都能獨立且高效地運作，實現即時且穩定的推論服務。
 
 **模組一：影格生產者（Frame Producer）**  
 負責從影片檔案或攝影機連續讀取影格，並將每個影格（含 frame_id）放入 frame_queue。生產者同時會記錄隊列長度等統計資訊，供管理器參考。當影片結束時，會自動發送結束信號給所有工作者。
@@ -138,7 +144,7 @@ while not self.should_stop:
     # ...記錄統計與結束信號...
 ```
 
----
+
 
 **模組二：智能推論工作者（Inference Worker）**  
 多個工作者並行從 frame_queue 取出影格進行 YOLO 推論，並將結果放入 result_queue。每位工作者同時只會處理一個影格，採用「只增不減」策略，啟動後持續運作直到程式結束，並具備錯誤容忍機制。
@@ -151,8 +157,6 @@ while not self.should_stop:
     await self.result_queue.put((result, frame_id, ...))
 ```
 
----
-
 **模組三：自適應工作者管理器（Workers Manager）**  
 持續監控 frame_queue 的積壓情況，採用滑動窗口計算平均隊列長度。當平均值超過設定閾值時，會立即自動增加新的工作者，無冷卻時間限制，確保系統能即時因應負載變化。
 
@@ -164,8 +168,6 @@ while not self.should_stop:
         await self._add_worker()
 ```
 
----
-
 **模組四：結果消費者（Result Consumer）**  
 從 result_queue 取得推論結果，並依照 frame_id 順序顯示或輸出。消費者會維護暫存區，確保多工作者並行下的結果能正確、有序地呈現給使用者。
 
@@ -175,30 +177,6 @@ while not self.should_stop:
     result, frame_id, ... = await self.result_queue.get()
     # ...依序顯示結果...
 ```
-
-### 預載入模型池與性能優化
-
-系統採用預載入模型池技術，在初始化時預先載入最大工作者數量的模型實例，避免運行時的模型載入延遲：
-
-```python
-def _preload_models(self):
-    """預載入模型池以避免運行時載入延遲"""
-    with ThreadPoolExecutor(max_workers=self.max_workers) as preload_executor:
-        futures = [preload_executor.submit(load_model, i) for i in range(self.max_workers)]
-        for future in futures:
-            thread_id, model = future.result()
-            self.models[thread_id] = model
-```
-
-### 性能監控與日誌記錄
-
-系統內建完整的性能監控機制，所有關鍵指標都會記錄到 `performance_stats.txt` 文件：
-
-- `PROCESSING_TIME`: 每次推論的處理時間
-- `QUEUE_LENGTH`: 影格隊列長度變化
-- `WORKER_ADDED`: 工作者增加事件
-- `MANAGER_STATUS`: 工作者管理器狀態
-- `RESULT_RECEIVED`: 結果接收統計
 
 ### 使用方式
 
@@ -214,5 +192,3 @@ python test.py --video_path ./data/video.mp4 \
 - `--min_workers`: 初始工作者數量（預設：1）
 - `--max_workers`: 最大工作者數量（預設：6）
 - `--queue_size`: 影格隊列大小（預設：32）
-
-系統會根據負載自動將工作者數從 `min_workers` 增加到 `max_workers`，實現真正的自適應負載平衡。每次執行時會自動重置 `performance_stats.txt` 文件，開始記錄新的性能統計數據。
