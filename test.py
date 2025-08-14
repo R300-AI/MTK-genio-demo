@@ -299,7 +299,7 @@ async def main():
     parser = argparse.ArgumentParser(description="自適應 YOLO 並發推理")
     parser.add_argument("--video_path", type=str, default="./data/video.mp4")
     parser.add_argument("--tflite_model", type=str, default="./models/yolov8n_float32.tflite")
-    parser.add_argument("--min_workers", type=int, default=2, help="最小工作者數量")
+    parser.add_argument("--min_workers", type=int, default=1, help="最小工作者數量")
     parser.add_argument("--max_workers", type=int, default=6, help="最大工作者數量")
     parser.add_argument("--queue_size", type=int, default=32, help="幀隊列大小")
     args = parser.parse_args()
