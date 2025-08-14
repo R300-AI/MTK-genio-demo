@@ -122,11 +122,42 @@ $$T_{sync} = \sum_{i=1}^{n} (t_{read,i} + t_{infer,i} + t_{display,i})$$
 
 * **Producer（生產者）**：作為生產線的起點，負責持續從影片來源讀取原始資料（影格），並將其放入佇列，確保後續處理環節有穩定且充足的資料供應。
 
+    ```python
+    # 關鍵流程
+    while not self.should_stop:
+        ret, frame = cap.read()
+        await self.frame_queue.put((frame, frame_id))
+        # ...記錄統計與結束信號...
+    ```
+
 * **Worker（工作者）**：如同產線上的多位並行運作的技術員，從佇列中取得影格進行核心的 AI 推論運算。每位工作者一次只專注處理一個影格，但允許多位工作者同時處理不同影格，藉此最大化推論產能。
+
+    ```python
+    # 關鍵流程
+    while not self.should_stop:
+        frame, frame_id = await self.frame_queue.get()
+        result = ... # 執行推論
+        await self.result_queue.put((result, frame_id, ...))
+    ```
 
 * **Manager（工作管理者）**：扮演現場主管的角色，持續監控佇列中待處理的影格數量。當偵測到負載增加（即佇列長度超過閾值）時，能動態增派新的工作者，確保生產線的流暢與高效。
 
+    ```python
+    # 關鍵流程
+    while not self.should_stop:
+        avg_queue_length = ... # 計算滑動平均
+        if avg_queue_length > 1.0:
+            await self._add_worker()
+    ```
+
 * **Consumer（消費者）**：位於生產線的終點，負責從佇列中取出已完成推論的結果。由於多位工作者並行處理，結果可能亂序抵達，因此消費者還需將結果依正確順序重組，最終呈現給使用者。
+
+    ```python
+    # 關鍵流程
+    while not self.should_stop:
+        result, frame_id, ... = await self.result_queue.get()
+        # ...依序顯示結果...
+    ```
 
 ---
 
@@ -135,47 +166,22 @@ $$T_{sync} = \sum_{i=1}^{n} (t_{read,i} + t_{infer,i} + t_{display,i})$$
 **模組一：影格生產者（Frame Producer）**  
 負責從影片檔案或攝影機連續讀取影格，並將每個影格（含 frame_id）放入 frame_queue。生產者同時會記錄隊列長度等統計資訊，供管理器參考。當影片結束時，會自動發送結束信號給所有工作者。
 
-```python
-# 關鍵流程
-while not self.should_stop:
-    ret, frame = cap.read()
-    await self.frame_queue.put((frame, frame_id))
-    # ...記錄統計與結束信號...
-```
 
 
 
 **模組二：智能推論工作者（Inference Worker）**  
 多個工作者並行從 frame_queue 取出影格進行 YOLO 推論，並將結果放入 result_queue。每位工作者同時只會處理一個影格，採用「只增不減」策略，啟動後持續運作直到程式結束，並具備錯誤容忍機制。
 
-```python
-# 關鍵流程
-while not self.should_stop:
-    frame, frame_id = await self.frame_queue.get()
-    result = ... # 執行推論
-    await self.result_queue.put((result, frame_id, ...))
-```
 
 **模組三：自適應工作者管理器（Workers Manager）**  
 持續監控 frame_queue 的積壓情況，採用滑動窗口計算平均隊列長度。當平均值超過設定閾值時，會立即自動增加新的工作者，無冷卻時間限制，確保系統能即時因應負載變化。
 
-```python
-# 關鍵流程
-while not self.should_stop:
-    avg_queue_length = ... # 計算滑動平均
-    if avg_queue_length > 1.0:
-        await self._add_worker()
-```
+
 
 **模組四：結果消費者（Result Consumer）**  
 從 result_queue 取得推論結果，並依照 frame_id 順序顯示或輸出。消費者會維護暫存區，確保多工作者並行下的結果能正確、有序地呈現給使用者。
 
-```python
-# 關鍵流程
-while not self.should_stop:
-    result, frame_id, ... = await self.result_queue.get()
-    # ...依序顯示結果...
-```
+
 
 ## 執行範例與參數設定
 
