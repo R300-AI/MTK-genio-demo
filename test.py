@@ -16,5 +16,6 @@ while cap.isOpened():
         break
     result = model.predict(frame, verbose=False)[0]
     cv2.imshow("Ultralytics Async Inference", cv2.resize(result.plot(), (720, 480)))
-
+    if cv2.waitKey(1) == ord('q'):
+            break
 cap.release()
