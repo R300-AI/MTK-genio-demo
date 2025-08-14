@@ -1,3 +1,33 @@
+[inference] got item from input_queue: 107
+[inference] created predict task for frame 107
+[predict] start: frame 107
+[predict] done: frame 97
+[predict] put to output_queue: frame 97
+[inference] got item from input_queue: 108
+[inference] created predict task for frame 108
+[predict] start: frame 108
+[predict] done: frame 98
+[predict] put to output_queue: frame 98
+[inference] got item from input_queue: None
+[inference] input_queue end signal received
+[inference] end
+... ...
+[inference] got item from input_queue: 107
+[inference] created predict task for frame 107
+[predict] start: frame 107
+[predict] done: frame 97
+[predict] put to output_queue: frame 97
+[inference] got item from input_queue: 108
+[inference] created predict task for frame 108
+[predict] start: frame 108
+[predict] done: frame 98
+[predict] put to output_queue: frame 98
+[inference] got item from input_queue: None
+[inference] input_queue end signal received
+[inference] end
+
+
+
 from ultralytics import YOLO
 import cv2, asyncio, time, argparse
 
