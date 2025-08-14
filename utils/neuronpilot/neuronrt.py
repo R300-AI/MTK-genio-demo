@@ -15,8 +15,8 @@ class Interpreter():
         self.output_handlers = queue.Queue()
         
     def allocate_tensors(self):
-        self.current_seed = str(uuid.uuid4())
-        bin_dir = f'./bin'
+        seed = str(uuid.uuid4())
+        bin_dir = f'./bin/{seed}'
         
         print(f"Load DLA model: {self.dla_path}")
         commands = ["sudo", "neuronrt", "-a", self.dla_path, "-d"]
