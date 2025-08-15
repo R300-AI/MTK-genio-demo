@@ -373,32 +373,57 @@ class InferencePipeline:
         self.should_stop = True
         logger.info("Starting cleanup process")
         
-        # 關閉線程池
+        # 1. 立即取消所有剩餘任務
         try:
+            current_task = asyncio.current_task()
+            all_tasks = [task for task in asyncio.all_tasks() if task != current_task]
+            if all_tasks:
+                for task in all_tasks:
+                    task.cancel()
+                # 等待所有任務取消完成，但設置短超時
+                await asyncio.wait_for(asyncio.gather(*all_tasks, return_exceptions=True), timeout=0.5)
+                logger.info("Cancelled remaining asyncio tasks")
+        except Exception as e:
+            logger.warning(f"Error cancelling tasks: {e}")
+        
+        # 2. 強制關閉線程池
+        try:
+            if hasattr(self.executor, '_threads'):
+                # 強制終止所有線程
+                for thread in self.executor._threads:
+                    if thread.is_alive():
+                        thread.join(timeout=0.1)
             self.executor.shutdown(wait=False, cancel_futures=True)
             logger.info("Thread pool shutdown completed")
         except Exception as e:
             logger.warning(f"Error shutting down executor: {e}")
         
-        # 釋放視頻捕獲器
+        # 3. 釋放視頻捕獲器
         try:
             cap.release()
             logger.info("Video capture released")
         except Exception as e:
             logger.warning(f"Error releasing video capture: {e}")
         
-        # 清理模型快取
+        # 4. 強制清理模型快取
         try:
             with self.models_lock:
+                # 明確刪除每個模型引用
+                for model_key in list(self.models.keys()):
+                    del self.models[model_key]
                 self.models.clear()
             logger.info("Model cache cleared")
         except Exception as e:
             logger.warning(f"Error clearing models: {e}")
         
-        # 取消關閉定時器
+        # 5. 取消關閉定時器
         if self.shutdown_timer and hasattr(self.shutdown_timer, 'is_alive') and self.shutdown_timer.is_alive():
             self.shutdown_timer.cancel()
             logger.info("Shutdown timer cancelled")
+        
+        # 6. 強制垃圾回收
+        import gc
+        gc.collect()
         
         logger.info("Cleanup completed")
 
@@ -448,3 +473,15 @@ if __name__ == "__main__":
     finally:
         # __main__ 只負責程式結束提示，不處理具體資源清理
         print("程式結束")
+        
+        # 強制垃圾回收和快速退出
+        import gc
+        gc.collect()
+        
+        # 檢查是否還有活躍線程，如果有則立即退出
+        import threading
+        active_threads = threading.active_count()
+        if active_threads > 1:
+            print(f"檢測到 {active_threads} 個活躍線程，強制結束...")
+            import os
+            os._exit(0)
