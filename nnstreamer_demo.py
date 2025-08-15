@@ -6,13 +6,10 @@ NNStreamer YOLO 實現 - 使用者自定義推論器示例
 使用者可以修改 YOLOInterpreter 來自定義模型推論行為
 """
 
-import asyncio
-import argparse
+import asyncio, cv2, argparse
 import numpy as np
 import warnings
 from ultralytics import YOLO
-
-# 導入核心模組
 from utils.nnstreamer import NNStreamer, logger
 
 # 抑制 Ultralytics 警告
