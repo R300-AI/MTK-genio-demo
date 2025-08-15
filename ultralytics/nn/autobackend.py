@@ -481,8 +481,7 @@ class AutoBackend(nn.Module):
                 #         )
                 #     ]
                 # )
-                # LOGGER.info("Successfully loaded ArmNN delegate for TFLite inference")
-    
+
                 # === 選項 B: 使用 NeuronRT 加速(MDLA/ VPU) ===
                 # from utils.neuronpilot.neuronrt import Interpreter
                 # 
@@ -492,7 +491,6 @@ class AutoBackend(nn.Module):
                 #     device= "<mdla3.0, mdla2.0 or vpu>"
                 #     admin_password='<enter_your_admin_password_here>'
                 # )
-                # LOGGER.info("Successfully loaded NeuronRT delegate for DLA inference")
 
             interpreter.allocate_tensors()  # allocate
             input_details = interpreter.get_input_details()  # inputs

@@ -35,7 +35,6 @@ else:  # TFLite
     #         )
     #     ]
     # )
-    # LOGGER.info("Successfully loaded ArmNN delegate for TFLite inference")
 
     # === 選項 B: 使用 NeuronRT 加速(MDLA/ VPU) ===
     # from utils.neuronpilot.neuronrt import Interpreter
@@ -46,7 +45,6 @@ else:  # TFLite
     #     device= "<mdla3.0, mdla2.0 or vpu>"
     #     admin_password='<enter_your_admin_password_here>'
     # )
-    # LOGGER.info("Successfully loaded NeuronRT delegate for DLA inference")
 ```
 
 ---
