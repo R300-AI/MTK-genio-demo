@@ -171,7 +171,11 @@ class InferencePipeline:
                     )
                     
                     await self.result_queue.put((result, result_frame_id, frame, processing_time))
-                    self.frame_queue.task_done()
+                    try:
+                        self.frame_queue.task_done()
+                    except ValueError:
+                        # 如果 task_done() 被調用次數過多，忽略錯誤
+                        pass
                     
                 except asyncio.TimeoutError:
                     # 記錄超時並檢查是否應該停止
@@ -201,27 +205,33 @@ class InferencePipeline:
         """改進的動態工作者管理器 - 只增不減模式，無冷卻限制"""
         queue_stats = deque(maxlen=5)  # 減少統計窗口，更快響應
         
-        while not self.should_stop:
-            await asyncio.sleep(0.5)  # 更頻繁檢查
-            
-            current_queue_size = self.frame_queue.qsize()
-            queue_stats.append(current_queue_size)
-            
-            if len(queue_stats) < 3:  # 減少最小統計數量
-                continue
-            
-            avg_queue_length = sum(queue_stats) / len(queue_stats)
-            
-            # 記錄管理器狀態
-            logger.info(f"MANAGER_STATUS,{self.current_workers},{avg_queue_length:.2f}")
-            
-            async with self.workers_lock:
-                # 只增加工作者的邏輯 - 移除冷卻時間限制
-                if avg_queue_length > 0.5 and self.current_workers < self.max_workers:
-                    # 降低閾值到2.0，更積極地增加工作者
-                    await self._add_worker()
-                    logger.info(f"WORKER_ADDED,{self.current_workers}")
-                    logger.info(f"Added worker, current workers: {self.current_workers}")
+        try:
+            while not self.should_stop:
+                await asyncio.sleep(0.1)  # 減少睡眠時間，更快響應停止信號
+                
+                if self.should_stop:  # 睡眠後立即檢查停止條件
+                    break
+                
+                current_queue_size = self.frame_queue.qsize()
+                queue_stats.append(current_queue_size)
+                
+                if len(queue_stats) < 3:  # 減少最小統計數量
+                    continue
+                
+                avg_queue_length = sum(queue_stats) / len(queue_stats)
+                
+                # 記錄管理器狀態
+                logger.info(f"MANAGER_STATUS,{self.current_workers},{avg_queue_length:.2f}")
+                
+                async with self.workers_lock:
+                    # 只增加工作者的邏輯 - 移除冷卻時間限制
+                    if avg_queue_length > 0.5 and self.current_workers < self.max_workers:
+                        # 降低閾值到2.0，更積極地增加工作者
+                        await self._add_worker()
+                        logger.info(f"WORKER_ADDED,{self.current_workers}")
+                        logger.info(f"Added worker, current workers: {self.current_workers}")
+        finally:
+            logger.info("Workers manager finished")
     
     async def _add_worker(self):
         """添加新的工作者"""
@@ -261,7 +271,11 @@ class InferencePipeline:
                         cv2.destroyAllWindows()
                         return
                     next_display_frame += 1
-                self.result_queue.task_done()
+                try:
+                    self.result_queue.task_done()
+                except ValueError:
+                    # 如果 task_done() 被調用次數過多，忽略錯誤
+                    pass
             except asyncio.TimeoutError:
                 # 檢查是否應該停止
                 if self.should_stop:
@@ -321,8 +335,19 @@ class InferencePipeline:
             except Exception as e:
                 logger.warning(f"Error shutting down executor: {e}")
             
-            cap.release()
+            # 確保 OpenCV 窗口關閉
             cv2.destroyAllWindows()
+            # 強制處理 OpenCV 事件
+            for _ in range(10):
+                cv2.waitKey(1)
+            
+            cap.release()
+            
+            # 清理所有剩餘的模型實例
+            with self.models_lock:
+                self.models.clear()
+            
+            logger.info("All resources cleaned up")
 
 async def main():
     parser = argparse.ArgumentParser(description="自適應 YOLO 並發推理")
@@ -351,7 +376,22 @@ async def main():
         queue_size=args.queue_size
     )
     
-    await pipeline.run(args.video_path)
+    try:
+        await pipeline.run(args.video_path)
+    except Exception as e:
+        logger.error(f"Main error: {e}")
+    finally:
+        # 確保程式完全結束
+        logger.info("Main function completed")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Program interrupted by user")
+    except Exception as e:
+        print(f"Program error: {e}")
+    finally:
+        # 最後的清理工作
+        cv2.destroyAllWindows()
+        print("Program finished")
