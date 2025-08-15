@@ -1,0 +1,80 @@
+(base) ubuntu@mtk-genio:~/MTK-genio-neuronrt-demo$ python ultralytics_demo.py 
+Preloading YOLO models...
+Loading models/yolov8n_float32.tflite for TensorFlow Lite inference...
+Loading models/yolov8n_float32.tflite for TensorFlow Lite inference...
+Loading models/yolov8n_float32.tflite for TensorFlow Lite inference...
+Loading models/yolov8n_float32.tflite for TensorFlow Lite inference...
+Loading models/yolov8n_float32.tflite for TensorFlow Lite inference...
+Loading models/yolov8n_float32.tflite for TensorFlow Lite inference...
+Loading models/yolov8n_float32.tflite for TensorFlow Lite inference...
+Loading models/yolov8n_float32.tflite for TensorFlow Lite inference...
+Successfully loaded NeuronRT delegate for DLA inference
+Successfully loaded NeuronRT delegate for DLA inference
+Successfully loaded NeuronRT delegate for DLA inference
+Successfully loaded NeuronRT delegate for DLA inference
+Successfully loaded NeuronRT delegate for DLA inference
+Successfully loaded NeuronRT delegate for DLA inference
+Successfully loaded NeuronRT delegate for DLA inference
+/home/ubuntu/miniconda3/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+Successfully loaded NeuronRT delegate for DLA inference
+Traceback (most recent call last):
+  File "/home/ubuntu/MTK-genio-neuronrt-demo/utils/neuronpilot/neuronrt.py", line 25, in allocate_tensors
+    process = subprocess.run(
+              ^^^^^^^^^^^^^^^
+  File "/home/ubuntu/miniconda3/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command 'echo 'mediatekg510' | sudo -S neuronrt -a ./models/yolov8n_float32.dla -d' returned non-zero exit status 1.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/MTK-genio-neuronrt-demo/ultralytics_demo.py", line 329, in <module>
+    asyncio.run(main())
+  File "/home/ubuntu/miniconda3/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/miniconda3/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/miniconda3/lib/python3.12/asyncio/base_events.py", line 685, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/ubuntu/MTK-genio-neuronrt-demo/ultralytics_demo.py", line 319, in main
+    pipeline = InferencePipeline(
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/MTK-genio-neuronrt-demo/ultralytics_demo.py", line 30, in __init__
+    self._preload_models()
+  File "/home/ubuntu/MTK-genio-neuronrt-demo/ultralytics_demo.py", line 83, in _preload_models
+    thread_id, model = future.result()
+                       ^^^^^^^^^^^^^^^
+  File "/home/ubuntu/miniconda3/lib/python3.12/concurrent/futures/_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/miniconda3/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/home/ubuntu/miniconda3/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/MTK-genio-neuronrt-demo/ultralytics_demo.py", line 76, in load_model
+    model.predict(dummy_input, verbose=False)
+  File "/home/ubuntu/MTK-genio-neuronrt-demo/ultralytics/engine/model.py", line 548, in predict
+    self.predictor.setup_model(model=self.model, verbose=is_cli)
+  File "/home/ubuntu/MTK-genio-neuronrt-demo/ultralytics/engine/predictor.py", line 391, in setup_model
+    self.model = AutoBackend(
+                 ^^^^^^^^^^^^
+  File "/home/ubuntu/miniconda3/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/MTK-genio-neuronrt-demo/ultralytics/nn/autobackend.py", line 496, in __init__
+    interpreter.allocate_tensors()  # allocate
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/MTK-genio-neuronrt-demo/utils/neuronpilot/neuronrt.py", line 35, in allocate_tensors
+    raise RuntimeError(f"Failed to load DLA model: {e.stderr}")
+RuntimeError: Failed to load DLA model: INFO: dlopen libneuronusdk_runtime.mtk.so
+ERROR: The number of input files should be 1
+ERROR: Inference fail
