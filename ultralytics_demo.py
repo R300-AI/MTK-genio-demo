@@ -276,12 +276,15 @@ class YOLOInferencePipeline:
     
     async def consumer(self) -> None:
         """
-        結果消費者 - 負責從結果隊列獲取推理結果，使用 result.plot() 繪製並顯示結果
+        結果消費者 - 負責從結果隊列獲取推理結果，確保按順序顯示
         """
         frame_count = 0
         total_processing_time = 0
+        expected_frame_id = 1  # 期待的下一個要顯示的幀ID
+        pending_results = {}   # 暫存亂序到達的結果 {frame_id: (result, processing_time)}
+        max_pending_frames = 50  # 最大暫存幀數，避免記憶體洩漏
         
-        logger.info("消費者啟動 - 開始顯示結果")
+        logger.info("消費者啟動 - 開始順序顯示結果")
         
         try:
             while not self.should_stop:
@@ -300,34 +303,57 @@ class YOLOInferencePipeline:
                     # 檢查推理結果是否有效
                     if result is None:
                         logger.warning(f"跳過幀 {frame_id} (推理結果為 None)")
+                        # 對於無效結果，如果是期待的幀，直接跳到下一幀
+                        if frame_id == expected_frame_id:
+                            expected_frame_id += 1
                         continue
                     
-                    # Consumer 負責繪製工作：使用 YOLO 內建的 plot() 方法
-                    try:
-                        plotted_img = result.plot()
-                        if plotted_img is not None and plotted_img.size > 0:
-                            # 調整大小並顯示
-                            display_frame = cv2.resize(plotted_img, self.DISPLAY_SIZE)
-                            cv2.imshow(self.WINDOW_NAME, display_frame)
-                            
-                            # 檢查使用者輸入
-                            if cv2.waitKey(1) == 27 or 0xFF == ord('q'):
-                                logger.info("使用者要求退出")
-                                self.should_stop = True
-                                break
+                    # 將結果存入暫存區
+                    pending_results[frame_id] = (result, processing_time)
+                    
+                    # 顯示所有可以順序顯示的幀
+                    while expected_frame_id in pending_results:
+                        current_result, current_processing_time = pending_results.pop(expected_frame_id)
+                        
+                        # Consumer 負責繪製工作：使用 YOLO 內建的 plot() 方法
+                        try:
+                            plotted_img = current_result.plot()
+                            if plotted_img is not None and plotted_img.size > 0:
+                                # 調整大小並顯示
+                                display_frame = cv2.resize(plotted_img, self.DISPLAY_SIZE)
+                                cv2.imshow(self.WINDOW_NAME, display_frame)
                                 
-                            # 更新統計
-                            frame_count += 1
-                            total_processing_time += processing_time
-                            avg_time = total_processing_time / frame_count
-                            fps = frame_count / total_processing_time if total_processing_time > 0 else 0
-                            logger.info(f"處理統計: {frame_count} 幀 {plotted_img.shape} {plotted_img.dtype}, 平均: {avg_time:.3f}s, FPS: {fps:.1f}")
-                        else:
-                            logger.warning(f"幀 {frame_id} 的 plot() 返回無效影像")
-                            
-                    except Exception as e:
-                        logger.error(f"幀 {frame_id} 繪製錯誤: {e}")
-                        continue
+                                # 檢查使用者輸入
+                                if cv2.waitKey(1) == 27 or 0xFF == ord('q'):
+                                    logger.info("使用者要求退出")
+                                    self.should_stop = True
+                                    break
+                                    
+                                # 更新統計
+                                frame_count += 1
+                                total_processing_time += current_processing_time
+                                avg_time = total_processing_time / frame_count
+                                fps = frame_count / total_processing_time if total_processing_time > 0 else 0
+                                
+                                if frame_count % 30 == 0:  # 每30幀輸出一次統計
+                                    logger.info(f"順序顯示統計: 當前顯示幀 {expected_frame_id-1}, 總計 {frame_count} 幀, 平均: {avg_time:.3f}s, FPS: {fps:.1f}, 待處理: {len(pending_results)}")
+                            else:
+                                logger.warning(f"幀 {expected_frame_id} 的 plot() 返回無效影像")
+                                
+                        except Exception as e:
+                            logger.error(f"幀 {expected_frame_id} 繪製錯誤: {e}")
+                        
+                        expected_frame_id += 1
+                        
+                        if self.should_stop:
+                            break
+                    
+                    # 防止記憶體洩漏：清理過舊的暫存結果
+                    if len(pending_results) > max_pending_frames:
+                        oldest_frames = sorted(pending_results.keys())[:len(pending_results) - max_pending_frames]
+                        for old_frame_id in oldest_frames:
+                            del pending_results[old_frame_id]
+                            logger.warning(f"清理過舊幀 {old_frame_id} (可能已跳過)")
 
                 except asyncio.TimeoutError:
                     if self.should_stop:
@@ -336,7 +362,7 @@ class YOLOInferencePipeline:
                     
         finally:
             self._cleanup_display()
-            logger.info(f"消費者結束 - 總共處理 {frame_count} 幀")
+            logger.info(f"消費者結束 - 總共順序顯示 {frame_count} 幀，剩餘暫存 {len(pending_results)} 幀")
         
     def _cleanup_display(self) -> None:
         """清理顯示視窗"""
