@@ -463,7 +463,7 @@ class AutoBackend(nn.Module):
             else:  # TFLite
                 LOGGER.info(f"Loading {w} for TensorFlow Lite inference...")
                 # === 原始 TFLite 解釋器 ===
-                interpreter = Interpreter(model_path=w)
+                #interpreter = Interpreter(model_path=w)
                 
                 # === 錯誤提示：需要手動配置後端 ===
                 raise RuntimeError(
