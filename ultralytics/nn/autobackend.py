@@ -463,12 +463,12 @@ class AutoBackend(nn.Module):
             else:  # TFLite
                 LOGGER.info(f"Loading {w} for TensorFlow Lite inference...")
                 # === 原始 TFLite 解釋器 ===
-                #interpreter = Interpreter(model_path=w)
+                interpreter = Interpreter(model_path=w)
                 
                 # === 錯誤提示：需要手動配置後端 ===
-                raise RuntimeError(
-                    f"Genio Backend not configured! Please edit {__file__} and uncomment one of the backend options above. Please see the tutorial at docs/ultralytics_streaming_tutorial.md for detailed instructions."
-                )
+                #raise RuntimeError(
+                #    f"Genio Backend not configured! Please edit {__file__} and uncomment one of the backend options above. Please see the tutorial at docs/ultralytics_streaming_tutorial.md for detailed instructions."
+                #)
                 # === 選項 A: 使用 ArmNN 加速 (CPU/ GPU) ===
                 # import tensorflow as tf
                 #
@@ -487,8 +487,8 @@ class AutoBackend(nn.Module):
                 # 
                 # interpreter = Interpreter(
                 #     tflite_path=w, 
-                #     dla_path="<path_to_your_dla_model>",       
-                #     device= "<mdla3.0, mdla2.0 or vpu>"
+                #     dla_path="./models/yolov8n_float32_mdla3.dla",       
+                #     device= "mdla3.0"
                 # )
 
             interpreter.allocate_tensors()  # allocate

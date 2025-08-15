@@ -434,59 +434,66 @@ class NNStreamer:
                 self.active_worker_count -= 1
             
     async def inference_manager(self):
-        """推論管理器協程"""
+        """推論管理器協程 - 修復並行處理"""
         logger.info("Starting AI Inference Manager")
         
         active_inference_tasks = set()
         
         try:
             while not self.should_stop:
-                frame_input_data = await self.frame_queue.get()
+                # 非阻塞地清理已完成的任務
+                completed_tasks = set()
+                for task in list(active_inference_tasks):
+                    if task.done():
+                        completed_tasks.add(task)
                 
-                if frame_input_data is None:
-                    logger.info("Shutdown Signal Received - Stopping Inference Manager")
-                    break
-                    
-                event_loop = asyncio.get_event_loop()
-                inference_task = event_loop.run_in_executor(
-                    self.thread_executor, 
-                    self.sync_inference, 
-                    frame_input_data
-                )
-                active_inference_tasks.add(inference_task)
-                
-                completed_tasks = [task for task in active_inference_tasks if task.done()]
+                # 處理已完成的任務
                 for completed_task in completed_tasks:
                     active_inference_tasks.remove(completed_task)
-                    task_result = await completed_task
-                    
-                    if task_result is not None:
-                        try:
-                            await asyncio.wait_for(
-                                self.result_queue.put(task_result),
-                                timeout=0.05
-                            )
-                        except asyncio.TimeoutError:
-                            self.dropped_result_count += 1
-                            logger.warning("WARNING: Result Queue Full - Dropping Inference Result")
-                            
-                while len(active_inference_tasks) >= self.max_worker_count:
-                    completed_tasks_set, active_inference_tasks = await asyncio.wait(
-                        active_inference_tasks,
-                        return_when=asyncio.FIRST_COMPLETED
-                    )
-                    
-                    for completed_task in completed_tasks_set:
+                    try:
                         task_result = await completed_task
                         if task_result is not None:
                             try:
                                 await asyncio.wait_for(
                                     self.result_queue.put(task_result),
-                                    timeout=self.result_timeout
+                                    timeout=0.05
                                 )
                             except asyncio.TimeoutError:
                                 self.dropped_result_count += 1
                                 logger.warning("WARNING: Result Queue Full - Dropping Inference Result")
+                    except Exception as e:
+                        logger.error(f"任務執行錯誤: {e}")
+                
+                # 如果有容量，啟動新的推論任務
+                if len(active_inference_tasks) < self.max_worker_count:
+                    try:
+                        frame_input_data = await asyncio.wait_for(
+                            self.frame_queue.get(), 
+                            timeout=0.01  # 短超時，避免阻塞
+                        )
+                        
+                        if frame_input_data is None:
+                            logger.info("Shutdown Signal Received - Stopping Inference Manager")
+                            break
+                        
+                        # 立即啟動新的推論任務
+                        event_loop = asyncio.get_event_loop()
+                        inference_task = event_loop.run_in_executor(
+                            self.thread_executor, 
+                            self.sync_inference, 
+                            frame_input_data
+                        )
+                        active_inference_tasks.add(inference_task)
+                        
+                    except asyncio.TimeoutError:
+                        # 沒有新幀可處理，繼續下一個循環
+                        pass
+                else:
+                    # 如果已達到最大並行數，稍微等待
+                    await asyncio.sleep(0.001)
+                
+                # 給其他協程執行機會
+                await asyncio.sleep(0.001)
                                     
         except Exception as error:
             logger.error(f"CRITICAL ERROR in Inference Manager: {error}")

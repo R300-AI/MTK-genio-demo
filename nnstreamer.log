@@ -1,34 +1,45 @@
-[2025-08-15 18:29:22,148] INFO - ============ NNStreamer System Initialization ============
-[2025-08-15 18:29:22,148] INFO - Model Path: ./models/yolov8n_float32.tflite
-[2025-08-15 18:29:22,148] INFO - Input Source: 0
-[2025-08-15 18:29:22,148] INFO - Input Type: Camera/Live Stream
-[2025-08-15 18:29:22,149] INFO - Max Workers: 4
-[2025-08-15 18:29:22,149] INFO - Queue Size: 32
-[2025-08-15 18:29:22,149] INFO - Target FPS: 24.00
-[2025-08-15 18:29:22,149] INFO - Processing Mode: Adaptive Frame Skipping (Live Stream)
-[2025-08-15 18:29:22,150] INFO - Preloading AI Model Executors...
-[2025-08-15 18:29:35,817] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 18:29:36,034] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 18:29:36,225] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 18:29:36,419] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 18:29:36,419] INFO - Successfully Preloaded 4 Executors
-[2025-08-15 18:29:36,419] INFO - ============ Starting NNStreamer Processing ============
-[2025-08-15 18:29:36,419] INFO - Starting Frame Capture System: 0
-[2025-08-15 18:29:41,250] INFO - Live Stream FPS: 24.00 (User Specified)
-[2025-08-15 18:29:41,778] INFO - Starting AI Inference Manager
-[2025-08-15 18:29:41,778] INFO - Starting Result Consumer
-[2025-08-15 18:29:42,042] INFO - 統計 - FPS: 0.0, 整體FPS: 0.0, 推論時間: 249.7ms, CPU: 17.0%, 記憶體: 43.6%, 丟幀率: 0.0%, 結果丟棄率: 0.0%, 隊列使用率: 3.1%, 等待幀數: 0
-[2025-08-15 18:29:44,341] INFO - 統計 - FPS: 13.3, 整體FPS: 13.4, 推論時間: 296.7ms, CPU: 100.0%, 記憶體: 43.7%, 丟幀率: 0.0%, 結果丟棄率: 0.0%, 隊列使用率: 62.5%, 等待幀數: 0
-[2025-08-15 18:29:46,494] INFO - 統計 - FPS: 13.8, 整體FPS: 13.7, 推論時間: 293.1ms, CPU: 100.0%, 記憶體: 43.6%, 丟幀率: 12.5%, 結果丟棄率: 0.0%, 隊列使用率: 78.1%, 等待幀數: 0
-[2025-08-15 18:29:48,660] INFO - 統計 - FPS: 14.3, 整體FPS: 13.7, 推論時間: 290.0ms, CPU: 99.9%, 記憶體: 43.6%, 丟幀率: 20.3%, 結果丟棄率: 0.0%, 隊列使用率: 81.2%, 等待幀數: 0
-[2025-08-15 18:29:50,823] INFO - 統計 - FPS: 14.3, 整體FPS: 13.8, 推論時間: 284.5ms, CPU: 89.0%, 記憶體: 43.7%, 丟幀率: 23.6%, 結果丟棄率: 0.0%, 隊列使用率: 81.2%, 等待幀數: 0
-[2025-08-15 18:29:53,292] INFO - 統計 - FPS: 13.0, 整體FPS: 13.4, 推論時間: 278.9ms, CPU: 96.5%, 記憶體: 43.6%, 丟幀率: 26.0%, 結果丟棄率: 0.0%, 隊列使用率: 71.9%, 等待幀數: 0
-[2025-08-15 18:29:54,465] INFO - 使用者請求退出
-[2025-08-15 18:29:54,687] INFO - Result Consumer Stopped Successfully
-[2025-08-15 18:29:54,983] INFO - Frame Capture System Stopped
-[2025-08-15 18:29:54,983] INFO - Waiting for 2 Inference Tasks to Complete...
-[2025-08-15 18:29:54,983] INFO - All Inference Tasks Completed Successfully
-[2025-08-15 18:29:55,093] INFO - Inference Manager Stopped Successfully
-[2025-08-15 18:29:55,094] INFO - Cleaning Up System Resources...
-[2025-08-15 18:29:55,257] INFO - Resource Cleanup Completed
-[2025-08-15 18:29:55,258] INFO - Program Terminated Successfully
+[2025-08-15 19:01:01,591] INFO - ============ NNStreamer System Initialization ============
+[2025-08-15 19:01:01,591] INFO - Model Path: ./models/yolov8n_float32.tflite
+[2025-08-15 19:01:01,591] INFO - Input Source: ./data/video.mp4
+[2025-08-15 19:01:01,591] INFO - Input Type: Video File
+[2025-08-15 19:01:01,591] INFO - Max Workers: 4
+[2025-08-15 19:01:01,591] INFO - Queue Size: 32
+[2025-08-15 19:01:01,591] INFO - Target FPS: 24.00
+[2025-08-15 19:01:01,591] INFO - Processing Mode: Sequential Frame Processing (Video)
+[2025-08-15 19:01:01,591] INFO - Preloading AI Model Executors...
+[2025-08-15 19:01:14,527] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
+[2025-08-15 19:01:14,735] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
+[2025-08-15 19:01:14,921] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
+[2025-08-15 19:01:15,123] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
+[2025-08-15 19:01:15,123] INFO - Successfully Preloaded 4 Executors
+[2025-08-15 19:01:15,123] INFO - ============ Starting NNStreamer Processing ============
+[2025-08-15 19:01:15,123] INFO - Starting Frame Capture System: ./data/video.mp4
+[2025-08-15 19:01:15,162] INFO - Video FPS: 24.00 (Specified), Frame Interval: 0.0417s
+[2025-08-15 19:01:15,174] INFO - Original Detected FPS: 29.97
+[2025-08-15 19:01:15,212] INFO - Starting AI Inference Manager
+[2025-08-15 19:01:15,212] INFO - Starting Result Consumer
+[2025-08-15 19:01:15,671] INFO - 統計 - FPS: 0.0, 整體FPS: 0.0, 推論時間: 302.2ms, CPU: 15.2%, 記憶體: 41.7%, 丟幀率: 0.0%, 結果丟棄率: 0.0%, 隊列使用率: 18.8%, 等待幀數: 0
+[2025-08-15 19:01:18,250] INFO - 統計 - FPS: 12.2, 整體FPS: 11.7, 推論時間: 283.7ms, CPU: 100.0%, 記憶體: 41.7%, 丟幀率: 0.0%, 結果丟棄率: 0.0%, 隊列使用率: 9.4%, 等待幀數: 0
+[2025-08-15 19:01:20,634] INFO - 統計 - FPS: 12.7, 整體FPS: 12.1, 推論時間: 284.4ms, CPU: 100.0%, 記憶體: 41.6%, 丟幀率: 0.0%, 結果丟棄率: 0.0%, 隊列使用率: 0.0%, 等待幀數: 0
+[2025-08-15 19:01:23,014] INFO - 統計 - FPS: 13.1, 整體FPS: 12.3, 推論時間: 284.8ms, CPU: 100.0%, 記憶體: 41.6%, 丟幀率: 0.0%, 結果丟棄率: 0.0%, 隊列使用率: 3.1%, 等待幀數: 0
+[2025-08-15 19:01:24,000] INFO - Video Playback Completed Successfully
+[2025-08-15 19:01:24,028] INFO - Video Reading Completed: 109 Frames Sent to Processing Queue
+[2025-08-15 19:01:24,028] INFO - Frame Capture System Stopped
+[2025-08-15 19:01:24,162] INFO - Shutdown Signal Received - Stopping Inference Manager
+[2025-08-15 19:01:24,268] INFO - Waiting for 3 Inference Tasks to Complete...
+[2025-08-15 19:01:24,335] INFO - All Inference Tasks Completed Successfully
+[2025-08-15 19:01:24,535] INFO - 影片處理完畢！總共處理了 109 幀
+[2025-08-15 19:01:24,535] INFO - 所有影像都已處理完成，準備關閉系統
+[2025-08-15 19:01:24,564] INFO - ✅ VIDEO PROCESSING FULLY COMPLETED - All Frames Processed and Displayed
+[2025-08-15 19:01:24,564] INFO - Result Consumer Stopped Successfully
+[2025-08-15 19:01:24,564] INFO - Inference Manager Stopped Successfully
+[2025-08-15 19:01:24,564] INFO - === Video Processing Status Check ===
+[2025-08-15 19:01:24,564] INFO - Video Reading Complete: True
+[2025-08-15 19:01:24,564] INFO - Total Frames Sent: 109
+[2025-08-15 19:01:24,564] INFO - Frames Processed: 109
+[2025-08-15 19:01:24,564] INFO - Pending Results: 0
+[2025-08-15 19:01:24,564] INFO - All Frames Processed: True
+[2025-08-15 19:01:24,564] INFO - 🎬 VIDEO PROCESSING SUCCESSFULLY COMPLETED - All Frames Processed and Displayed
+[2025-08-15 19:01:24,564] INFO - Cleaning Up System Resources...
+[2025-08-15 19:01:24,719] INFO - Resource Cleanup Completed
+[2025-08-15 19:01:24,719] INFO - Program Terminated Successfully
