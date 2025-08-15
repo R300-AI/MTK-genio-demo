@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-"""
-NNStreamer 核心模組
-包含 NNStreamer 主要類別和效能監控器
-"""
-
 import asyncio
 import cv2
 import numpy as np
@@ -31,114 +26,119 @@ def setup_logging():
 
 logger = setup_logging()
 
+class AdaptiveDisplayController:
+    def __init__(self, target_fps: float = 30.0):
+        self.target_fps = target_fps
+        self.target_interval = 1.0 / target_fps
+        self.last_display_time = 0
+        self.display_time_history = deque(maxlen=30)
+        
+    def should_display_now(self) -> tuple[bool, float]:
+        current_time = time.time()
+        
+        if self.last_display_time == 0:
+            self.last_display_time = current_time
+            return True, 0
+            
+        elapsed_time = current_time - self.last_display_time
+        
+        if elapsed_time >= self.target_interval:
+            self.display_time_history.append(elapsed_time)
+            self.last_display_time = current_time
+            return True, 0
+        else:
+            wait_time = self.target_interval - elapsed_time
+            return False, wait_time
+
+
+
 class SlidingWindowController:
-    """滑動窗口幀控制器 - 處理worker速度變化"""
-    
     def __init__(self, window_size: int = 10):
         self.window_size = window_size
         self.recent_decisions = deque(maxlen=window_size)
-        self.startup_frames = 0  # 啟動階段計數器
-        self.startup_threshold = 30  # 啟動階段幀數
+        self.startup_frame_count = 0
+        self.startup_threshold = 30
         
-    def should_process_frame(self, queue_usage: float) -> bool:
-        """基於隊列壓力動態決策是否處理幀"""
-        self.startup_frames += 1
+    def should_process_frame(self, queue_usage_ratio: float) -> bool:
+        self.startup_frame_count += 1
         
-        # 啟動階段：處理所有幀，讓系統穩定
-        if self.startup_frames <= self.startup_threshold:
+        if self.startup_frame_count <= self.startup_threshold:
             self.recent_decisions.append(1)
             return True
         
-        # 更溫和的目標計算：避免過度激進
-        # 只有當隊列使用率超過70%時才開始減少處理
-        if queue_usage <= 0.7:
-            target_keep_ratio = 1.0  # 正常處理所有幀
+        if queue_usage_ratio <= 0.7:
+            target_keep_ratio = 1.0
         else:
-            # 當隊列使用率 > 70% 時，逐漸減少處理
-            # 使用平方根函數使變化更平緩
-            pressure = (queue_usage - 0.7) / 0.3  # 將70%-100%映射到0-1
-            target_keep_ratio = max(0.3, 1.0 - (pressure ** 0.5) * 0.7)
+            pressure_factor = (queue_usage_ratio - 0.7) / 0.3
+            target_keep_ratio = max(0.3, 1.0 - (pressure_factor ** 0.5) * 0.7)
         
-        # 計算最近的實際處理比率
         if len(self.recent_decisions) == 0:
-            current_ratio = 1.0  # 初始狀態：處理所有幀
+            current_ratio = 1.0
         else:
             current_ratio = sum(self.recent_decisions) / len(self.recent_decisions)
         
-        # 更保守的決策：只有當明顯超出目標時才減少處理
-        should_process = current_ratio <= target_keep_ratio * 1.1  # 10%容忍度
+        should_process = current_ratio <= target_keep_ratio * 1.1
         
-        # 記錄決策到滑動窗口
         self.recent_decisions.append(1 if should_process else 0)
         
         return should_process
 
 class PerformanceMonitor:
-    """效能監控器"""
-    
     def __init__(self, window_size: int = 100):
         self.window_size = window_size
-        self.inference_times = deque(maxlen=window_size)
-        self.display_timestamps = deque(maxlen=window_size)  # 顯示時間戳
-        self.cpu_readings = deque(maxlen=20)  # CPU使用率移動窗口
-        self.start_time = None  # 系統啟動時間
-        self.total_displayed_frames = 0  # 實際顯示幀數
+        self.inference_time_history = deque(maxlen=window_size)
+        self.display_timestamp_history = deque(maxlen=window_size)
+        self.cpu_usage_history = deque(maxlen=20)
+        self.system_start_time = None
+        self.total_displayed_frame_count = 0
         
-    def add_inference_time(self, inference_time: float):
-        """添加推論時間"""
-        self.inference_times.append(inference_time)
+    def add_inference_time(self, inference_duration: float):
+        self.inference_time_history.append(inference_duration)
         
     def add_display_sample(self):
-        """添加顯示樣本 - 每次實際顯示幀時調用"""
-        current_time = time.time()
+        current_timestamp = time.time()
         
-        if self.start_time is None:
-            self.start_time = current_time
+        if self.system_start_time is None:
+            self.system_start_time = current_timestamp
             
-        self.display_timestamps.append(current_time)
-        self.total_displayed_frames += 1
+        self.display_timestamp_history.append(current_timestamp)
+        self.total_displayed_frame_count += 1
         
-        # 同時添加CPU使用率樣本
-        self.cpu_readings.append(psutil.cpu_percent())
+        self.cpu_usage_history.append(psutil.cpu_percent())
         
     def get_avg_inference_time(self) -> float:
-        """獲取平均推論時間"""
-        return np.mean(self.inference_times) if self.inference_times else 0.0
+        return np.mean(self.inference_time_history) if self.inference_time_history else 0.0
         
     def get_fps(self) -> float:
-        """獲取實際顯示FPS"""
-        if len(self.display_timestamps) < 2:
+        if len(self.display_timestamp_history) < 2:
             return 0.0
             
-        # 基於最近時間窗口計算
-        recent_window = min(30, len(self.display_timestamps))  # 最近30幀
-        if recent_window < 2:
+        recent_window_size = min(30, len(self.display_timestamp_history))
+        if recent_window_size < 2:
             return 0.0
             
-        time_span = self.display_timestamps[-1] - self.display_timestamps[-recent_window]
+        time_span = self.display_timestamp_history[-1] - self.display_timestamp_history[-recent_window_size]
         if time_span <= 0:
             return 0.0
             
-        return (recent_window - 1) / time_span
+        return (recent_window_size - 1) / time_span
         
     def get_overall_fps(self) -> float:
-        """獲取整體平均FPS"""
-        if self.start_time is None or self.total_displayed_frames < 2:
+        if self.system_start_time is None or self.total_displayed_frame_count < 2:
             return 0.0
             
-        elapsed_time = time.time() - self.start_time
+        elapsed_time = time.time() - self.system_start_time
         if elapsed_time <= 0:
             return 0.0
             
-        return self.total_displayed_frames / elapsed_time
+        return self.total_displayed_frame_count / elapsed_time
         
     def get_avg_cpu_percent(self) -> float:
-        """獲取移動窗口平均CPU使用率"""
-        if len(self.cpu_readings) == 0:
+        if len(self.cpu_usage_history) == 0:
             return 0.0
-        return np.mean(self.cpu_readings)
+        return np.mean(self.cpu_usage_history)
+    
     def get_system_stats(self) -> Dict[str, Any]:
-        """獲取系統統計資訊"""
         return {
             'cpu_percent': self.get_avg_cpu_percent(),
             'memory_percent': psutil.virtual_memory().percent,
@@ -152,67 +152,81 @@ class NNStreamer:
     """
     NNStreamer 主要類別
     實現高效的模型串流推論架構
+    
+    參數說明:
+    - target_fps: 目標幀率 (預設: None)
+      * None: 自動設定FPS (影片檔案自動檢測，攝像頭使用30.0)
+      * 指定數值: 強制使用該FPS，如 24.0, 30.0, 60.0 等
+    
+    使用範例:
+    # 自動設定FPS (預設)
+    neural_streamer = NNStreamer(executor, model_file_path, video_file_path)
+    
+    # 強制使用24 FPS播放
+    neural_streamer = NNStreamer(executor, model_file_path, video_file_path, target_fps=24.0)
+    
+    # 強制使用60 FPS播放
+    neural_streamer = NNStreamer(executor, model_file_path, video_file_path, target_fps=60.0)
     """
     
     def __init__(self, 
-                 interpreter_class,
+                 executor,
                  model_path: str,
                  input_source: str = None,
                  max_workers: int = 4,
-                 queue_size: int = 32,
-                 display_output: bool = True):
+                 max_queue_length: int = 32,
+                 display_output: bool = True,
+                 target_fps: float = None):
         
-        self.interpreter_class = interpreter_class
+        self.executor = executor
         self.model_path = model_path
-        self.input_source = input_source or 0  # 預設使用攝影機
-        self.max_workers = max_workers
-        self.queue_size = queue_size
+        self.input_source = input_source or 0
+        self.max_worker_count = max_workers
+        self.max_queue_length = max_queue_length
         self.display_output = display_output
+        self.target_fps = target_fps
         
-        # 性能調優參數
-        self.frame_timeout = 0.1  # 即時模式幀隊列超時
-        self.result_timeout = 0.1  # 結果隊列超時
+        self.frame_timeout = 0.1
+        self.result_timeout = 0.1
         
-        # 統計計數器
-        self.total_frames = 0
-        self.dropped_frames = 0
-        self.dropped_results = 0
+        self.total_frame_count = 0
+        self.dropped_frame_count = 0
+        self.dropped_result_count = 0
         
-        # 輸入源類型檢測
         self.is_video_file = self._detect_video_file(input_source)
         
-        # 幀順序控制
-        self.next_display_frame_id = 0  # 下一個顯示幀ID
-        self.pending_results = {}  # 等待顯示的結果 {frame_id: result}
-        self.max_pending_frames = 10  # 最大等待幀數
-        self.last_display_time = time.time()  # 上次顯示時間
-        self.frame_timeout_threshold = 2.0  # 幀等待超時（秒）
+        self.next_display_frame_id = 0
+        self.pending_result_dict = {}
+        self.max_pending_frame_count = 10
+        self.last_display_timestamp = time.time()
+        self.frame_timeout_threshold = 2.0
         
-        # 滑動窗口控制器
-        self.window_controller = SlidingWindowController(window_size=8)
+        self.sliding_window_controller = SlidingWindowController(window_size=8)
         
-        # 初始化組件
-        self.interpreters = {}
-        self.executor = ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="AI-Worker")
+        initial_fps = self.target_fps or 30.0
+        self.display_controller = AdaptiveDisplayController(target_fps=initial_fps)
+        
+        self.executor_dict = {}
+        self.thread_executor = ThreadPoolExecutor(max_workers=self.max_worker_count, thread_name_prefix="AI-Worker")
         self.performance_monitor = PerformanceMonitor()
         
-        # 異步隊列
         self.frame_queue = None
         self.result_queue = None
         
-        # 控制狀態
         self.should_stop = False
         self.is_running = False
         
-        # 影片處理完成追蹤
-        self.video_end_reached = False  # 影片是否讀取完畢
-        self.all_frames_processed = False  # 所有幀是否處理完畢
-        self.total_video_frames = 0  # 影片總幀數（發送到隊列的）
-        self.processed_video_frames = 0  # 已處理完成的幀數
+        self.video_end_reached = False
+        self.all_frames_processed = False
+        self.total_video_frame_count = 0
+        self.processed_video_frame_count = 0
         
-        # Workers 使用狀態追蹤
-        self.active_workers = 0  # 當前活躍的工作者數量
-        self._worker_lock = threading.Lock()  # 保護 active_workers 的鎖
+        self.video_fps = 30.0
+        self.frame_interval = 1.0 / self.video_fps
+        self.last_frame_timestamp = 0
+        
+        self.active_worker_count = 0
+        self._worker_lock = threading.Lock()
         
         # 初始化系統
         self._initialize_system()
@@ -235,126 +249,158 @@ class NNStreamer:
         
     def _initialize_system(self):
         """初始化系統組件"""
-        logger.info("=== NNStreamer 系統啟動 ===")
-        logger.info(f"模型: {self.model_path}")
-        logger.info(f"輸入來源: {self.input_source}")
-        logger.info(f"輸入類型: {'影片文件' if self.is_video_file else '攝像頭/即時流'}")
-        logger.info(f"最大工作者數: {self.max_workers}")
+        logger.info("============ NNStreamer System Initialization ============")
+        logger.info(f"Model Path: {self.model_path}")
+        logger.info(f"Input Source: {self.input_source}")
+        logger.info(f"Input Type: {'Video File' if self.is_video_file else 'Camera/Live Stream'}")
+        logger.info(f"Max Workers: {self.max_worker_count}")
+        logger.info(f"Queue Size: {self.max_queue_length}")
         
-        # 根據輸入類型調整策略
-        if self.is_video_file:
-            logger.info("影片模式: 逐幀處理，保持完整時間軸連續性")
+        if self.target_fps is not None:
+            logger.info(f"Target FPS: {self.target_fps:.2f}")
         else:
-            logger.info("即時模式: 採用跳幀策略，優化即時性能")
+            logger.info("FPS Mode: Auto Detection (Video Files) / 30.0 FPS (Camera)")
         
-        # 預載入解釋器
-        self._preload_interpreters()
+        if self.is_video_file:
+            logger.info("Processing Mode: Sequential Frame Processing (Video)")
+        else:
+            logger.info("Processing Mode: Adaptive Frame Skipping (Live Stream)")
         
-    def _preload_interpreters(self):
-        """預載入解釋器"""
-        logger.info("預載入解釋器...")
+        self._preload_executors()
         
-        # 為每個工作者創建獨立的解釋器
-        for i in range(self.max_workers):
-            thread_id = f"worker_{i}"
-            self.interpreters[thread_id] = self.interpreter_class(
+    def _preload_executors(self):
+        logger.info("Preloading AI Model Executors...")
+        
+        for i in range(self.max_worker_count):
+            worker_thread_id = f"worker_{i}"
+            self.executor_dict[worker_thread_id] = self.executor(
                 model_path=self.model_path
             )
             
-        logger.info(f"成功預載入 {len(self.interpreters)} 個解釋器")
+        logger.info(f"Successfully Preloaded {len(self.executor_dict)} Executors")
         
-    def get_interpreter_for_thread(self):
-        """獲取對應執行緒的解釋器"""
-        thread_id = threading.current_thread().name
+    def get_executor_for_thread(self):
+        current_thread_id = threading.current_thread().name
         
-        # 如果當前執行緒沒有對應解釋器，創建新的
-        if thread_id not in self.interpreters:
-            worker_keys = [k for k in self.interpreters.keys() if k.startswith("worker_")]
-            if worker_keys:
-                # 重用預載入的解釋器
-                available_key = worker_keys[0]
-                self.interpreters[thread_id] = self.interpreters.pop(available_key)
+        if current_thread_id not in self.executor_dict:
+            available_worker_keys = [k for k in self.executor_dict.keys() if k.startswith("worker_")]
+            if available_worker_keys:
+                available_key = available_worker_keys[0]
+                self.executor_dict[current_thread_id] = self.executor_dict.pop(available_key)
             else:
-                # 創建新解釋器
-                self.interpreters[thread_id] = self.interpreter_class(
+                self.executor_dict[current_thread_id] = self.executor(
                     model_path=self.model_path
                 )
                 
-        return self.interpreters[thread_id]
+        return self.executor_dict[current_thread_id]
 
-    async def frame_producer(self, source):
-        """影像幀生產者協程"""
-        logger.info(f"啟動影像擷取器: {source}")
+    async def frame_producer(self, input_source):
+        logger.info(f"Starting Frame Capture System: {input_source}")
         
-        if isinstance(source, str) and source.isdigit():
-            cap = cv2.VideoCapture(int(source))
+        if isinstance(input_source, str) and input_source.isdigit():
+            video_capture = cv2.VideoCapture(int(input_source))
         else:
-            cap = cv2.VideoCapture(source)
+            video_capture = cv2.VideoCapture(input_source)
             
-        if not cap.isOpened():
-            logger.error(f"無法開啟影像來源: {source}")
+        if not video_capture.isOpened():
+            logger.error(f"FAILED: Unable to Open Input Source: {input_source}")
             return
+        
+        if self.is_video_file:
+            detected_fps = video_capture.get(cv2.CAP_PROP_FPS)
             
-        frame_count = 0
+            if self.target_fps is not None:
+                self.video_fps = self.target_fps
+                fps_source = "Specified"
+            elif detected_fps > 0:
+                self.video_fps = detected_fps
+                fps_source = "Auto"
+            else:
+                self.video_fps = 30.0
+                fps_source = "Default"
+            
+            self.frame_interval = 1.0 / self.video_fps
+            
+            self.display_controller = AdaptiveDisplayController(target_fps=self.video_fps)
+            
+            logger.info(f"Video FPS: {self.video_fps:.2f} ({fps_source}), Frame Interval: {self.frame_interval:.4f}s")
+            if detected_fps > 0 and detected_fps != self.video_fps:
+                logger.info(f"Original Detected FPS: {detected_fps:.2f}")
+        else:
+            if self.target_fps is not None:
+                self.video_fps = self.target_fps
+                fps_source = "User Specified"
+            else:
+                self.video_fps = 30.0
+                fps_source = "Auto Configuration"
+            
+            self.frame_interval = 1.0 / self.video_fps
+            logger.info(f"Live Stream FPS: {self.video_fps:.2f} ({fps_source})")
+            
+        frame_counter = 0
+        self.last_frame_timestamp = time.time()
+        
         try:
             while not self.should_stop:
-                ret, frame = cap.read()
-                if not ret:
-                    if isinstance(source, str) and source != "0":
-                        logger.info("影片播放完畢")
+                frame_read_success, current_frame = video_capture.read()
+                if not frame_read_success:
+                    if isinstance(input_source, str) and input_source != "0":
+                        logger.info("Video Playback Completed Successfully")
                         break
                     else:
                         continue
                 
-                self.total_frames += 1
+                self.total_frame_count += 1
                 
-                # 根據輸入源類型採用不同策略
-                queue_usage = self.frame_queue.qsize() / self.queue_size
+                if self.frame_interval > 0:
+                    current_timestamp = time.time()
+                    expected_timestamp = self.last_frame_timestamp + self.frame_interval
+                    
+                    if current_timestamp < expected_timestamp:
+                        wait_duration = expected_timestamp - current_timestamp
+                        await asyncio.sleep(wait_duration)
+                        current_timestamp = time.time()
+                    
+                    self.last_frame_timestamp = current_timestamp
+                
+                queue_usage_ratio = self.frame_queue.qsize() / self.max_queue_length
                 
                 if self.is_video_file:
-                    # 影片文件：逐幀處理，不跳幀
-                    should_process = self._should_process_video_frame(queue_usage, frame_count)
+                    should_process_current_frame = self._should_process_video_frame(queue_usage_ratio, frame_counter)
                 else:
-                    # 即時串流：使用滑動窗口控制器跳幀
-                    should_process = self.window_controller.should_process_frame(queue_usage)
+                    should_process_current_frame = self.sliding_window_controller.should_process_frame(queue_usage_ratio)
                 
-                if not should_process:
-                    self.dropped_frames += 1
+                if not should_process_current_frame:
+                    self.dropped_frame_count += 1
                     continue
                         
-                # 將幀放入隊列
                 try:
                     if self.is_video_file:
-                        # 影片模式：等待隊列有空間，不設超時（避免跳幀）
-                        await self.frame_queue.put((frame_count, frame))
-                        self.total_video_frames += 1  # 記錄發送的影片幀數
+                        await self.frame_queue.put((frame_counter, current_frame))
+                        self.total_video_frame_count += 1
                     else:
-                        # 即時模式：有超時限制，避免累積延遲
                         await asyncio.wait_for(
-                            self.frame_queue.put((frame_count, frame)), 
+                            self.frame_queue.put((frame_counter, current_frame)), 
                             timeout=self.frame_timeout
                         )
-                    frame_count += 1
+                    frame_counter += 1
                 except asyncio.TimeoutError:
-                    # 只有即時模式會觸發這個異常
-                    self.dropped_frames += 1
-                    drop_rate = (self.dropped_frames / self.total_frames) * 100
-                    logger.warning(f"幀隊列已滿，跳過幀 (丟幀率: {drop_rate:.1f}%)")
+                    self.dropped_frame_count += 1
+                    drop_rate = (self.dropped_frame_count / self.total_frame_count) * 100
+                    logger.warning(f"WARNING: Frame Queue Full - Dropping Frame (Drop Rate: {drop_rate:.1f}%)")
                     continue
                     
         except Exception as e:
-            logger.error(f"影像擷取錯誤: {e}")
+            logger.error(f"CRITICAL ERROR: Frame Capture Failed: {e}")
         finally:
-            cap.release()
+            video_capture.release()
             
-            # 標記影片讀取完成
             if self.is_video_file:
                 self.video_end_reached = True
-                logger.info(f"影片讀取完畢，共發送 {self.total_video_frames} 幀到處理隊列")
+                logger.info(f"Video Reading Completed: {self.total_video_frame_count} Frames Sent to Processing Queue")
             
-            # 發送結束信號
             await self.frame_queue.put(None)
-            logger.info("影像擷取器停止")
+            logger.info("Frame Capture System Stopped")
             
     def _should_process_video_frame(self, queue_usage: float, frame_count: int) -> bool:
         """影片幀處理策略 - 逐幀處理保持完整性"""
@@ -364,130 +410,117 @@ class NNStreamer:
             
     def sync_inference(self, frame_data: Tuple[int, np.ndarray]) -> Optional[Tuple[int, np.ndarray, Any]]:
         """同步推論函數（在執行緒中運行）"""
-        frame_id, frame = frame_data
+        frame_id, input_frame = frame_data
         
         try:
-            # 更新活躍工作者計數
             with self._worker_lock:
-                self.active_workers += 1
+                self.active_worker_count += 1
             
-            # 獲取解釋器
-            interpreter = self.get_interpreter_for_thread()
+            model_executor = self.get_executor_for_thread()
             
-            # 執行推論
-            start_time = time.time()
-            result = interpreter.inference(frame)
+            start_timestamp = time.time()
+            inference_result = model_executor.inference(input_frame)
             
-            # 記錄推論時間
-            inference_time = time.time() - start_time
-            self.performance_monitor.add_inference_time(inference_time)
+            inference_duration = time.time() - start_timestamp
+            self.performance_monitor.add_inference_time(inference_duration)
             
-            return frame_id, frame, result
+            return frame_id, input_frame, inference_result
             
-        except Exception as e:
-            logger.error(f"推論失敗 (Frame {frame_id}): {e}")
+        except Exception as error:
+            logger.error(f"INFERENCE FAILED for Frame {frame_id}: {error}")
             return None
         finally:
-            # 減少活躍工作者計數
             with self._worker_lock:
-                self.active_workers -= 1
+                self.active_worker_count -= 1
             
     async def inference_manager(self):
         """推論管理器協程"""
-        logger.info("啟動推論管理器")
+        logger.info("Starting AI Inference Manager")
         
-        active_tasks = set()
+        active_inference_tasks = set()
         
         try:
             while not self.should_stop:
-                # 從幀隊列獲取數據
-                frame_data = await self.frame_queue.get()
+                frame_input_data = await self.frame_queue.get()
                 
-                if frame_data is None:
-                    logger.info("收到結束信號")
+                if frame_input_data is None:
+                    logger.info("Shutdown Signal Received - Stopping Inference Manager")
                     break
                     
-                # 創建推論任務
-                loop = asyncio.get_event_loop()
-                task = loop.run_in_executor(
-                    self.executor, 
+                event_loop = asyncio.get_event_loop()
+                inference_task = event_loop.run_in_executor(
+                    self.thread_executor, 
                     self.sync_inference, 
-                    frame_data
+                    frame_input_data
                 )
-                active_tasks.add(task)
+                active_inference_tasks.add(inference_task)
                 
-                # 處理完成的任務
-                done_tasks = [t for t in active_tasks if t.done()]
-                for task in done_tasks:
-                    active_tasks.remove(task)
-                    result = await task
+                completed_tasks = [task for task in active_inference_tasks if task.done()]
+                for completed_task in completed_tasks:
+                    active_inference_tasks.remove(completed_task)
+                    task_result = await completed_task
                     
-                    if result is not None:
+                    if task_result is not None:
                         try:
-                            # 將結果放入隊列，但不立即處理順序
                             await asyncio.wait_for(
-                                self.result_queue.put(result),
+                                self.result_queue.put(task_result),
                                 timeout=0.05
                             )
                         except asyncio.TimeoutError:
-                            self.dropped_results += 1
-                            logger.warning("結果隊列已滿，丟棄結果")
+                            self.dropped_result_count += 1
+                            logger.warning("WARNING: Result Queue Full - Dropping Inference Result")
                             
-                # 限制同時進行的任務數量
-                while len(active_tasks) >= self.max_workers:
-                    done, active_tasks = await asyncio.wait(
-                        active_tasks,
+                while len(active_inference_tasks) >= self.max_worker_count:
+                    completed_tasks_set, active_inference_tasks = await asyncio.wait(
+                        active_inference_tasks,
                         return_when=asyncio.FIRST_COMPLETED
                     )
                     
-                    for task in done:
-                        result = await task
-                        if result is not None:
+                    for completed_task in completed_tasks_set:
+                        task_result = await completed_task
+                        if task_result is not None:
                             try:
                                 await asyncio.wait_for(
-                                    self.result_queue.put(result),
+                                    self.result_queue.put(task_result),
                                     timeout=self.result_timeout
                                 )
                             except asyncio.TimeoutError:
-                                self.dropped_results += 1
-                                logger.warning("結果隊列已滿，丟棄結果")
+                                self.dropped_result_count += 1
+                                logger.warning("WARNING: Result Queue Full - Dropping Inference Result")
                                     
-        except Exception as e:
-            logger.error(f"推論管理器錯誤: {e}")
+        except Exception as error:
+            logger.error(f"CRITICAL ERROR in Inference Manager: {error}")
         finally:
-            # 等待所有任務完成並處理所有結果
-            if active_tasks:
-                logger.info(f"等待 {len(active_tasks)} 個推論任務完成...")
-                results = await asyncio.gather(*active_tasks, return_exceptions=True)
+            if active_inference_tasks:
+                logger.info(f"Waiting for {len(active_inference_tasks)} Inference Tasks to Complete...")
+                task_results = await asyncio.gather(*active_inference_tasks, return_exceptions=True)
                 
-                # 處理剩餘的結果
-                for result in results:
-                    if result is not None and not isinstance(result, Exception):
+                for task_result in task_results:
+                    if task_result is not None and not isinstance(task_result, Exception):
                         try:
                             await asyncio.wait_for(
-                                self.result_queue.put(result),
-                                timeout=2.0  # 給更長的時間等待結果隊列
+                                self.result_queue.put(task_result),
+                                timeout=2.0
                             )
                         except asyncio.TimeoutError:
-                            self.dropped_results += 1
-                            logger.warning("最終結果隊列已滿，丟棄結果")
+                            self.dropped_result_count += 1
+                            logger.warning("WARNING: Final Result Queue Full - Dropping Result")
                 
-                logger.info("所有推論任務已完成")
+                logger.info("All Inference Tasks Completed Successfully")
             
-            # 確保所有結果都發送完成後才發送結束信號
-            await asyncio.sleep(0.1)  # 給一點時間讓結果隊列處理
+            await asyncio.sleep(0.1)
             await self.result_queue.put(None)
-            logger.info("推論管理器停止")
+            logger.info("Inference Manager Stopped Successfully")
             
     async def result_consumer(self):
         """結果消費者協程 - 使用解釋器的視覺化方法，保證幀順序"""
-        logger.info("啟動結果處理器")
+        logger.info("Starting Result Consumer")
         
         if self.display_output:
             cv2.namedWindow("NNStreamer Output", cv2.WINDOW_AUTOSIZE)
             
-        # 獲取一個解釋器用於繪圖
-        interpreter = list(self.interpreters.values())[0]
+        # 獲取一個執行器用於繪圖
+        model_executor = list(self.executor_dict.values())[0]
             
         try:
             while not self.should_stop:
@@ -502,116 +535,110 @@ class NNStreamer:
                         logger.info("收到結束信號")
                         # 影片模式：需要等待剩餘結果處理完畢
                         if self.is_video_file:
-                            logger.info(f"影片模式結束信號：等待處理剩餘 {len(self.pending_results)} 個結果")
-                            # 繼續處理剩餘的 pending_results 直到全部完成
+                            logger.info(f"Video Mode Shutdown: Waiting for {len(self.pending_result_dict)} Remaining Results")
                             timeout_counter = 0
-                            max_timeout_cycles = 300  # 增加到300個循環週期（15秒）
+                            max_timeout_cycles = 300
                             
-                            while len(self.pending_results) > 0 and timeout_counter < max_timeout_cycles:
-                                processed_any = False
+                            while len(self.pending_result_dict) > 0 and timeout_counter < max_timeout_cycles:
+                                frames_processed_this_cycle = False
                                 
-                                # 嘗試處理所有可以顯示的幀
-                                while self.next_display_frame_id in self.pending_results:
-                                    display_frame, display_result = self.pending_results.pop(self.next_display_frame_id)
-                                    processed_any = True
-                                    self.last_display_time = time.time()
+                                while self.next_display_frame_id in self.pending_result_dict:
+                                    display_frame, display_result = self.pending_result_dict.pop(self.next_display_frame_id)
+                                    frames_processed_this_cycle = True
+                                    self.last_display_timestamp = time.time()
                                     
-                                    # 更新效能監控
                                     self.performance_monitor.add_display_sample()
                                     
-                                    # 使用解釋器的視覺化方法
-                                    if hasattr(interpreter, 'visualize'):
-                                        annotated_frame = interpreter.visualize(display_frame, display_result)
+                                    if hasattr(model_executor, 'visualize'):
+                                        annotated_display_frame = model_executor.visualize(display_frame, display_result)
                                     else:
-                                        annotated_frame = display_frame
+                                        annotated_display_frame = display_frame
                                     
-                                    # 獲取統計資訊並顯示
-                                    stats = self.performance_monitor.get_system_stats()
-                                    info_text = [
+                                    performance_stats = self.performance_monitor.get_system_stats()
+                                    performance_info_text = [
                                         f"Frame: {self.next_display_frame_id}",
-                                        f"FPS: {stats['fps']:.1f}",
-                                        f"Inference: {stats['avg_inference_ms']:.1f}ms",
-                                        f"CPU: {stats['cpu_percent']:.1f}%",
-                                        f"Memory: {stats['memory_percent']:.1f}%",
-                                        f"Workers: {self.active_workers}/{self.max_workers}"
+                                        f"FPS: {performance_stats['fps']:.1f}",
+                                        f"Inference: {performance_stats['avg_inference_ms']:.1f}ms",
+                                        f"CPU: {performance_stats['cpu_percent']:.1f}%",
+                                        f"Memory: {performance_stats['memory_percent']:.1f}%",
+                                        f"Workers: {self.active_worker_count}/{self.max_worker_count}"
                                     ]
                                     
-                                    for i, text in enumerate(info_text):
-                                        cv2.putText(annotated_frame, text, (10, 30 + i * 25),
+                                    for text_index, display_text in enumerate(performance_info_text):
+                                        cv2.putText(annotated_display_frame, display_text, (10, 30 + text_index * 25),
                                                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                                     
                                     if self.display_output:
-                                        cv2.imshow("NNStreamer Output", annotated_frame)
+                                        cv2.imshow("NNStreamer Output", annotated_display_frame)
                                         cv2.waitKey(1)
                                     
                                     self.next_display_frame_id += 1
                                 
-                                if not processed_any:
-                                    # 如果這一輪沒有處理任何幀，等待一小段時間
+                                if not frames_processed_this_cycle:
                                     await asyncio.sleep(0.05)
                                     timeout_counter += 1
                                 else:
-                                    timeout_counter = 0  # 重置超時計數器
+                                    timeout_counter = 0
                             
-                            # 檢查最終完成狀態
-                            if self.processed_video_frames >= self.total_video_frames and len(self.pending_results) == 0:
+                            if self.processed_video_frame_count >= self.total_video_frame_count and len(self.pending_result_dict) == 0:
                                 self.all_frames_processed = True
-                                logger.info(f"✅ 影片處理完畢！總共處理了 {self.processed_video_frames} 幀")
-                                logger.info("所有影像都已處理完成，準備關閉系統")
+                                logger.info(f"✅ VIDEO PROCESSING COMPLETED: {self.processed_video_frame_count} Frames Processed")
+                                logger.info("All frames processed successfully - System shutdown initiated")
                             else:
-                                logger.warning(f"⚠️ 影片處理可能不完整：處理了 {self.processed_video_frames}/{self.total_video_frames} 幀，剩餘等待結果 {len(self.pending_results)} 個")
+                                logger.warning(f"⚠️ VIDEO PROCESSING INCOMPLETE: {self.processed_video_frame_count}/{self.total_video_frame_count} Frames, {len(self.pending_result_dict)} Results Pending")
                         
                         break
                         
-                    frame_id, frame, model_result = result
+                    current_frame_id, current_frame, current_model_result = result
                     
-                    # 將結果存入待處理字典
-                    self.pending_results[frame_id] = (frame, model_result)
+                    self.pending_result_dict[current_frame_id] = (current_frame, current_model_result)
                     
-                    # 如果是影片模式，記錄處理進度
                     if self.is_video_file:
-                        self.processed_video_frames += 1
+                        self.processed_video_frame_count += 1
                     
-                    # 按順序處理可以顯示的幀，增加超時保護
-                    processed_any = False
-                    while self.next_display_frame_id in self.pending_results:
-                        display_frame, display_result = self.pending_results.pop(self.next_display_frame_id)
-                        processed_any = True
-                        self.last_display_time = time.time()  # 更新顯示時間
+                    frames_processed_this_cycle = False
+                    while self.next_display_frame_id in self.pending_result_dict:
+                        display_frame, display_result = self.pending_result_dict.pop(self.next_display_frame_id)
+                        frames_processed_this_cycle = True
+                        self.last_display_timestamp = time.time()
                         
-                        # 更新效能監控 - 記錄實際顯示
                         self.performance_monitor.add_display_sample()
                         
-                        # 使用解釋器的視覺化方法
-                        if hasattr(interpreter, 'visualize'):
-                            annotated_frame = interpreter.visualize(display_frame, display_result)
+                        if hasattr(model_executor, 'visualize'):
+                            annotated_display_frame = model_executor.visualize(display_frame, display_result)
                         else:
-                            # 回退到基本顯示
-                            annotated_frame = display_frame
+                            annotated_display_frame = display_frame
                         
-                        # 獲取統計資訊
-                        stats = self.performance_monitor.get_system_stats()
+                        performance_stats = self.performance_monitor.get_system_stats()
 
                         # 顯示統計資訊
                         info_text = [
                             f"Frame: {self.next_display_frame_id}",
-                            f"FPS: {stats['fps']:.1f}",
-                            f"Inference: {stats['avg_inference_ms']:.1f}ms",
-                            f"CPU: {stats['cpu_percent']:.1f}%",
-                            f"Memory: {stats['memory_percent']:.1f}%",
-                            f"Workers: {self.active_workers}/{self.max_workers}"
+                            f"FPS: {performance_stats['fps']:.1f}",
+                            f"Inference: {performance_stats['avg_inference_ms']:.1f}ms",
+                            f"CPU: {performance_stats['cpu_percent']:.1f}%",
+                            f"Memory: {performance_stats['memory_percent']:.1f}%",
+                            f"Workers: {self.active_worker_count}/{self.max_worker_count}"
                         ]
                         
                         for i, text in enumerate(info_text):
-                            cv2.putText(annotated_frame, text, (10, 30 + i * 25),
-                                      cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                            cv2.putText(annotated_display_frame, text, (10, 30 + i * 25),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2
+                            )
                         
                         # 顯示影像
                         if self.display_output:
-                            cv2.imshow("NNStreamer Output", annotated_frame)
+                            cv2.imshow("NNStreamer Output", annotated_display_frame)
                             
-                            # 檢查按鍵退出
-                            key = cv2.waitKey(1) & 0xFF
+                            # 影片模式：使用固定等待時間維持幀率
+                            if self.is_video_file:
+                                # 計算適合的等待時間（毫秒）
+                                wait_ms = max(1, int(self.frame_interval * 1000))
+                                key = cv2.waitKey(wait_ms) & 0xFF
+                            else:
+                                # 即時模式：使用最小等待時間
+                                key = cv2.waitKey(1) & 0xFF
+                            
                             if key == ord('q') or key == 27:  # 'q' 或 ESC
                                 logger.info("使用者請求退出")
                                 self.should_stop = True
@@ -622,8 +649,8 @@ class NNStreamer:
                             stats = self.performance_monitor.get_system_stats()
                             
                             # 計算統計信息
-                            drop_rate = (self.dropped_frames / max(1, self.total_frames)) * 100
-                            result_drop_rate = (self.dropped_results / max(1, self.next_display_frame_id)) * 100
+                            drop_rate = (self.dropped_frame_count / max(1, self.total_frame_count)) * 100
+                            result_drop_rate = (self.dropped_result_count / max(1, self.next_display_frame_id)) * 100
                             
                             logger.info(f"統計 - FPS: {stats['fps']:.1f}, "
                                       f"整體FPS: {stats['overall_fps']:.1f}, "
@@ -632,8 +659,8 @@ class NNStreamer:
                                       f"記憶體: {stats['memory_percent']:.1f}%, "
                                       f"丟幀率: {drop_rate:.1f}%, "
                                       f"結果丟棄率: {result_drop_rate:.1f}%, "
-                                      f"隊列使用率: {(self.frame_queue.qsize() / self.queue_size * 100):.1f}%, "
-                                      f"等待幀數: {len(self.pending_results)}")
+                                      f"隊列使用率: {(self.frame_queue.qsize() / self.max_queue_length * 100):.1f}%, "
+                                      f"等待幀數: {len(self.pending_result_dict)}")
 
                         # 移動到下一幀
                         self.next_display_frame_id += 1
@@ -644,37 +671,37 @@ class NNStreamer:
                     
                     # 影片模式：檢查是否所有幀都已處理完畢
                     if self.is_video_file and self.video_end_reached:
-                        if (self.processed_video_frames >= self.total_video_frames and 
-                            len(self.pending_results) == 0):
+                        if (self.processed_video_frame_count >= self.total_video_frame_count and 
+                            len(self.pending_result_dict) == 0):
                             self.all_frames_processed = True
-                            logger.info(f"影片處理完畢！總共處理了 {self.processed_video_frames} 幀")
+                            logger.info(f"影片處理完畢！總共處理了 {self.processed_video_frame_count} 幀")
                             logger.info("所有影像都已處理完成，準備關閉系統")
                             break
                     
                     # 超時保護：只在即時模式下啟用
                     if not self.is_video_file:
                         current_time = time.time()
-                        if not processed_any and (current_time - self.last_display_time) > self.frame_timeout_threshold:
-                            if len(self.pending_results) > 0:
+                        if not frames_processed_this_cycle and (current_time - self.last_display_timestamp) > self.frame_timeout_threshold:
+                            if len(self.pending_result_dict) > 0:
                                 # 找到最小的可用幀ID
-                                min_available_frame = min(self.pending_results.keys())
+                                min_available_frame = min(self.pending_result_dict.keys())
                                 if min_available_frame > self.next_display_frame_id:
                                     skipped_frames = min_available_frame - self.next_display_frame_id
                                     logger.warning(f"超時保護: 跳過 {skipped_frames} 幀 (從 {self.next_display_frame_id} 到 {min_available_frame - 1})")
                                     self.next_display_frame_id = min_available_frame
-                                    self.last_display_time = current_time
+                                    self.last_display_timestamp = current_time
                     
                     # 清理過舊的等待幀，只在即時模式下啟用（影片模式需要所有幀）
-                    if not self.is_video_file and len(self.pending_results) > self.max_pending_frames:
+                    if not self.is_video_file and len(self.pending_result_dict) > self.max_pending_frame_count:
                         # 保留最近的幀，移除距離當前顯示幀太遠的幀
-                        sorted_frames = sorted(self.pending_results.keys())
+                        sorted_frames = sorted(self.pending_result_dict.keys())
                         frames_to_remove = []
                         
-                        for frame_id in sorted_frames[:-self.max_pending_frames]:
+                        for frame_id in sorted_frames[:-self.max_pending_frame_count]:
                             frames_to_remove.append(frame_id)
                         
                         for frame_id in frames_to_remove:
-                            self.pending_results.pop(frame_id, None)
+                            self.pending_result_dict.pop(frame_id, None)
                         
                         if frames_to_remove:
                             logger.warning(f"清理 {len(frames_to_remove)} 個過舊幀: {frames_to_remove[0]} 到 {frames_to_remove[-1]}")
@@ -683,57 +710,56 @@ class NNStreamer:
                     # 影片模式：如果沒有更多結果且影片已讀取完畢，檢查是否完成
                     if self.is_video_file and self.video_end_reached:
                         # 給更多時間等待最後的推論結果
-                        if (self.processed_video_frames >= self.total_video_frames and 
-                            len(self.pending_results) == 0):
+                        if (self.processed_video_frame_count >= self.total_video_frame_count and 
+                            len(self.pending_result_dict) == 0):
                             self.all_frames_processed = True
-                            logger.info(f"影片處理完畢！總共處理了 {self.processed_video_frames} 幀")
+                            logger.info(f"影片處理完畢！總共處理了 {self.processed_video_frame_count} 幀")
                             logger.info("所有影像都已處理完成，準備關閉系統")
                             break
                         else:
                             # 如果還有未處理的幀，繼續等待
-                            missing_frames = self.total_video_frames - self.processed_video_frames
-                            logger.info(f"影片結束但仍有 {missing_frames} 幀未處理，{len(self.pending_results)} 幀等待顯示，繼續等待...")
+                            missing_frames = self.total_video_frame_count - self.processed_video_frame_count
+                            logger.info(f"影片結束但仍有 {missing_frames} 幀未處理，{len(self.pending_result_dict)} 幀等待顯示，繼續等待...")
                             continue
                     
                     # 在超時時也檢查是否需要跳過等待的幀（主要針對即時模式）
                     if not self.is_video_file:
                         current_time = time.time()
-                        if (current_time - self.last_display_time) > self.frame_timeout_threshold:
-                            if len(self.pending_results) > 0:
-                                min_available_frame = min(self.pending_results.keys())
+                        if (current_time - self.last_display_timestamp) > self.frame_timeout_threshold:
+                            if len(self.pending_result_dict) > 0:
+                                min_available_frame = min(self.pending_result_dict.keys())
                                 if min_available_frame > self.next_display_frame_id:
                                     skipped_frames = min_available_frame - self.next_display_frame_id
                                     logger.warning(f"超時跳幀: 跳過 {skipped_frames} 幀 (從 {self.next_display_frame_id} 到 {min_available_frame - 1})")
                                     self.next_display_frame_id = min_available_frame
-                                    self.last_display_time = current_time
+                                    self.last_display_timestamp = current_time
                     continue
                     
         except Exception as e:
-            logger.error(f"結果處理器錯誤: {e}")
+            logger.error(f"CRITICAL ERROR in Result Consumer: {e}")
         finally:
             if self.display_output:
                 cv2.destroyAllWindows()
             
-            # 影片模式：確保處理完成狀態
             if self.is_video_file and self.all_frames_processed:
-                logger.info("✅ 影片處理完全完成，所有幀都已處理和顯示")
+                logger.info("✅ VIDEO PROCESSING FULLY COMPLETED - All Frames Processed and Displayed")
             
-            logger.info("結果處理器停止")
+            logger.info("Result Consumer Stopped Successfully")
 
     async def run(self):
         """運行 NNStreamer 主循環"""
         if self.is_running:
-            logger.warning("NNStreamer 已在運行中")
+            logger.warning("WARNING: NNStreamer Already Running")
             return
             
         self.is_running = True
         self.should_stop = False
         
         # 初始化異步隊列
-        self.frame_queue = asyncio.Queue(maxsize=self.queue_size)
-        self.result_queue = asyncio.Queue(maxsize=self.queue_size)
+        self.frame_queue = asyncio.Queue(maxsize=self.max_queue_length)
+        self.result_queue = asyncio.Queue(maxsize=self.max_queue_length)
         
-        logger.info("=== 啟動 NNStreamer 串流處理 ===")
+        logger.info("============ Starting NNStreamer Processing ============")
         
         try:
             # 創建所有協程任務
@@ -746,41 +772,37 @@ class NNStreamer:
             # 並行運行所有任務
             await asyncio.gather(*tasks, return_exceptions=True)
             
-            # 影片模式：額外檢查確保完全處理完畢
             if self.is_video_file:
-                logger.info("=== 影片處理狀態檢查 ===")
-                logger.info(f"影片讀取完成: {self.video_end_reached}")
-                logger.info(f"總發送幀數: {self.total_video_frames}")
-                logger.info(f"已處理幀數: {self.processed_video_frames}")
-                logger.info(f"等待處理結果: {len(self.pending_results)}")
-                logger.info(f"所有幀處理完成: {self.all_frames_processed}")
+                logger.info("=== Video Processing Status Check ===")
+                logger.info(f"Video Reading Complete: {self.video_end_reached}")
+                logger.info(f"Total Frames Sent: {self.total_video_frame_count}")
+                logger.info(f"Frames Processed: {self.processed_video_frame_count}")
+                logger.info(f"Pending Results: {len(self.pending_result_dict) if hasattr(self, 'pending_result_dict') else 0}")
+                logger.info(f"All Frames Processed: {self.all_frames_processed}")
                 
                 if self.all_frames_processed:
-                    logger.info("🎬 影片處理成功完成！所有幀都已處理和顯示")
+                    logger.info("🎬 VIDEO PROCESSING SUCCESSFULLY COMPLETED - All Frames Processed and Displayed")
                 else:
-                    logger.warning("⚠️  影片可能未完全處理完畢")
+                    logger.warning("⚠️ Video processing may be incomplete")
             
         except KeyboardInterrupt:
-            logger.info("收到中斷信號")
+            logger.info("Keyboard Interrupt Received")
         except Exception as e:
-            logger.error(f"運行時錯誤: {e}")
+            logger.error(f"Runtime Error: {e}")
         finally:
             await self.cleanup()
             
     async def cleanup(self):
         """清理資源"""
-        logger.info("清理系統資源...")
+        logger.info("Cleaning Up System Resources...")
         self.should_stop = True
         self.is_running = False
         
-        # 關閉執行器
-        if hasattr(self, 'executor'):
-            self.executor.shutdown(wait=True)
+        if hasattr(self, 'thread_executor'):
+            self.thread_executor.shutdown(wait=True)
             
-        # 清理解釋器
-        self.interpreters.clear()
+        self.executor_dict.clear()
         
-        # 強制垃圾回收
         gc.collect()
         
-        logger.info("資源清理完成")
+        logger.info("Resource Cleanup Completed")
