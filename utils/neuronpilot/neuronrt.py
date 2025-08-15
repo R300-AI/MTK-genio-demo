@@ -18,7 +18,6 @@ class Interpreter():
     def allocate_tensors(self):
         commands = ["sudo", "neuronrt", "-a", self.dla_path, "-d"]
         results = subprocess.run(commands, capture_output=True, text=True)
-        
 
     def get_input_details(self):
         return self.input_details
