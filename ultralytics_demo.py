@@ -234,36 +234,31 @@ class InferencePipeline:
         next_display_frame = 1
         
         while not self.should_stop:
-            try:
-                result_data = await asyncio.wait_for(self.result_queue.get(), timeout=3.0)
+            result_data = await asyncio.wait_for(self.result_queue.get(), timeout=3.0)
+            if result_data is None:
+                break
+            
+            result, frame_id, original_frame, processing_time = result_data
+            processed_frames[frame_id] = (result, original_frame)
+            
+            # 記錄結果佇列狀態
+            self.perf_logger.info(f"RESULT_RECEIVED,{frame_id},{len(processed_frames)}")
+            
+            # 按順序顯示結果
+            while next_display_frame in processed_frames:
+                display_result, display_frame = processed_frames.pop(next_display_frame)
                 
-                if result_data is None:
-                    break
+                display_img = cv2.resize(display_result.plot(), (720, 480))
+                cv2.imshow("Adaptive YOLO Inference", display_img)
                 
-                result, frame_id, original_frame, processing_time = result_data
-                processed_frames[frame_id] = (result, original_frame)
-                
-                # 記錄結果佇列狀態
-                self.perf_logger.info(f"RESULT_RECEIVED,{frame_id},{len(processed_frames)}")
-                
-                # 按順序顯示結果
-                while next_display_frame in processed_frames:
-                    display_result, display_frame = processed_frames.pop(next_display_frame)
-                    
-                    display_img = cv2.resize(display_result.plot(), (720, 480))
-                    cv2.imshow("Adaptive YOLO Inference", display_img)
-                    
-                    if cv2.waitKey(1) & 0xFF == 27:
-                        self.should_stop = True
-                        return
-                    
-                    next_display_frame += 1
-                
-                self.result_queue.task_done()
-                
-            except asyncio.TimeoutError:
-                if self.frame_queue.empty() and self.result_queue.empty() and self.should_stop:
-                    break
+                if cv2.waitKey(1) & 0xFF == 27:
+                    self.should_stop = True
+                    cv2.destroyAllWindows()
+                    return
+                next_display_frame += 1
+            self.result_queue.task_done()
+            
+        cv2.destroyAllWindows()
 
     async def run(self, video_path):
         """主要的推理流程"""

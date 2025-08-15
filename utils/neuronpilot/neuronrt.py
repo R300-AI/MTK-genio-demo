@@ -20,14 +20,21 @@ class Interpreter():
     def allocate_tensors(self):
         self.bin_dir = f'./bin'
         try:
-            command = f"echo '{self.admin_password}' | sudo -S neuronrt -a {self.dla_path} -d"
-            result = subprocess.run(
-                command, 
-                shell=True,
-                capture_output=True, 
-                text=True,
-                check=True
+            # 使用 Popen 來更好地控制 stdin
+            process = subprocess.Popen(
+                ['sudo', '-S', 'neuronrt', '-a', self.dla_path, '-d'],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
             )
+            
+            # 將密碼寫入 stdin
+            stdout, stderr = process.communicate(input=f"{self.admin_password}\n")
+            
+            if process.returncode != 0:
+                raise subprocess.CalledProcessError(process.returncode, 'neuronrt', stderr)
+                
             self._dla_loaded = True
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to load DLA model: {e.stderr}")
