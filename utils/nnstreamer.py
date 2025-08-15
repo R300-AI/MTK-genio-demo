@@ -465,6 +465,7 @@ class NNStreamer:
                         logger.error(f"任務執行錯誤: {e}")
                 
                 # 如果有容量，啟動新的推論任務
+                print('啟動新任務',len(active_inference_tasks) < self.max_worker_count, len(active_inference_tasks), self.max_worker_count)
                 if len(active_inference_tasks) < self.max_worker_count:
                     try:
                         frame_input_data = await asyncio.wait_for(
