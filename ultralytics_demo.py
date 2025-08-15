@@ -66,7 +66,7 @@ class YOLOInferencePipeline:
         logger.info(f"工作者範圍: {self.min_workers}-{self.max_workers}")
         self._preload_models()
         
-    def load_model(index: int) -> tuple:
+    def load_model(self, index: int) -> tuple:
         """載入單一模型實例"""
         thread_id = f"preload_{index}"
         logger.debug(f"載入模型實例 {index}")
@@ -90,6 +90,7 @@ class YOLOInferencePipeline:
         logger.info(f"成功預載入 {len(self.models)} 個模型實例")
         
     def get_model_for_thread(self) -> YOLO:
+        """獲取對應執行緒的 YOLO 模型"""
         thread_id = threading.current_thread().ident
         
         with self.models_lock:
@@ -107,16 +108,25 @@ class YOLOInferencePipeline:
         
         return self.models[thread_id]
     
-    def predict_frame(self, frame_data: tuple) -> tuple:
+    def _predict(self, frame_data: tuple) -> tuple:
+        """執行 YOLO 推理工作"""
         frame, frame_id, worker_id = frame_data
         model = self.get_model_for_thread()
-        
         start_time = time.time()
-        result = model.predict(frame, verbose=False)[0]
-        processing_time = time.time() - start_time
-        
-        logger.debug(f"幀 {frame_id} 處理完成: {processing_time:.4f}s (工作者 {worker_id})")
-        return result, frame_id, processing_time
+        try:
+            # 執行推理
+            results = model.predict(frame, verbose=False)
+            if results and len(results) > 0:
+                result = results[0]
+                processing_time = time.time() - start_time
+                return result, frame_id, processing_time
+            else:
+                logger.warning(f"幀 {frame_id} 推理返回空結果")
+                return None, frame_id, time.time() - start_time
+                
+        except Exception as e:
+            logger.error(f"幀 {frame_id} 推理錯誤: {e}")
+            return None, frame_id, time.time() - start_time
     
     async def producer(self, cap: cv2.VideoCapture) -> None:
         frame_id = 0
@@ -165,10 +175,12 @@ class YOLOInferencePipeline:
                 continue
     
     async def worker(self, worker_id: int) -> None:
+        """
+        工作者 - 負責從隊列獲取原始影像幀，並返回 YOLO 模型的推理結果
+        """
         logger.info(f"工作者 {worker_id} 啟動")
         consecutive_errors = 0
         max_errors = 10
-        
         try:
             while not self.should_stop:
                 try:
@@ -188,7 +200,7 @@ class YOLOInferencePipeline:
                     loop = asyncio.get_event_loop()
                     result = await loop.run_in_executor(
                         self.executor, 
-                        self.predict_frame, 
+                        self._predict, 
                         (frame, frame_id, worker_id)
                     )
                     
@@ -198,8 +210,7 @@ class YOLOInferencePipeline:
                 except asyncio.TimeoutError:
                     if self.should_stop:
                         break
-                    continue
-                        
+                    continue   
                 except Exception as e:
                     consecutive_errors += 1
                     logger.error(f"工作者 {worker_id} 錯誤 ({consecutive_errors}/{max_errors}): {e}")
@@ -220,6 +231,7 @@ class YOLOInferencePipeline:
                 logger.info(f"工作者 {worker_id} 已移除 (剩餘: {self.current_workers})")
     
     async def workers_manager(self) -> None:
+        """工作管理者 - 負責動態調整工作者數量"""
         queue_stats = deque(maxlen=5)
         check_interval = 0.1
         min_stats_count = 3
@@ -229,10 +241,8 @@ class YOLOInferencePipeline:
         try:
             while not self.should_stop:
                 await asyncio.sleep(check_interval)
-                
                 if self.should_stop:
                     break
-                
                 # 收集隊列統計
                 current_queue_size = self.frame_queue.qsize()
                 queue_stats.append(current_queue_size)
@@ -265,6 +275,9 @@ class YOLOInferencePipeline:
         self.current_workers += 1
     
     async def consumer(self) -> None:
+        """
+        結果消費者 - 負責從結果隊列獲取推理結果，使用 result.plot() 繪製並顯示結果
+        """
         frame_count = 0
         total_processing_time = 0
         display_interval = 30
@@ -285,27 +298,35 @@ class YOLOInferencePipeline:
                     
                     result, frame_id, processing_time = result_data
                     
-                    # 使用 YOLO 內建的 plot() 方法繪製並顯示
-                    display_frame = cv2.resize(result.plot(), self.DISPLAY_SIZE)
-                    cv2.imshow(self.WINDOW_NAME, display_frame)
+                    # 檢查推理結果是否有效
+                    if result is None:
+                        logger.warning(f"跳過幀 {frame_id} (推理結果為 None)")
+                        continue
+                    
+                    # Consumer 負責繪製工作：使用 YOLO 內建的 plot() 方法
+                    try:
+                        plotted_img = result.plot()
+                        if plotted_img is not None and plotted_img.size > 0:
+                            # 調整大小並顯示
+                            display_frame = cv2.resize(plotted_img, self.DISPLAY_SIZE)
+                            cv2.imshow(self.WINDOW_NAME, display_frame)
+                            cv2.waitKey(1)
+                        else:
+                            logger.warning(f"幀 {frame_id} 的 plot() 返回無效影像")
+                            
+                    except Exception as e:
+                        logger.error(f"幀 {frame_id} 繪製錯誤: {e}")
+                        continue
                     
                     # 更新統計
                     frame_count += 1
                     total_processing_time += processing_time
-                    
                     if frame_count % display_interval == 0:
                         avg_time = total_processing_time / display_interval
                         fps = display_interval / total_processing_time if total_processing_time > 0 else 0
                         logger.info(f"處理統計: {frame_count} 幀, 平均: {avg_time:.3f}s, FPS: {fps:.1f}")
                         total_processing_time = 0
-                    
-                    # 檢查使用者輸入
-                    key = cv2.waitKey(1) & 0xFF
-                    if key in [27, ord('q')]:  # ESC 或 Q
-                        logger.info("使用者要求退出")
-                        self.should_stop = True
-                        break
-                        
+
                 except asyncio.TimeoutError:
                     if self.should_stop:
                         break
@@ -322,6 +343,7 @@ class YOLOInferencePipeline:
             cv2.waitKey(1)
 
     async def run(self, video_path: str) -> None:
+        """主執行序 - 啟動生產者、消費者和工作者管理器"""
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             logger.error(f"無法開啟視頻: {video_path}")
@@ -475,8 +497,15 @@ async def main() -> None:
     )
     args = parser.parse_args()
     
-    # 設定日誌級別
-    logging.getLogger().setLevel(getattr(logging, "INFO"))
+    # 設定日誌級別 - 暫時設為 DEBUG 來排查問題
+    logging.getLogger().setLevel(logging.DEBUG)
+    
+    # 同時輸出到控制台以便即時查看
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_formatter = logging.Formatter('[%(levelname)s] %(message)s')
+    console_handler.setFormatter(console_formatter)
+    logging.getLogger().addHandler(console_handler)
 
     # 建立推理管道
     pipeline = YOLOInferencePipeline(
@@ -498,7 +527,6 @@ async def main() -> None:
         logger.info("程式執行完成")
 
 if __name__ == "__main__":
-    """程式入口點 - 執行高性能 YOLO 推理演示"""
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
