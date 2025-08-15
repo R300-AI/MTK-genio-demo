@@ -154,19 +154,8 @@ class NNStreamer:
     實現高效的模型串流推論架構
     
     參數說明:
-    - target_fps: 目標幀率 (預設: None)
-      * None: 自動設定FPS (影片檔案自動檢測，攝像頭使用30.0)
-      * 指定數值: 強制使用該FPS，如 24.0, 30.0, 60.0 等
-    
-    使用範例:
-    # 自動設定FPS (預設)
-    neural_streamer = NNStreamer(executor, model_file_path, video_file_path)
-    
-    # 強制使用24 FPS播放
-    neural_streamer = NNStreamer(executor, model_file_path, video_file_path, target_fps=24.0)
-    
-    # 強制使用60 FPS播放
-    neural_streamer = NNStreamer(executor, model_file_path, video_file_path, target_fps=60.0)
+    - 初始FPS: 固定為120 FPS
+    - Producer FPS: 自動調整為Consumer FPS的兩倍
     """
     
     def __init__(self, 
@@ -175,8 +164,7 @@ class NNStreamer:
                  input_source: str = None,
                  max_workers: int = 4,
                  max_queue_length: int = 32,
-                 display_output: bool = True,
-                 target_fps: float = None):
+                 display_output: bool = True):
         
         self.executor = executor
         self.model_path = model_path
@@ -184,7 +172,10 @@ class NNStreamer:
         self.max_worker_count = max_workers
         self.max_queue_length = max_queue_length
         self.display_output = display_output
-        self.target_fps = target_fps
+        self.fps = 120.0  # 固定初始 Producer FPS
+        
+        # 動態 FPS 控制 - 簡化設計
+        self.current_producer_fps = 120.0  # 從120 FPS開始
         
         self.frame_timeout = 0.1
         self.result_timeout = 0.1
@@ -203,7 +194,7 @@ class NNStreamer:
         
         self.sliding_window_controller = SlidingWindowController(window_size=8)
         
-        initial_fps = self.target_fps or 30.0
+        initial_fps = self.fps
         self.display_controller = AdaptiveDisplayController(target_fps=initial_fps)
         
         self.executor_dict = {}
@@ -221,8 +212,9 @@ class NNStreamer:
         self.total_video_frame_count = 0
         self.processed_video_frame_count = 0
         
-        self.video_fps = 30.0
-        self.frame_interval = 1.0 / self.video_fps
+        # 初始化 FPS 控制
+        self.video_fps = self.current_producer_fps
+        self.frame_interval = 1.0 / self.current_producer_fps
         self.last_frame_timestamp = 0
         
         self.active_worker_count = 0
@@ -255,16 +247,13 @@ class NNStreamer:
         logger.info(f"Input Type: {'Video File' if self.is_video_file else 'Camera/Live Stream'}")
         logger.info(f"Max Workers: {self.max_worker_count}")
         logger.info(f"Queue Size: {self.max_queue_length}")
-        
-        if self.target_fps is not None:
-            logger.info(f"Target FPS: {self.target_fps:.2f}")
-        else:
-            logger.info("FPS Mode: Auto Detection (Video Files) / 30.0 FPS (Camera)")
+        logger.info(f"Initial Producer FPS: 120.0 (固定)")
+        logger.info(f"FPS策略: Producer FPS = Consumer FPS × 2 (僅在顯示時調整)")
         
         if self.is_video_file:
-            logger.info("Processing Mode: Sequential Frame Processing (Video)")
+            logger.info("Processing Mode: Dynamic FPS Adjustment (Video)")
         else:
-            logger.info("Processing Mode: Adaptive Frame Skipping (Live Stream)")
+            logger.info("Processing Mode: Adaptive Frame Skipping with Dynamic FPS (Live Stream)")
         
         self._preload_executors()
         
@@ -308,37 +297,14 @@ class NNStreamer:
         
         if self.is_video_file:
             detected_fps = video_capture.get(cv2.CAP_PROP_FPS)
-            
-            if self.target_fps is not None:
-                self.video_fps = self.target_fps
-                fps_source = "Specified"
-            elif detected_fps > 0:
-                self.video_fps = detected_fps
-                fps_source = "Auto"
-            else:
-                self.video_fps = 30.0
-                fps_source = "Default"
-            
-            self.frame_interval = 1.0 / self.video_fps
-            
-            self.display_controller = AdaptiveDisplayController(target_fps=self.video_fps)
-            
-            logger.info(f"Video FPS: {self.video_fps:.2f} ({fps_source}), Frame Interval: {self.frame_interval:.4f}s")
-            if detected_fps > 0 and detected_fps != self.video_fps:
-                logger.info(f"Original Detected FPS: {detected_fps:.2f}")
+            logger.info(f"影片原始 FPS: {detected_fps:.2f}")
+            logger.info(f"初始 Producer FPS: {self.current_producer_fps:.2f} (將動態調整)")
         else:
-            if self.target_fps is not None:
-                self.video_fps = self.target_fps
-                fps_source = "User Specified"
-            else:
-                self.video_fps = 30.0
-                fps_source = "Auto Configuration"
-            
-            self.frame_interval = 1.0 / self.video_fps
-            logger.info(f"Live Stream FPS: {self.video_fps:.2f} ({fps_source})")
+            logger.info(f"即時串流初始 FPS: {self.current_producer_fps:.2f} (將動態調整)")
             
         frame_counter = 0
         self.last_frame_timestamp = time.time()
+        fps_print_counter = 0  # 用於控制 FPS 打印頻率
         
         try:
             while not self.should_stop:
@@ -351,6 +317,16 @@ class NNStreamer:
                         continue
                 
                 self.total_frame_count += 1
+                fps_print_counter += 1
+                
+                # 每 30 幀打印一次當前 FPS 狀態（僅顯示，不調整）
+                if fps_print_counter % 30 == 0:
+                    current_consumer_fps = self.performance_monitor.get_fps()
+                    queue_size = self.frame_queue.qsize() if self.frame_queue else 0
+                    print(f"🎬 Producer FPS 狀態: 當前={self.current_producer_fps:.2f}, "
+                          f"Consumer FPS={current_consumer_fps:.2f}, "
+                          f"隊列={queue_size}/{self.max_queue_length}, "
+                          f"幀間隔={self.frame_interval:.3f}s")
                 
                 if self.frame_interval > 0:
                     current_timestamp = time.time()
@@ -398,6 +374,7 @@ class NNStreamer:
             if self.is_video_file:
                 self.video_end_reached = True
                 logger.info(f"Video Reading Completed: {self.total_video_frame_count} Frames Sent to Processing Queue")
+                logger.info(f"最終 Producer FPS: {self.current_producer_fps:.2f}")
             
             await self.frame_queue.put(None)
             logger.info("Frame Capture System Stopped")
@@ -420,8 +397,8 @@ class NNStreamer:
             
             start_timestamp = time.time()
             inference_result = model_executor.inference(input_frame)
-            
             inference_duration = time.time() - start_timestamp
+
             self.performance_monitor.add_inference_time(inference_duration)
             
             return frame_id, input_frame, inference_result
@@ -465,14 +442,14 @@ class NNStreamer:
                         logger.error(f"任務執行錯誤: {e}")
                 
                 # 如果有容量，啟動新的推論任務
-                print('啟動新任務',len(active_inference_tasks) < self.max_worker_count, len(active_inference_tasks), self.max_worker_count)
-                if len(active_inference_tasks) < self.max_worker_count:
+                amount_of_tasks = len(active_inference_tasks)
+                print('啟動新任務', amount_of_tasks < self.max_worker_count, amount_of_tasks, self.max_worker_count)
+                if amount_of_tasks < self.max_worker_count:
                     try:
                         frame_input_data = await asyncio.wait_for(
                             self.frame_queue.get(), 
-                            timeout=0.01  # 短超時，避免阻塞
+                            timeout=0.001  # 短超時，避免阻塞
                         )
-                        
                         if frame_input_data is None:
                             logger.info("Shutdown Signal Received - Stopping Inference Manager")
                             break
@@ -485,15 +462,12 @@ class NNStreamer:
                             frame_input_data
                         )
                         active_inference_tasks.add(inference_task)
-                        
                     except asyncio.TimeoutError:
-                        # 沒有新幀可處理，繼續下一個循環
+                        logger.debug("No Frame Data Available - Waiting for Next Frame")
                         pass
                 else:
-                    # 如果已達到最大並行數，稍微等待
                     await asyncio.sleep(0.001)
                 
-                # 給其他協程執行機會
                 await asyncio.sleep(0.001)
                                     
         except Exception as error:
@@ -556,31 +530,38 @@ class NNStreamer:
                                     self.last_display_timestamp = time.time()
                                     
                                     self.performance_monitor.add_display_sample()
+                                
+                                if hasattr(model_executor, 'visualize'):
+                                    annotated_display_frame = model_executor.visualize(display_frame, display_result)
+                                else:
+                                    annotated_display_frame = display_frame
+                                
+                                performance_stats = self.performance_monitor.get_system_stats()
+                                performance_info_text = [
+                                    f"Frame: {self.next_display_frame_id}",
+                                    f"FPS: {performance_stats['fps']:.1f}",
+                                    f"Inference: {performance_stats['avg_inference_ms']:.1f}ms",
+                                    f"CPU: {performance_stats['cpu_percent']:.1f}%",
+                                    f"Memory: {performance_stats['memory_percent']:.1f}%",
+                                    f"Workers: {self.active_worker_count}/{self.max_worker_count}"
+                                ]
+                                
+                                for text_index, display_text in enumerate(performance_info_text):
+                                    cv2.putText(annotated_display_frame, display_text, (10, 30 + text_index * 25),
+                                              cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                                
+                                if self.display_output:
+                                    # FPS 調整邏輯：Producer FPS = Consumer FPS × 2
+                                    current_consumer_fps = performance_stats['fps']
+                                    target_producer_fps = current_consumer_fps * 2.0
+                                    target_producer_fps = max(1, min(120, target_producer_fps))  # 限制在 1-120 FPS 範圍內
+                                    #logger.info(f"FPS調整: Consumer={current_consumer_fps:.1f} → Producer={target_producer_fps:.1f}")
+                                    self.current_producer_fps = target_producer_fps
                                     
-                                    if hasattr(model_executor, 'visualize'):
-                                        annotated_display_frame = model_executor.visualize(display_frame, display_result)
-                                    else:
-                                        annotated_display_frame = display_frame
-                                    
-                                    performance_stats = self.performance_monitor.get_system_stats()
-                                    performance_info_text = [
-                                        f"Frame: {self.next_display_frame_id}",
-                                        f"FPS: {performance_stats['fps']:.1f}",
-                                        f"Inference: {performance_stats['avg_inference_ms']:.1f}ms",
-                                        f"CPU: {performance_stats['cpu_percent']:.1f}%",
-                                        f"Memory: {performance_stats['memory_percent']:.1f}%",
-                                        f"Workers: {self.active_worker_count}/{self.max_worker_count}"
-                                    ]
-                                    
-                                    for text_index, display_text in enumerate(performance_info_text):
-                                        cv2.putText(annotated_display_frame, display_text, (10, 30 + text_index * 25),
-                                                  cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                                    
-                                    if self.display_output:
-                                        cv2.imshow("NNStreamer Output", annotated_display_frame)
-                                        cv2.waitKey(1)
-                                    
-                                    self.next_display_frame_id += 1
+                                    cv2.imshow("NNStreamer Output", annotated_display_frame)
+                                    cv2.waitKey(1)
+                                
+                                self.next_display_frame_id += 1
                                 
                                 if not frames_processed_this_cycle:
                                     await asyncio.sleep(0.05)
@@ -636,6 +617,13 @@ class NNStreamer:
                         
                         # 顯示影像
                         if self.display_output:
+                            # FPS 調整邏輯：Producer FPS = Consumer FPS × 2
+                            current_consumer_fps = performance_stats['fps']
+                            target_producer_fps = current_consumer_fps * 2.0
+                            target_producer_fps = max(1, min(120, target_producer_fps))  # 限制在 1-120 FPS 範圍內
+                            logger.info(f"FPS調整: Consumer={current_consumer_fps:.1f} → Producer={target_producer_fps:.1f}")
+                            self.current_producer_fps = target_producer_fps
+                            
                             cv2.imshow("NNStreamer Output", annotated_display_frame)
                             
                             # 影片模式：使用固定等待時間維持幀率

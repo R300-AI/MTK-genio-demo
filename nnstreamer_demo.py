@@ -64,11 +64,9 @@ class CustomInferenceExecutor:
 def main():
     parser = argparse.ArgumentParser(description="NNStreamer - Ultralytics YOLO 串流推論系統")
     parser.add_argument("--model", type=str, default="./models/yolov8n_float32.tflite", help="YOLO模型路徑")
-    parser.add_argument("--input", type=str, default="./data/video.mp4", help="輸入來源 (0=攝像頭, 檔案路徑=影片)")
-    parser.add_argument("--workers", type=int, default=16, help="最大工作者數量")
-    parser.add_argument("--queue_size", type=int, default=32, help="隊列大小")
-    parser.add_argument("--target_fps", type=float, default=5.0, help="目標幀率")
-    parser.add_argument("--no_display", action="store_true", help="禁用視覺輸出")
+    parser.add_argument("--input", type=str, default="0", help="輸入來源 (0=攝像頭, 檔案路徑=影片)") #./data/video.mp4
+    parser.add_argument("--workers", type=int, default=8, help="最大工作者數量")
+    parser.add_argument("--queue_size", type=int, default=64, help="隊列大小")
     args = parser.parse_args()
 
     input_source = args.input
@@ -80,9 +78,7 @@ def main():
         model_path=args.model,
         input_source=input_source,
         max_workers=args.workers,
-        max_queue_length=args.queue_size,
-        display_output=not args.no_display,
-        target_fps=args.target_fps
+        max_queue_length=args.queue_size
     )
     
     try:

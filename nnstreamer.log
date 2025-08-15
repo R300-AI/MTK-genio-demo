@@ -1,57 +1,373 @@
-[2025-08-15 19:46:08,501] INFO - ============ NNStreamer System Initialization ============
-[2025-08-15 19:46:08,501] INFO - Model Path: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:08,502] INFO - Input Source: ./data/video.mp4
-[2025-08-15 19:46:08,502] INFO - Input Type: Video File
-[2025-08-15 19:46:08,502] INFO - Max Workers: 16
-[2025-08-15 19:46:08,502] INFO - Queue Size: 32
-[2025-08-15 19:46:08,503] INFO - Target FPS: 24.00
-[2025-08-15 19:46:08,504] INFO - Processing Mode: Sequential Frame Processing (Video)
-[2025-08-15 19:46:08,504] INFO - Preloading AI Model Executors...
-[2025-08-15 19:46:24,413] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:24,613] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:24,829] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:25,095] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:25,312] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:25,512] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:25,710] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:25,895] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:26,100] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:26,295] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:26,519] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:26,737] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:26,942] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:27,157] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:27,360] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:27,573] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
-[2025-08-15 19:46:27,573] INFO - Successfully Preloaded 16 Executors
-[2025-08-15 19:46:27,573] INFO - ============ Starting NNStreamer Processing ============
-[2025-08-15 19:46:27,573] INFO - Starting Frame Capture System: ./data/video.mp4
-[2025-08-15 19:46:27,614] INFO - Video FPS: 24.00 (Specified), Frame Interval: 0.0417s
-[2025-08-15 19:46:27,614] INFO - Original Detected FPS: 29.97
-[2025-08-15 19:46:27,679] INFO - Starting AI Inference Manager
-[2025-08-15 19:46:27,679] INFO - Starting Result Consumer
-[2025-08-15 19:46:28,207] INFO - 統計 - FPS: 0.0, 整體FPS: 0.0, 推論時間: 400.2ms, CPU: 29.4%, 記憶體: 45.9%, 丟幀率: 0.0%, 結果丟棄率: 0.0%, 隊列使用率: 0.0%, 等待幀數: 0
-[2025-08-15 19:46:31,192] INFO - 統計 - FPS: 9.9, 整體FPS: 10.1, 推論時間: 676.5ms, CPU: 93.8%, 記憶體: 46.1%, 丟幀率: 0.0%, 結果丟棄率: 0.0%, 隊列使用率: 0.0%, 等待幀數: 2
-[2025-08-15 19:46:34,259] INFO - 統計 - FPS: 9.6, 整體FPS: 10.0, 推論時間: 839.2ms, CPU: 100.0%, 記憶體: 46.4%, 丟幀率: 0.0%, 結果丟棄率: 0.0%, 隊列使用率: 0.0%, 等待幀數: 0
-[2025-08-15 19:46:36,926] INFO - Video Playback Completed Successfully
-[2025-08-15 19:46:36,955] INFO - Video Reading Completed: 109 Frames Sent to Processing Queue
-[2025-08-15 19:46:36,955] INFO - Frame Capture System Stopped
-[2025-08-15 19:46:37,075] INFO - 統計 - FPS: 10.8, 整體FPS: 10.2, 推論時間: 837.2ms, CPU: 88.9%, 記憶體: 45.9%, 丟幀率: 0.0%, 結果丟棄率: 0.0%, 隊列使用率: 9.4%, 等待幀數: 0
-[2025-08-15 19:46:37,243] INFO - Shutdown Signal Received - Stopping Inference Manager
-[2025-08-15 19:46:37,243] INFO - Waiting for 15 Inference Tasks to Complete...
-[2025-08-15 19:46:37,749] INFO - All Inference Tasks Completed Successfully
-[2025-08-15 19:46:38,605] INFO - 影片處理完畢！總共處理了 109 幀
-[2025-08-15 19:46:38,605] INFO - 所有影像都已處理完成，準備關閉系統
-[2025-08-15 19:46:38,607] INFO - ✅ VIDEO PROCESSING FULLY COMPLETED - All Frames Processed and Displayed
-[2025-08-15 19:46:38,607] INFO - Result Consumer Stopped Successfully
-[2025-08-15 19:46:38,607] INFO - Inference Manager Stopped Successfully
-[2025-08-15 19:46:38,607] INFO - === Video Processing Status Check ===
-[2025-08-15 19:46:38,607] INFO - Video Reading Complete: True
-[2025-08-15 19:46:38,617] INFO - Total Frames Sent: 109
-[2025-08-15 19:46:38,617] INFO - Frames Processed: 109
-[2025-08-15 19:46:38,617] INFO - Pending Results: 0
-[2025-08-15 19:46:38,617] INFO - All Frames Processed: True
-[2025-08-15 19:46:38,618] INFO - 🎬 VIDEO PROCESSING SUCCESSFULLY COMPLETED - All Frames Processed and Displayed
-[2025-08-15 19:46:38,618] INFO - Cleaning Up System Resources...
-[2025-08-15 19:46:38,886] INFO - Resource Cleanup Completed
-[2025-08-15 19:46:38,887] INFO - Program Terminated Successfully
+[2025-08-15 22:01:48,202] INFO - ============ NNStreamer System Initialization ============
+[2025-08-15 22:01:48,202] INFO - Model Path: ./models/yolov8n_float32.tflite
+[2025-08-15 22:01:48,202] INFO - Input Source: 0
+[2025-08-15 22:01:48,202] INFO - Input Type: Camera/Live Stream
+[2025-08-15 22:01:48,202] INFO - Max Workers: 8
+[2025-08-15 22:01:48,202] INFO - Queue Size: 64
+[2025-08-15 22:01:48,205] INFO - Initial Producer FPS: 120.0 (固定)
+[2025-08-15 22:01:48,205] INFO - FPS策略: Producer FPS = Consumer FPS × 2 (僅在顯示時調整)
+[2025-08-15 22:01:48,205] INFO - Processing Mode: Adaptive Frame Skipping with Dynamic FPS (Live Stream)
+[2025-08-15 22:01:48,205] INFO - Preloading AI Model Executors...
+[2025-08-15 22:02:02,195] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
+[2025-08-15 22:02:02,408] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
+[2025-08-15 22:02:02,611] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
+[2025-08-15 22:02:02,805] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
+[2025-08-15 22:02:02,991] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
+[2025-08-15 22:02:03,165] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
+[2025-08-15 22:02:03,353] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
+[2025-08-15 22:02:03,535] INFO - YOLO Model Loaded Successfully: ./models/yolov8n_float32.tflite
+[2025-08-15 22:02:03,535] INFO - Successfully Preloaded 8 Executors
+[2025-08-15 22:02:03,537] INFO - ============ Starting NNStreamer Processing ============
+[2025-08-15 22:02:03,537] INFO - Starting Frame Capture System: 0
+[2025-08-15 22:02:08,447] INFO - 即時串流初始 FPS: 120.00 (將動態調整)
+[2025-08-15 22:02:08,992] INFO - Starting AI Inference Manager
+[2025-08-15 22:02:08,992] INFO - Starting Result Consumer
+[2025-08-15 22:02:11,085] INFO - FPS調整: Consumer=0.0 → Producer=1.0
+[2025-08-15 22:02:11,092] INFO - 統計 - FPS: 0.0, 整體FPS: 0.0, 推論時間: 220.5ms, CPU: 17.7%, 記憶體: 44.3%, 丟幀率: 10.9%, 結果丟棄率: 0.0%, 隊列使用率: 82.8%, 等待幀數: 0
+[2025-08-15 22:02:11,100] INFO - FPS調整: Consumer=85.0 → Producer=120.0
+[2025-08-15 22:02:11,421] INFO - FPS調整: Consumer=5.9 → Producer=11.9
+[2025-08-15 22:02:11,787] INFO - FPS調整: Consumer=4.2 → Producer=8.5
+[2025-08-15 22:02:12,121] INFO - FPS調整: Consumer=3.9 → Producer=7.7
+[2025-08-15 22:02:12,297] INFO - FPS調整: Consumer=4.1 → Producer=8.3
+[2025-08-15 22:02:12,755] INFO - FPS調整: Consumer=3.6 → Producer=7.2
+[2025-08-15 22:02:12,824] INFO - FPS調整: Consumer=4.0 → Producer=8.0
+[2025-08-15 22:02:12,841] INFO - FPS調整: Consumer=4.6 → Producer=9.1
+[2025-08-15 22:02:12,952] INFO - FPS調整: Consumer=4.8 → Producer=9.6
+[2025-08-15 22:02:13,164] INFO - FPS調整: Consumer=4.8 → Producer=9.6
+[2025-08-15 22:02:13,178] INFO - FPS調整: Consumer=5.3 → Producer=10.5
+[2025-08-15 22:02:13,231] INFO - FPS調整: Consumer=5.6 → Producer=11.2
+[2025-08-15 22:02:13,612] INFO - FPS調整: Consumer=5.1 → Producer=10.3
+[2025-08-15 22:02:13,622] INFO - FPS調整: Consumer=5.5 → Producer=11.0
+[2025-08-15 22:02:13,805] INFO - FPS調整: Consumer=5.5 → Producer=11.0
+[2025-08-15 22:02:13,877] INFO - FPS調整: Consumer=5.7 → Producer=11.5
+[2025-08-15 22:02:13,890] INFO - FPS調整: Consumer=6.1 → Producer=12.1
+[2025-08-15 22:02:14,202] INFO - FPS調整: Consumer=5.8 → Producer=11.6
+[2025-08-15 22:02:14,239] INFO - FPS調整: Consumer=6.0 → Producer=12.0
+[2025-08-15 22:02:14,254] INFO - FPS調整: Consumer=6.3 → Producer=12.6
+[2025-08-15 22:02:14,620] INFO - FPS調整: Consumer=5.9 → Producer=11.9
+[2025-08-15 22:02:14,630] INFO - FPS調整: Consumer=6.2 → Producer=12.4
+[2025-08-15 22:02:14,648] INFO - FPS調整: Consumer=6.5 → Producer=12.9
+[2025-08-15 22:02:14,720] INFO - FPS調整: Consumer=6.6 → Producer=13.2
+[2025-08-15 22:02:14,972] INFO - FPS調整: Consumer=6.4 → Producer=12.9
+[2025-08-15 22:02:14,982] INFO - FPS調整: Consumer=6.7 → Producer=13.3
+[2025-08-15 22:02:14,990] INFO - FPS調整: Consumer=6.9 → Producer=13.8
+[2025-08-15 22:02:15,547] INFO - FPS調整: Consumer=6.3 → Producer=12.6
+[2025-08-15 22:02:15,571] INFO - FPS調整: Consumer=6.5 → Producer=12.9
+[2025-08-15 22:02:15,579] INFO - FPS調整: Consumer=6.5 → Producer=12.9
+[2025-08-15 22:02:15,582] INFO - 統計 - FPS: 6.5, 整體FPS: 6.9, 推論時間: 266.0ms, CPU: 80.0%, 記憶體: 44.5%, 丟幀率: 44.5%, 結果丟棄率: 0.0%, 隊列使用率: 98.4%, 等待幀數: 4
+[2025-08-15 22:02:15,588] INFO - FPS調整: Consumer=7.0 → Producer=13.9
+[2025-08-15 22:02:15,596] INFO - FPS調整: Consumer=7.6 → Producer=15.3
+[2025-08-15 22:02:15,603] INFO - FPS調整: Consumer=8.3 → Producer=16.7
+[2025-08-15 22:02:15,613] INFO - FPS調整: Consumer=8.7 → Producer=17.5
+[2025-08-15 22:02:15,621] INFO - FPS調整: Consumer=10.1 → Producer=20.2
+[2025-08-15 22:02:15,819] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:16,011] INFO - FPS調整: Consumer=9.1 → Producer=18.3
+[2025-08-15 22:02:16,125] INFO - FPS調整: Consumer=9.1 → Producer=18.3
+[2025-08-15 22:02:16,134] INFO - FPS調整: Consumer=9.8 → Producer=19.5
+[2025-08-15 22:02:16,314] INFO - FPS調整: Consumer=9.2 → Producer=18.5
+[2025-08-15 22:02:16,427] INFO - FPS調整: Consumer=9.1 → Producer=18.1
+[2025-08-15 22:02:16,436] INFO - FPS調整: Consumer=10.3 → Producer=20.5
+[2025-08-15 22:02:16,619] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:16,715] INFO - FPS調整: Consumer=10.0 → Producer=19.9
+[2025-08-15 22:02:16,724] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:16,923] INFO - FPS調整: Consumer=9.6 → Producer=19.1
+[2025-08-15 22:02:17,656] INFO - FPS調整: Consumer=8.4 → Producer=16.8
+[2025-08-15 22:02:17,665] INFO - FPS調整: Consumer=8.5 → Producer=16.9
+[2025-08-15 22:02:17,674] INFO - FPS調整: Consumer=8.5 → Producer=17.0
+[2025-08-15 22:02:18,092] INFO - FPS調整: Consumer=8.4 → Producer=16.7
+[2025-08-15 22:02:18,101] INFO - FPS調整: Consumer=8.4 → Producer=16.7
+[2025-08-15 22:02:18,109] INFO - FPS調整: Consumer=8.4 → Producer=16.8
+[2025-08-15 22:02:18,117] INFO - FPS調整: Consumer=8.5 → Producer=17.1
+[2025-08-15 22:02:18,126] INFO - FPS調整: Consumer=9.2 → Producer=18.4
+[2025-08-15 22:02:18,397] INFO - FPS調整: Consumer=8.5 → Producer=17.0
+[2025-08-15 22:02:18,463] INFO - FPS調整: Consumer=8.4 → Producer=16.7
+[2025-08-15 22:02:18,539] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:18,667] INFO - FPS調整: Consumer=9.4 → Producer=18.7
+[2025-08-15 22:02:18,827] INFO - FPS調整: Consumer=8.9 → Producer=17.9
+[2025-08-15 22:02:18,835] INFO - FPS調整: Consumer=8.9 → Producer=17.9
+[2025-08-15 22:02:18,839] INFO - 統計 - FPS: 8.9, 整體FPS: 7.9, 推論時間: 261.8ms, CPU: 83.0%, 記憶體: 44.5%, 丟幀率: 51.5%, 結果丟棄率: 0.0%, 隊列使用率: 98.4%, 等待幀數: 0
+[2025-08-15 22:02:18,971] INFO - FPS調整: Consumer=8.6 → Producer=17.2
+[2025-08-15 22:02:19,099] INFO - FPS調整: Consumer=8.3 → Producer=16.6
+[2025-08-15 22:02:19,109] INFO - FPS調整: Consumer=8.3 → Producer=16.6
+[2025-08-15 22:02:19,242] INFO - FPS調整: Consumer=8.0 → Producer=16.0
+[2025-08-15 22:02:19,437] INFO - FPS調整: Consumer=8.0 → Producer=16.0
+[2025-08-15 22:02:19,582] INFO - FPS調整: Consumer=8.1 → Producer=16.3
+[2025-08-15 22:02:19,589] INFO - FPS調整: Consumer=8.4 → Producer=16.7
+[2025-08-15 22:02:19,597] INFO - FPS調整: Consumer=8.4 → Producer=16.7
+[2025-08-15 22:02:19,707] INFO - FPS調整: Consumer=8.5 → Producer=17.1
+[2025-08-15 22:02:19,867] INFO - FPS調整: Consumer=8.4 → Producer=16.9
+[2025-08-15 22:02:20,013] INFO - FPS調整: Consumer=8.1 → Producer=16.2
+[2025-08-15 22:02:20,042] INFO - FPS調整: Consumer=8.5 → Producer=16.9
+[2025-08-15 22:02:20,171] INFO - FPS調整: Consumer=8.4 → Producer=16.8
+[2025-08-15 22:02:20,316] INFO - FPS調整: Consumer=8.1 → Producer=16.1
+[2025-08-15 22:02:20,325] INFO - FPS調整: Consumer=8.5 → Producer=17.1
+[2025-08-15 22:02:20,477] INFO - FPS調整: Consumer=10.3 → Producer=20.6
+[2025-08-15 22:02:20,618] INFO - FPS調整: Consumer=9.8 → Producer=19.6
+[2025-08-15 22:02:20,628] INFO - FPS調整: Consumer=9.8 → Producer=19.6
+[2025-08-15 22:02:20,780] INFO - FPS調整: Consumer=10.8 → Producer=21.6
+[2025-08-15 22:02:20,911] INFO - FPS調整: Consumer=10.3 → Producer=20.6
+[2025-08-15 22:02:20,940] INFO - FPS調整: Consumer=10.2 → Producer=20.5
+[2025-08-15 22:02:21,085] INFO - FPS調整: Consumer=9.8 → Producer=19.6
+[2025-08-15 22:02:21,211] INFO - FPS調整: Consumer=9.4 → Producer=18.8
+[2025-08-15 22:02:21,221] INFO - FPS調整: Consumer=10.3 → Producer=20.5
+[2025-08-15 22:02:21,389] INFO - FPS調整: Consumer=9.9 → Producer=19.8
+[2025-08-15 22:02:21,516] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:21,525] INFO - FPS調整: Consumer=10.2 → Producer=20.3
+[2025-08-15 22:02:21,691] INFO - FPS調整: Consumer=10.1 → Producer=20.3
+[2025-08-15 22:02:21,820] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:21,829] INFO - FPS調整: Consumer=10.2 → Producer=20.3
+[2025-08-15 22:02:21,832] INFO - 統計 - FPS: 10.2, 整體FPS: 8.5, 推論時間: 261.8ms, CPU: 90.0%, 記憶體: 44.6%, 丟幀率: 55.4%, 結果丟棄率: 0.0%, 隊列使用率: 98.4%, 等待幀數: 0
+[2025-08-15 22:02:21,978] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:22,124] INFO - FPS調整: Consumer=9.6 → Producer=19.2
+[2025-08-15 22:02:22,132] INFO - FPS調整: Consumer=10.0 → Producer=20.1
+[2025-08-15 22:02:22,285] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:22,428] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:22,459] INFO - FPS調整: Consumer=10.1 → Producer=20.2
+[2025-08-15 22:02:22,588] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:22,687] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:22,763] INFO - FPS調整: Consumer=10.0 → Producer=20.0
+[2025-08-15 22:02:22,891] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:23,020] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:23,052] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:23,196] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:23,323] INFO - FPS調整: Consumer=9.7 → Producer=19.3
+[2025-08-15 22:02:23,332] INFO - FPS調整: Consumer=10.2 → Producer=20.3
+[2025-08-15 22:02:23,628] INFO - FPS調整: Consumer=9.6 → Producer=19.3
+[2025-08-15 22:02:23,639] INFO - FPS調整: Consumer=9.6 → Producer=19.3
+[2025-08-15 22:02:23,683] INFO - FPS調整: Consumer=10.0 → Producer=20.0
+[2025-08-15 22:02:23,852] INFO - FPS調整: Consumer=9.9 → Producer=19.7
+[2025-08-15 22:02:23,905] INFO - FPS調整: Consumer=9.8 → Producer=19.6
+[2025-08-15 22:02:24,068] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:24,143] INFO - FPS調整: Consumer=9.9 → Producer=19.8
+[2025-08-15 22:02:24,266] INFO - FPS調整: Consumer=9.5 → Producer=19.1
+[2025-08-15 22:02:24,462] INFO - FPS調整: Consumer=9.4 → Producer=18.9
+[2025-08-15 22:02:24,471] INFO - FPS調整: Consumer=9.8 → Producer=19.6
+[2025-08-15 22:02:24,798] INFO - FPS調整: Consumer=8.9 → Producer=17.7
+[2025-08-15 22:02:24,806] INFO - FPS調整: Consumer=9.3 → Producer=18.6
+[2025-08-15 22:02:24,814] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:25,068] INFO - FPS調整: Consumer=9.0 → Producer=17.9
+[2025-08-15 22:02:25,213] INFO - FPS調整: Consumer=9.0 → Producer=17.9
+[2025-08-15 22:02:25,215] INFO - 統計 - FPS: 9.0, 整體FPS: 8.6, 推論時間: 268.4ms, CPU: 84.5%, 記憶體: 44.5%, 丟幀率: 57.5%, 結果丟棄率: 0.0%, 隊列使用率: 98.4%, 等待幀數: 0
+[2025-08-15 22:02:25,243] INFO - FPS調整: Consumer=9.3 → Producer=18.6
+[2025-08-15 22:02:25,371] INFO - FPS調整: Consumer=9.0 → Producer=17.9
+[2025-08-15 22:02:25,500] INFO - FPS調整: Consumer=9.0 → Producer=18.0
+[2025-08-15 22:02:25,509] INFO - FPS調整: Consumer=9.4 → Producer=18.8
+[2025-08-15 22:02:25,676] INFO - FPS調整: Consumer=9.0 → Producer=18.0
+[2025-08-15 22:02:25,804] INFO - FPS調整: Consumer=9.0 → Producer=18.0
+[2025-08-15 22:02:25,837] INFO - FPS調整: Consumer=9.2 → Producer=18.4
+[2025-08-15 22:02:25,982] INFO - FPS調整: Consumer=9.0 → Producer=18.0
+[2025-08-15 22:02:26,107] INFO - FPS調整: Consumer=9.0 → Producer=18.0
+[2025-08-15 22:02:26,116] INFO - FPS調整: Consumer=9.4 → Producer=18.7
+[2025-08-15 22:02:26,284] INFO - FPS調整: Consumer=9.0 → Producer=17.9
+[2025-08-15 22:02:26,414] INFO - FPS調整: Consumer=9.0 → Producer=18.0
+[2025-08-15 22:02:26,422] INFO - FPS調整: Consumer=9.4 → Producer=18.7
+[2025-08-15 22:02:26,572] INFO - FPS調整: Consumer=9.0 → Producer=17.9
+[2025-08-15 22:02:26,716] INFO - FPS調整: Consumer=9.4 → Producer=18.8
+[2025-08-15 22:02:26,726] INFO - FPS調整: Consumer=9.4 → Producer=18.8
+[2025-08-15 22:02:26,876] INFO - FPS調整: Consumer=9.1 → Producer=18.2
+[2025-08-15 22:02:27,022] INFO - FPS調整: Consumer=9.1 → Producer=18.3
+[2025-08-15 22:02:27,031] INFO - FPS調整: Consumer=9.3 → Producer=18.5
+[2025-08-15 22:02:27,180] INFO - FPS調整: Consumer=9.3 → Producer=18.6
+[2025-08-15 22:02:27,326] INFO - FPS調整: Consumer=9.1 → Producer=18.2
+[2025-08-15 22:02:27,356] INFO - FPS調整: Consumer=9.4 → Producer=18.8
+[2025-08-15 22:02:27,485] INFO - FPS調整: Consumer=9.6 → Producer=19.2
+[2025-08-15 22:02:27,612] INFO - FPS調整: Consumer=9.2 → Producer=18.5
+[2025-08-15 22:02:27,621] INFO - FPS調整: Consumer=10.3 → Producer=20.5
+[2025-08-15 22:02:27,789] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:27,918] INFO - FPS調整: Consumer=9.3 → Producer=18.7
+[2025-08-15 22:02:27,948] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:28,092] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:28,221] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:28,224] INFO - 統計 - FPS: 9.7, 整體FPS: 8.8, 推論時間: 260.3ms, CPU: 95.0%, 記憶體: 44.5%, 丟幀率: 59.0%, 結果丟棄率: 0.0%, 隊列使用率: 98.4%, 等待幀數: 0
+[2025-08-15 22:02:28,253] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:28,524] INFO - FPS調整: Consumer=9.6 → Producer=19.2
+[2025-08-15 22:02:28,532] INFO - FPS調整: Consumer=9.6 → Producer=19.2
+[2025-08-15 22:02:28,541] INFO - FPS調整: Consumer=10.1 → Producer=20.2
+[2025-08-15 22:02:28,700] INFO - FPS調整: Consumer=10.0 → Producer=20.0
+[2025-08-15 22:02:28,828] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:28,837] INFO - FPS調整: Consumer=10.2 → Producer=20.3
+[2025-08-15 22:02:28,989] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:29,132] INFO - FPS調整: Consumer=9.6 → Producer=19.2
+[2025-08-15 22:02:29,142] INFO - FPS調整: Consumer=10.2 → Producer=20.3
+[2025-08-15 22:02:29,295] INFO - FPS調整: Consumer=10.1 → Producer=20.2
+[2025-08-15 22:02:29,409] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:29,436] INFO - FPS調整: Consumer=10.1 → Producer=20.2
+[2025-08-15 22:02:29,597] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:29,725] INFO - FPS調整: Consumer=9.7 → Producer=19.3
+[2025-08-15 22:02:29,734] INFO - FPS調整: Consumer=10.2 → Producer=20.3
+[2025-08-15 22:02:29,868] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:30,031] INFO - FPS調整: Consumer=9.7 → Producer=19.3
+[2025-08-15 22:02:30,039] INFO - FPS調整: Consumer=10.1 → Producer=20.3
+[2025-08-15 22:02:30,303] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:30,335] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:30,345] INFO - FPS調整: Consumer=10.1 → Producer=20.3
+[2025-08-15 22:02:30,431] INFO - FPS調整: Consumer=10.3 → Producer=20.6
+[2025-08-15 22:02:30,606] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:30,639] INFO - FPS調整: Consumer=10.2 → Producer=20.3
+[2025-08-15 22:02:30,767] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:30,908] INFO - FPS調整: Consumer=9.8 → Producer=19.6
+[2025-08-15 22:02:30,917] INFO - FPS調整: Consumer=10.3 → Producer=20.5
+[2025-08-15 22:02:31,068] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:31,213] INFO - FPS調整: Consumer=9.8 → Producer=19.6
+[2025-08-15 22:02:31,215] INFO - 統計 - FPS: 9.8, 整體FPS: 9.0, 推論時間: 257.8ms, CPU: 100.0%, 記憶體: 44.5%, 丟幀率: 60.1%, 結果丟棄率: 0.0%, 隊列使用率: 98.4%, 等待幀數: 1
+[2025-08-15 22:02:31,222] INFO - FPS調整: Consumer=10.8 → Producer=21.5
+[2025-08-15 22:02:31,372] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:31,516] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:31,526] INFO - FPS調整: Consumer=10.3 → Producer=20.5
+[2025-08-15 22:02:31,676] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:31,804] INFO - FPS調整: Consumer=9.8 → Producer=19.5
+[2025-08-15 22:02:31,813] INFO - FPS調整: Consumer=10.3 → Producer=20.5
+[2025-08-15 22:02:31,982] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:32,111] INFO - FPS調整: Consumer=9.8 → Producer=19.5
+[2025-08-15 22:02:32,120] INFO - FPS調整: Consumer=10.3 → Producer=20.5
+[2025-08-15 22:02:32,286] INFO - FPS調整: Consumer=10.1 → Producer=20.2
+[2025-08-15 22:02:32,414] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:32,423] INFO - FPS調整: Consumer=10.3 → Producer=20.5
+[2025-08-15 22:02:32,588] INFO - FPS調整: Consumer=10.1 → Producer=20.3
+[2025-08-15 22:02:32,718] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:32,727] INFO - FPS調整: Consumer=10.1 → Producer=20.3
+[2025-08-15 22:02:32,928] INFO - FPS調整: Consumer=10.0 → Producer=20.0
+[2025-08-15 22:02:33,215] INFO - FPS調整: Consumer=9.1 → Producer=18.3
+[2025-08-15 22:02:33,225] INFO - FPS調整: Consumer=9.9 → Producer=19.8
+[2025-08-15 22:02:33,232] INFO - FPS調整: Consumer=10.0 → Producer=20.0
+[2025-08-15 22:02:33,517] INFO - FPS調整: Consumer=9.1 → Producer=18.3
+[2025-08-15 22:02:33,527] INFO - FPS調整: Consumer=9.4 → Producer=18.7
+[2025-08-15 22:02:33,693] INFO - FPS調整: Consumer=9.4 → Producer=18.8
+[2025-08-15 22:02:33,823] INFO - FPS調整: Consumer=9.1 → Producer=18.2
+[2025-08-15 22:02:33,833] INFO - FPS調整: Consumer=9.5 → Producer=18.9
+[2025-08-15 22:02:33,951] INFO - FPS調整: Consumer=9.5 → Producer=19.1
+[2025-08-15 22:02:34,124] INFO - FPS調整: Consumer=9.0 → Producer=18.1
+[2025-08-15 22:02:34,133] INFO - FPS調整: Consumer=9.5 → Producer=18.9
+[2025-08-15 22:02:34,285] INFO - FPS調整: Consumer=9.4 → Producer=18.9
+[2025-08-15 22:02:34,431] INFO - FPS調整: Consumer=9.0 → Producer=18.1
+[2025-08-15 22:02:34,434] INFO - 統計 - FPS: 9.0, 整體FPS: 9.0, 推論時間: 257.2ms, CPU: 79.9%, 記憶體: 44.6%, 丟幀率: 61.0%, 結果丟棄率: 0.0%, 隊列使用率: 98.4%, 等待幀數: 1
+[2025-08-15 22:02:34,441] INFO - FPS調整: Consumer=9.5 → Producer=18.9
+[2025-08-15 22:02:34,589] INFO - FPS調整: Consumer=9.4 → Producer=18.9
+[2025-08-15 22:02:34,733] INFO - FPS調整: Consumer=9.0 → Producer=18.1
+[2025-08-15 22:02:34,743] INFO - FPS調整: Consumer=9.5 → Producer=18.9
+[2025-08-15 22:02:34,892] INFO - FPS調整: Consumer=9.4 → Producer=18.8
+[2025-08-15 22:02:34,990] INFO - FPS調整: Consumer=9.1 → Producer=18.2
+[2025-08-15 22:02:35,036] INFO - FPS調整: Consumer=9.5 → Producer=19.0
+[2025-08-15 22:02:35,166] INFO - FPS調整: Consumer=9.5 → Producer=19.0
+[2025-08-15 22:02:35,325] INFO - FPS調整: Consumer=9.0 → Producer=18.1
+[2025-08-15 22:02:35,334] INFO - FPS調整: Consumer=9.5 → Producer=19.0
+[2025-08-15 22:02:35,631] INFO - FPS調整: Consumer=9.0 → Producer=18.0
+[2025-08-15 22:02:35,640] INFO - FPS調整: Consumer=9.0 → Producer=18.0
+[2025-08-15 22:02:35,649] INFO - FPS調整: Consumer=9.5 → Producer=18.9
+[2025-08-15 22:02:35,657] INFO - FPS調整: Consumer=9.9 → Producer=19.7
+[2025-08-15 22:02:35,901] INFO - FPS調整: Consumer=9.1 → Producer=18.3
+[2025-08-15 22:02:35,936] INFO - FPS調整: Consumer=9.6 → Producer=19.3
+[2025-08-15 22:02:36,064] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:36,206] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:36,214] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:36,365] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:36,509] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:36,518] INFO - FPS調整: Consumer=10.3 → Producer=20.5
+[2025-08-15 22:02:36,670] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:36,813] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:36,822] INFO - FPS調整: Consumer=10.1 → Producer=20.2
+[2025-08-15 22:02:36,974] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:37,103] INFO - FPS調整: Consumer=9.8 → Producer=19.5
+[2025-08-15 22:02:37,148] INFO - FPS調整: Consumer=10.1 → Producer=20.3
+[2025-08-15 22:02:37,277] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:37,406] INFO - FPS調整: Consumer=9.8 → Producer=19.6
+[2025-08-15 22:02:37,409] INFO - 統計 - FPS: 9.8, 整體FPS: 9.2, 推論時間: 259.1ms, CPU: 89.9%, 記憶體: 44.6%, 丟幀率: 61.6%, 結果丟棄率: 0.0%, 隊列使用率: 98.4%, 等待幀數: 0
+[2025-08-15 22:02:37,440] INFO - FPS調整: Consumer=10.2 → Producer=20.3
+[2025-08-15 22:02:37,581] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:37,711] INFO - FPS調整: Consumer=9.8 → Producer=19.5
+[2025-08-15 22:02:37,741] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:37,886] INFO - FPS調整: Consumer=10.0 → Producer=20.0
+[2025-08-15 22:02:38,014] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:38,045] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:38,174] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:38,319] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:38,351] INFO - FPS調整: Consumer=10.7 → Producer=21.3
+[2025-08-15 22:02:38,477] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:38,624] INFO - FPS調整: Consumer=9.8 → Producer=19.5
+[2025-08-15 22:02:38,652] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:38,782] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:38,926] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:38,935] INFO - FPS調整: Consumer=10.1 → Producer=20.2
+[2025-08-15 22:02:39,085] INFO - FPS調整: Consumer=10.1 → Producer=20.2
+[2025-08-15 22:02:39,213] INFO - FPS調整: Consumer=9.7 → Producer=19.3
+[2025-08-15 22:02:39,262] INFO - FPS調整: Consumer=10.0 → Producer=20.0
+[2025-08-15 22:02:39,389] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:39,518] INFO - FPS調整: Consumer=9.7 → Producer=19.3
+[2025-08-15 22:02:39,527] INFO - FPS調整: Consumer=10.2 → Producer=20.3
+[2025-08-15 22:02:39,693] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:39,821] INFO - FPS調整: Consumer=9.7 → Producer=19.3
+[2025-08-15 22:02:39,831] INFO - FPS調整: Consumer=10.2 → Producer=20.3
+[2025-08-15 22:02:40,126] INFO - FPS調整: Consumer=9.6 → Producer=19.2
+[2025-08-15 22:02:40,134] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:40,143] INFO - FPS調整: Consumer=10.1 → Producer=20.2
+[2025-08-15 22:02:40,287] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:40,430] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:40,432] INFO - 統計 - FPS: 9.7, 整體FPS: 9.2, 推論時間: 259.2ms, CPU: 90.0%, 記憶體: 44.6%, 丟幀率: 62.1%, 結果丟棄率: 0.0%, 隊列使用率: 98.4%, 等待幀數: 1
+[2025-08-15 22:02:40,439] INFO - FPS調整: Consumer=10.1 → Producer=20.3
+[2025-08-15 22:02:40,589] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:40,734] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:40,745] INFO - FPS調整: Consumer=10.1 → Producer=20.3
+[2025-08-15 22:02:40,895] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:40,992] INFO - FPS調整: Consumer=9.8 → Producer=19.7
+[2025-08-15 22:02:41,001] INFO - FPS調整: Consumer=10.3 → Producer=20.5
+[2025-08-15 22:02:41,166] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:41,326] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:41,335] INFO - FPS調整: Consumer=10.2 → Producer=20.3
+[2025-08-15 22:02:41,470] INFO - FPS調整: Consumer=10.2 → Producer=20.4
+[2025-08-15 22:02:41,598] INFO - FPS調整: Consumer=9.8 → Producer=19.7
+[2025-08-15 22:02:41,608] INFO - FPS調整: Consumer=10.3 → Producer=20.5
+[2025-08-15 22:02:41,904] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:41,913] INFO - FPS調整: Consumer=9.7 → Producer=19.5
+[2025-08-15 22:02:41,936] INFO - FPS調整: Consumer=10.2 → Producer=20.3
+[2025-08-15 22:02:42,078] INFO - FPS調整: Consumer=10.1 → Producer=20.3
+[2025-08-15 22:02:42,205] INFO - FPS調整: Consumer=9.9 → Producer=19.7
+[2025-08-15 22:02:42,292] INFO - FPS調整: Consumer=10.0 → Producer=20.0
+[2025-08-15 22:02:42,446] INFO - FPS調整: Consumer=9.9 → Producer=19.8
+[2025-08-15 22:02:42,739] INFO - FPS調整: Consumer=9.0 → Producer=18.1
+[2025-08-15 22:02:42,748] INFO - FPS調整: Consumer=9.5 → Producer=19.0
+[2025-08-15 22:02:42,755] INFO - FPS調整: Consumer=9.9 → Producer=19.8
+[2025-08-15 22:02:42,912] INFO - FPS調整: Consumer=9.4 → Producer=18.8
+[2025-08-15 22:02:42,921] INFO - FPS調整: Consumer=10.4 → Producer=20.8
+[2025-08-15 22:02:43,037] INFO - FPS調整: Consumer=10.0 → Producer=20.0
+[2025-08-15 22:02:43,216] INFO - FPS調整: Consumer=9.4 → Producer=18.9
+[2025-08-15 22:02:43,226] INFO - FPS調整: Consumer=9.9 → Producer=19.7
+[2025-08-15 22:02:43,343] INFO - FPS調整: Consumer=10.0 → Producer=19.9
+[2025-08-15 22:02:43,516] INFO - FPS調整: Consumer=9.4 → Producer=18.8
+[2025-08-15 22:02:43,522] INFO - 統計 - FPS: 9.4, 整體FPS: 9.3, 推論時間: 261.9ms, CPU: 84.7%, 記憶體: 44.6%, 丟幀率: 62.5%, 結果丟棄率: 0.0%, 隊列使用率: 98.4%, 等待幀數: 0
+[2025-08-15 22:02:43,529] INFO - FPS調整: Consumer=9.9 → Producer=19.7
+[2025-08-15 22:02:43,647] INFO - FPS調整: Consumer=10.0 → Producer=19.9
+[2025-08-15 22:02:43,806] INFO - FPS調整: Consumer=9.5 → Producer=18.9
+[2025-08-15 22:02:43,815] INFO - FPS調整: Consumer=9.9 → Producer=19.9
+[2025-08-15 22:02:43,951] INFO - FPS調整: Consumer=9.8 → Producer=19.6
+[2025-08-15 22:02:44,110] INFO - FPS調整: Consumer=9.3 → Producer=18.6
+[2025-08-15 22:02:44,120] INFO - FPS調整: Consumer=9.8 → Producer=19.6
+[2025-08-15 22:02:44,254] INFO - FPS調整: Consumer=9.9 → Producer=19.8
+[2025-08-15 22:02:44,446] INFO - FPS調整: Consumer=9.3 → Producer=18.6
+[2025-08-15 22:02:44,456] INFO - FPS調整: Consumer=9.7 → Producer=19.4
+[2025-08-15 22:02:44,560] INFO - FPS調整: Consumer=9.8 → Producer=19.6
+[2025-08-15 22:02:44,719] INFO - FPS調整: Consumer=9.3 → Producer=18.6
+[2025-08-15 22:02:44,729] INFO - FPS調整: Consumer=10.3 → Producer=20.5
+[2025-08-15 22:02:44,847] INFO - FPS調整: Consumer=9.9 → Producer=19.8
+[2025-08-15 22:02:45,023] INFO - FPS調整: Consumer=9.4 → Producer=18.8
+[2025-08-15 22:02:45,032] INFO - FPS調整: Consumer=9.8 → Producer=19.6
+[2025-08-15 22:02:45,150] INFO - FPS調整: Consumer=9.9 → Producer=19.7
+[2025-08-15 22:02:45,329] INFO - FPS調整: Consumer=9.6 → Producer=19.1
+[2025-08-15 22:02:45,611] INFO - FPS調整: Consumer=9.2 → Producer=18.3
+[2025-08-15 22:02:45,620] INFO - FPS調整: Consumer=10.1 → Producer=20.1
+[2025-08-15 22:02:45,642] INFO - FPS調整: Consumer=10.0 → Producer=20.0
+[2025-08-15 22:02:45,857] INFO - FPS調整: Consumer=9.4 → Producer=18.7
+[2025-08-15 22:02:45,921] INFO - FPS調整: Consumer=9.6 → Producer=19.3
+[2025-08-15 22:02:46,127] INFO - FPS調整: Consumer=9.0 → Producer=18.1
+[2025-08-15 22:02:46,136] INFO - FPS調整: Consumer=9.4 → Producer=18.7
+[2025-08-15 22:02:46,160] INFO - FPS調整: Consumer=9.9 → Producer=19.7
+[2025-08-15 22:02:46,462] INFO - FPS調整: Consumer=9.0 → Producer=17.9
+[2025-08-15 22:02:46,475] INFO - FPS調整: Consumer=9.3 → Producer=18.5
+[2025-08-15 22:02:46,653] INFO - FPS調整: Consumer=9.3 → Producer=18.5
+[2025-08-15 22:02:46,663] INFO - FPS調整: Consumer=9.3 → Producer=18.5
+[2025-08-15 22:02:46,667] INFO - 統計 - FPS: 9.3, 整體FPS: 9.3, 推論時間: 258.7ms, CPU: 89.6%, 記憶體: 44.6%, 丟幀率: 62.8%, 結果丟棄率: 0.0%, 隊列使用率: 98.4%, 等待幀數: 0
+[2025-08-15 22:02:46,962] INFO - FPS調整: Consumer=8.7 → Producer=17.5
+[2025-08-15 22:02:46,965] INFO - 使用者請求退出
+[2025-08-15 22:02:47,141] INFO - Result Consumer Stopped Successfully
+[2025-08-15 22:02:47,452] INFO - Waiting for 1 Inference Tasks to Complete...
+[2025-08-15 22:02:47,452] INFO - All Inference Tasks Completed Successfully
+[2025-08-15 22:02:47,564] INFO - Inference Manager Stopped Successfully
