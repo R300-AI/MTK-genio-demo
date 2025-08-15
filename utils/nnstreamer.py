@@ -10,7 +10,6 @@ import numpy as np
 import time
 import threading
 import logging
-import os
 from concurrent.futures import ThreadPoolExecutor
 from collections import deque
 from typing import Optional, Tuple, List, Dict, Any
@@ -81,9 +80,9 @@ class PerformanceMonitor:
         self.window_size = window_size
         self.inference_times = deque(maxlen=window_size)
         self.display_timestamps = deque(maxlen=window_size)  # 顯示時間戳
-        self.cpu_readings = deque(maxlen=20)  # CPU 使用率移動窗口 (20個樣本)
+        self.cpu_readings = deque(maxlen=20)  # CPU使用率移動窗口
         self.start_time = None  # 系統啟動時間
-        self.total_displayed_frames = 0  # 實際顯示的幀數
+        self.total_displayed_frames = 0  # 實際顯示幀數
         
     def add_inference_time(self, inference_time: float):
         """添加推論時間"""
@@ -136,7 +135,7 @@ class PerformanceMonitor:
     def get_avg_cpu_percent(self) -> float:
         """獲取移動窗口平均CPU使用率"""
         if len(self.cpu_readings) == 0:
-            return psutil.cpu_percent()
+            return 0.0
         return np.mean(self.cpu_readings)
     def get_system_stats(self) -> Dict[str, Any]:
         """獲取系統統計資訊"""
@@ -173,20 +172,23 @@ class NNStreamer:
         self.enable_auto_tuning = enable_auto_tuning
         
         # 性能調優參數
-        self.frame_timeout = 0.1  # 幀隊列超時時間
-        self.result_timeout = 0.1  # 結果隊列超時時間
-        self.frame_skip_interval = 1  # 幀跳過間隔
-        self.frame_counter = 0  # 幀計數器
+        self.frame_timeout = 0.1  # 即時模式幀隊列超時
+        self.result_timeout = 0.1  # 結果隊列超時
         
         # 統計計數器
         self.total_frames = 0
         self.dropped_frames = 0
         self.dropped_results = 0
         
+        # 輸入源類型檢測
+        self.is_video_file = self._detect_video_file(input_source)
+        
         # 幀順序控制
-        self.next_display_frame_id = 0  # 下一個應該顯示的幀ID
+        self.next_display_frame_id = 0  # 下一個顯示幀ID
         self.pending_results = {}  # 等待顯示的結果 {frame_id: result}
-        self.max_pending_frames = 10  # 最大等待幀數，防止記憶體累積
+        self.max_pending_frames = 10  # 最大等待幀數
+        self.last_display_time = time.time()  # 上次顯示時間
+        self.frame_timeout_threshold = 2.0  # 幀等待超時（秒）
         
         # 滑動窗口控制器
         self.window_controller = SlidingWindowController(window_size=8)
@@ -207,12 +209,35 @@ class NNStreamer:
         # 初始化系統
         self._initialize_system()
         
+    def _detect_video_file(self, input_source: str) -> bool:
+        """檢測輸入源是否為影片文件"""
+        if input_source is None:
+            return False
+        
+        # 如果是數字字符串或單個數字，認為是攝像頭
+        if isinstance(input_source, int) or (isinstance(input_source, str) and input_source.isdigit()):
+            return False
+            
+        # 檢查文件副檔名
+        if isinstance(input_source, str):
+            video_extensions = {'.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm', '.m4v'}
+            return any(input_source.lower().endswith(ext) for ext in video_extensions)
+        
+        return False
+        
     def _initialize_system(self):
         """初始化系統組件"""
         logger.info("=== NNStreamer 系統啟動 ===")
         logger.info(f"模型: {self.model_path}")
         logger.info(f"輸入來源: {self.input_source}")
+        logger.info(f"輸入類型: {'影片文件' if self.is_video_file else '攝像頭/即時流'}")
         logger.info(f"最大工作者數: {self.max_workers}")
+        
+        # 根據輸入類型調整策略
+        if self.is_video_file:
+            logger.info("影片模式: 逐幀處理，保持完整時間軸連續性")
+        else:
+            logger.info("即時模式: 採用跳幀策略，優化即時性能")
         
         # 預載入解釋器
         self._preload_interpreters()
@@ -275,21 +300,34 @@ class NNStreamer:
                 
                 self.total_frames += 1
                 
-                # 使用滑動窗口控制器動態決策
+                # 根據輸入源類型採用不同策略
                 queue_usage = self.frame_queue.qsize() / self.queue_size
                 
-                if not self.window_controller.should_process_frame(queue_usage):
+                if self.is_video_file:
+                    # 影片文件：逐幀處理，不跳幀
+                    should_process = self._should_process_video_frame(queue_usage, frame_count)
+                else:
+                    # 即時串流：使用滑動窗口控制器跳幀
+                    should_process = self.window_controller.should_process_frame(queue_usage)
+                
+                if not should_process:
                     self.dropped_frames += 1
                     continue
                         
                 # 將幀放入隊列
                 try:
-                    await asyncio.wait_for(
-                        self.frame_queue.put((frame_count, frame)), 
-                        timeout=self.frame_timeout
-                    )
+                    if self.is_video_file:
+                        # 影片模式：等待隊列有空間，不設超時（避免跳幀）
+                        await self.frame_queue.put((frame_count, frame))
+                    else:
+                        # 即時模式：有超時限制，避免累積延遲
+                        await asyncio.wait_for(
+                            self.frame_queue.put((frame_count, frame)), 
+                            timeout=self.frame_timeout
+                        )
                     frame_count += 1
                 except asyncio.TimeoutError:
+                    # 只有即時模式會觸發這個異常
                     self.dropped_frames += 1
                     drop_rate = (self.dropped_frames / self.total_frames) * 100
                     logger.warning(f"幀隊列已滿，跳過幀 (丟幀率: {drop_rate:.1f}%)")
@@ -306,6 +344,12 @@ class NNStreamer:
             # 發送結束信號
             await self.frame_queue.put(None)
             logger.info("影像擷取器停止")
+            
+    def _should_process_video_frame(self, queue_usage: float, frame_count: int) -> bool:
+        """影片幀處理策略 - 逐幀處理保持完整性"""
+        # 影片文件逐幀處理，不跳幀，保持時間軸完整性
+        # 參數保留供未來擴展使用
+        return True
             
     def sync_inference(self, frame_data: Tuple[int, np.ndarray]) -> Optional[Tuple[int, np.ndarray, Any]]:
         """同步推論函數（在執行緒中運行）"""
@@ -428,9 +472,12 @@ class NNStreamer:
                     # 將結果存入待處理字典
                     self.pending_results[frame_id] = (frame, model_result)
                     
-                    # 按順序處理可以顯示的幀
+                    # 按順序處理可以顯示的幀，增加超時保護
+                    processed_any = False
                     while self.next_display_frame_id in self.pending_results:
                         display_frame, display_result = self.pending_results.pop(self.next_display_frame_id)
+                        processed_any = True
+                        self.last_display_time = time.time()  # 更新顯示時間
                         
                         # 更新效能監控 - 記錄實際顯示
                         self.performance_monitor.add_display_sample()
@@ -456,7 +503,8 @@ class NNStreamer:
                             f"Queue: {self.frame_queue.qsize()}/{self.queue_size}",
                             f"Drop Rate: {(self.dropped_frames / max(1, self.total_frames) * 100):.1f}%",
                             f"Pending: {len(self.pending_results)}",
-                            f"Controller: {'Startup' if self.window_controller.startup_frames <= self.window_controller.startup_threshold else 'Active'}"
+                            f"Mode: {'Video' if self.is_video_file else 'Live'}",
+                            f"Controller: {'Startup' if not self.is_video_file and self.window_controller.startup_frames <= self.window_controller.startup_threshold else 'Active'}"
                         ]
                         
                         for i, text in enumerate(info_text):
@@ -465,7 +513,7 @@ class NNStreamer:
                         
                         # 顯示影像
                         if self.display_output:
-                            cv2.imshow("NNStreamer Output", cv2.resize(annotated_frame, (720, 480)))
+                            cv2.imshow("NNStreamer Output", annotated_frame)
                             
                             # 檢查按鍵退出
                             key = cv2.waitKey(1) & 0xFF
@@ -491,11 +539,7 @@ class NNStreamer:
                                       f"結果丟棄率: {result_drop_rate:.1f}%, "
                                       f"隊列使用率: {(self.frame_queue.qsize() / self.queue_size * 100):.1f}%, "
                                       f"等待幀數: {len(self.pending_results)}")
-                            
-                            # 自動調優建議
-                            if self.enable_auto_tuning:
-                                self._auto_tuning_suggestions(stats, drop_rate, result_drop_rate)
-                        
+
                         # 移動到下一幀
                         self.next_display_frame_id += 1
                         
@@ -503,19 +547,44 @@ class NNStreamer:
                         if self.should_stop:
                             break
                     
+                    # 超時保護：如果長時間沒有顯示幀，跳過等待的幀
+                    current_time = time.time()
+                    if not processed_any and (current_time - self.last_display_time) > self.frame_timeout_threshold:
+                        if len(self.pending_results) > 0:
+                            # 找到最小的可用幀ID
+                            min_available_frame = min(self.pending_results.keys())
+                            if min_available_frame > self.next_display_frame_id:
+                                skipped_frames = min_available_frame - self.next_display_frame_id
+                                logger.warning(f"超時保護: 跳過 {skipped_frames} 幀 (從 {self.next_display_frame_id} 到 {min_available_frame - 1})")
+                                self.next_display_frame_id = min_available_frame
+                                self.last_display_time = current_time
+                    
                     # 清理過舊的等待幀，防止記憶體累積
                     if len(self.pending_results) > self.max_pending_frames:
-                        # 移除最舊的幀
-                        oldest_frames = sorted(self.pending_results.keys())[:len(self.pending_results) - self.max_pending_frames]
-                        for old_frame_id in oldest_frames:
-                            self.pending_results.pop(old_frame_id, None)
-                            # 如果移除的是應該顯示的幀，跳到下一個
-                            if old_frame_id == self.next_display_frame_id:
-                                self.next_display_frame_id = old_frame_id + 1
+                        # 保留最近的幀，移除距離當前顯示幀太遠的幀
+                        sorted_frames = sorted(self.pending_results.keys())
+                        frames_to_remove = []
                         
-                        logger.warning(f"清理過舊幀，跳到 frame {self.next_display_frame_id}")
+                        for frame_id in sorted_frames[:-self.max_pending_frames]:
+                            frames_to_remove.append(frame_id)
+                        
+                        for frame_id in frames_to_remove:
+                            self.pending_results.pop(frame_id, None)
+                        
+                        if frames_to_remove:
+                            logger.warning(f"清理 {len(frames_to_remove)} 個過舊幀: {frames_to_remove[0]} 到 {frames_to_remove[-1]}")
 
                 except asyncio.TimeoutError:
+                    # 在超時時也檢查是否需要跳過等待的幀
+                    current_time = time.time()
+                    if (current_time - self.last_display_time) > self.frame_timeout_threshold:
+                        if len(self.pending_results) > 0:
+                            min_available_frame = min(self.pending_results.keys())
+                            if min_available_frame > self.next_display_frame_id:
+                                skipped_frames = min_available_frame - self.next_display_frame_id
+                                logger.warning(f"超時跳幀: 跳過 {skipped_frames} 幀 (從 {self.next_display_frame_id} 到 {min_available_frame - 1})")
+                                self.next_display_frame_id = min_available_frame
+                                self.last_display_time = current_time
                     continue
                     
         except Exception as e:
@@ -524,7 +593,7 @@ class NNStreamer:
             if self.display_output:
                 cv2.destroyAllWindows()
             logger.info("結果處理器停止")
-            
+
     async def run(self):
         """運行 NNStreamer 主循環"""
         if self.is_running:

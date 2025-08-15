@@ -74,7 +74,7 @@ class YOLOInterpreter:
         try:
             # 使用 YOLO 內建的 plot 方法繪製檢測結果
             annotated_frame = yolo_result.plot(show=False, save=False)
-            return annotated_frame
+            return cv2.resize(annotated_frame, (1080, 720))
             
         except Exception as e:
             logger.error(f"視覺化失敗: {e}")
@@ -83,23 +83,29 @@ class YOLOInterpreter:
 
 
 def main():
-    """主函數"""
     parser = argparse.ArgumentParser(description="NNStreamer - Ultralytics YOLO 串流推論系統")
     parser.add_argument("--model", type=str, default="./models/yolov8n_float32.tflite", help="YOLO模型路徑")
-    parser.add_argument("--input", type=str, default="0", help="輸入來源") #"./data/video.mp4"
+    parser.add_argument("--input", type=str, default="./data/video.mp4", help="輸入來源 (0=攝像頭, 檔案路徑=影片)")
     parser.add_argument("--workers", type=int, default=5, help="最大工作者數量")
     parser.add_argument("--queue_size", type=int, default=32, help="隊列大小")
     parser.add_argument("--no_display", action="store_true", help="禁用視覺輸出")
+    parser.add_argument("--auto_tuning", action="store_true", help="啟用自動調優建議")
     args = parser.parse_args()
+
+    # 處理輸入來源
+    input_source = args.input
+    if input_source.isdigit():
+        input_source = int(input_source)
 
     # 創建 NNStreamer 實例，傳入 YOLOInterpreter 類別
     nnstreamer = NNStreamer(
         interpreter_class=YOLOInterpreter,
         model_path=args.model,
-        input_source=args.input,
+        input_source=input_source,
         max_workers=args.workers,
         queue_size=args.queue_size,
-        display_output=not args.no_display
+        display_output=not args.no_display,
+        enable_auto_tuning=args.auto_tuning
     )
     
     # 運行系統
