@@ -13,13 +13,12 @@ import warnings
 # 取消警告
 warnings.filterwarnings("ignore")
 
-# 配置全局日誌 - 統一輸出到 performance_stats.txt，自動清空
+# 配置全局日誌 - 只輸出到 performance_stats.txt，不顯示到終端
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - [%(threadName)s] - %(message)s',
+    format='[%(asctime)s %(threadName)s] - %(message)s',
     handlers=[
-        logging.StreamHandler(),  # 控制台輸出
-        logging.FileHandler('performance_stats.txt', mode='w', encoding='utf-8')  # 自動清空並寫入
+        logging.FileHandler('performance_stats.txt', mode='w', encoding='utf-8')  # 只輸出到文件
     ]
 )
 
