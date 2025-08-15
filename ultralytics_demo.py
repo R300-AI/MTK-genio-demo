@@ -417,4 +417,13 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("程式被使用者中斷")
+    except Exception as e:
+        print(f"程式發生錯誤: {e}")
+    finally:
+        # 確保 OpenCV 視窗關閉
+        cv2.destroyAllWindows()
+        print("程式結束")
