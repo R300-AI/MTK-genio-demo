@@ -310,7 +310,13 @@ class YOLOInferencePipeline:
                             # 調整大小並顯示
                             display_frame = cv2.resize(plotted_img, self.DISPLAY_SIZE)
                             cv2.imshow(self.WINDOW_NAME, display_frame)
-                            cv2.waitKey(1)
+                            
+                            # 檢查使用者輸入
+                            key = cv2.waitKey(1) & 0xFF
+                            if key in [27, ord('q')]:  # ESC 或 Q
+                                logger.info("使用者要求退出")
+                                self.should_stop = True
+                                break
                         else:
                             logger.warning(f"幀 {frame_id} 的 plot() 返回無效影像")
                             
@@ -453,78 +459,26 @@ class YOLOInferencePipeline:
             logger.warning(f"✗ 清理模型快取: {e}")
         
         # 5. 強制垃圾回收
-        try:
-            gc.collect()
-            logger.debug("✓ 強制垃圾回收")
-        except Exception as e:
-            logger.warning(f"✗ 強制垃圾回收: {e}")
-        
+        gc.collect()
         logger.info("資源清理完成")
-async def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="YOLO 高性能並發推理演示程式",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
-    parser.add_argument(
-        "--video_path", 
-        type=str, 
-        default="./data/video.mp4",
-        help="輸入視頻檔案路徑"
-    )
-    parser.add_argument(
-        "--model_path", 
-        type=str, 
-        default="./models/yolov8n_float32.tflite",
-        help="YOLO 模型檔案路徑"
-    )
-    parser.add_argument(
-        "--min_workers", 
-        type=int, 
-        default=1,
-        help="最小工作者數量"
-    )
-    parser.add_argument(
-        "--max_workers", 
-        type=int, 
-        default=8,
-        help="最大工作者數量"
-    )
-    parser.add_argument(
-        "--queue_size", 
-        type=int, 
-        default=32,
-        help="處理隊列大小"
-    )
-    args = parser.parse_args()
-    
-    # 設定日誌級別 - 暫時設為 DEBUG 來排查問題
-    logging.getLogger().setLevel(logging.DEBUG)
-    
-    # 同時輸出到控制台以便即時查看
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    console_formatter = logging.Formatter('[%(levelname)s] %(message)s')
-    console_handler.setFormatter(console_formatter)
-    logging.getLogger().addHandler(console_handler)
 
-    # 建立推理管道
+async def main() -> None:
+    parser = argparse.ArgumentParser(description="YOLO 高性能並發推理演示程式", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--video_path", type=str, default="./data/video.mp4", help="輸入視頻檔案路徑")
+    parser.add_argument("--model_path", type=str, default="./models/yolov8n_float32.tflite", help="YOLO 模型檔案路徑")
+    parser.add_argument("--min_workers", type=int, default=1, help="最小工作者數量")
+    parser.add_argument("--max_workers", type=int, default=8, help="最大工作者數量")
+    parser.add_argument("--queue_size", type=int, default=32, help="處理隊列大小")
+    args = parser.parse_args()
+    logging.getLogger().setLevel(logging.INFO)
+
     pipeline = YOLOInferencePipeline(
         model_path=args.model_path,
         min_workers=args.min_workers,
         max_workers=args.max_workers,
         queue_size=args.queue_size
     )
-    
-    try:
-        await pipeline.run(args.video_path)
-    except KeyboardInterrupt:
-        logger.info("使用者中斷程式執行")
-        print("程式被使用者中斷")
-    except Exception as e:
-        logger.error(f"程式執行錯誤: {e}")
-        print(f"執行發生錯誤: {e}")
-    finally:
-        logger.info("程式執行完成")
+    await pipeline.run(args.video_path)
 
 if __name__ == "__main__":
     try:
