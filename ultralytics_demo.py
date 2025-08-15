@@ -157,7 +157,7 @@ class InferencePipeline:
         try:
             while not self.should_stop:
                 try:
-                    frame_data = await asyncio.wait_for(self.frame_queue.get(), timeout=5.0)
+                    frame_data = await asyncio.wait_for(self.frame_queue.get(), timeout=1.0)  # 減少超時時間
                     
                     if frame_data is None:
                         break
@@ -174,8 +174,10 @@ class InferencePipeline:
                     self.frame_queue.task_done()
                     
                 except asyncio.TimeoutError:
-                    # 記錄超時
+                    # 記錄超時並檢查是否應該停止
                     logger.info(f"WORKER_TIMEOUT,{worker_id}")
+                    if self.should_stop:
+                        break
                     continue
                         
                 except Exception as e:
@@ -237,7 +239,7 @@ class InferencePipeline:
         
         while not self.should_stop:
             try:
-                result_data = await asyncio.wait_for(self.result_queue.get(), timeout=3.0)
+                result_data = await asyncio.wait_for(self.result_queue.get(), timeout=1.0)  # 減少超時時間
                 if result_data is None:
                     break
                 
@@ -261,6 +263,9 @@ class InferencePipeline:
                     next_display_frame += 1
                 self.result_queue.task_done()
             except asyncio.TimeoutError:
+                # 檢查是否應該停止
+                if self.should_stop:
+                    break
                 logger.debug("Consumer timeout waiting for results")
                 continue
             
@@ -287,17 +292,21 @@ class InferencePipeline:
                 asyncio.create_task(self.workers_manager())
             ]
             
-            async with self.workers_lock:
-                for worker_task in self.workers.values():
-                    tasks.append(worker_task)
-            
+            # 等待主要任務完成
             await asyncio.gather(*tasks[:3])
             
+            # 等待所有工作者完成，但設置超時
             async with self.workers_lock:
                 remaining_workers = list(self.workers.values())
             
             if remaining_workers:
-                await asyncio.gather(*remaining_workers, return_exceptions=True)
+                try:
+                    await asyncio.wait_for(
+                        asyncio.gather(*remaining_workers, return_exceptions=True),
+                        timeout=3.0  # 設置3秒超時
+                    )
+                except asyncio.TimeoutError:
+                    logger.warning("Workers didn't finish in time, forcing shutdown")
             
         except Exception as e:
             logger.error(f"Pipeline error: {str(e)}")
@@ -305,7 +314,13 @@ class InferencePipeline:
             self.should_stop = True
             logger.info("Pipeline stopped")
             logger.info("PIPELINE_STOPPED")
-            self.executor.shutdown(wait=True)
+            
+            # 強制關閉 ThreadPoolExecutor，不等待未完成的任務
+            try:
+                self.executor.shutdown(wait=False, cancel_futures=True)
+            except Exception as e:
+                logger.warning(f"Error shutting down executor: {e}")
+            
             cap.release()
             cv2.destroyAllWindows()
 
