@@ -311,8 +311,7 @@ class YOLOInferencePipeline:
                             cv2.imshow(self.WINDOW_NAME, display_frame)
                             
                             # 檢查使用者輸入
-                            key = cv2.waitKey(1) & 0xFF
-                            if key in [27, ord('q')]:  # ESC 或 Q
+                            if key == 27 or key == ord('q'):
                                 logger.info("使用者要求退出")
                                 self.should_stop = True
                                 break
@@ -322,8 +321,7 @@ class YOLOInferencePipeline:
                             total_processing_time += processing_time
                             avg_time = total_processing_time / frame_count
                             fps = frame_count / total_processing_time if total_processing_time > 0 else 0
-                            logger.info(f"處理統計: {frame_count} 幀, 平均: {avg_time:.3f}s, FPS: {fps:.1f}")
-                            # 注意：不要重置 total_processing_time，因為我們要計算累計平均值
+                            logger.info(f"處理統計: {frame_count} 幀 {plotted_img.shape} {plotted_img.dtype}, 平均: {avg_time:.3f}s, FPS: {fps:.1f}")
                         else:
                             logger.warning(f"幀 {frame_id} 的 plot() 返回無效影像")
                             
