@@ -280,7 +280,6 @@ class YOLOInferencePipeline:
         """
         frame_count = 0
         total_processing_time = 0
-        display_interval = 30
         
         logger.info("消費者啟動 - 開始顯示結果")
         
@@ -309,6 +308,7 @@ class YOLOInferencePipeline:
                         if plotted_img is not None and plotted_img.size > 0:
                             # 調整大小並顯示
                             display_frame = cv2.resize(plotted_img, self.DISPLAY_SIZE)
+                            logger.info(display_frame.shape)
                             cv2.imshow(self.WINDOW_NAME, display_frame)
                             
                             # 檢查使用者輸入
@@ -317,21 +317,20 @@ class YOLOInferencePipeline:
                                 logger.info("使用者要求退出")
                                 self.should_stop = True
                                 break
+                                
+                            # 更新統計
+                            frame_count += 1
+                            total_processing_time += processing_time
+                            avg_time = total_processing_time / display_interval
+                            fps = display_interval / total_processing_time if total_processing_time > 0 else 0
+                            logger.info(f"處理統計: {frame_count} 幀, 平均: {avg_time:.3f}s, FPS: {fps:.1f}")
+                            total_processing_time = 0
                         else:
                             logger.warning(f"幀 {frame_id} 的 plot() 返回無效影像")
                             
                     except Exception as e:
                         logger.error(f"幀 {frame_id} 繪製錯誤: {e}")
                         continue
-                    
-                    # 更新統計
-                    frame_count += 1
-                    total_processing_time += processing_time
-                    if frame_count % display_interval == 0:
-                        avg_time = total_processing_time / display_interval
-                        fps = display_interval / total_processing_time if total_processing_time > 0 else 0
-                        logger.info(f"處理統計: {frame_count} 幀, 平均: {avg_time:.3f}s, FPS: {fps:.1f}")
-                        total_processing_time = 0
 
                 except asyncio.TimeoutError:
                     if self.should_stop:
@@ -470,6 +469,8 @@ async def main() -> None:
     parser.add_argument("--max_workers", type=int, default=8, help="最大工作者數量")
     parser.add_argument("--queue_size", type=int, default=32, help="處理隊列大小")
     args = parser.parse_args()
+    
+    # 設定日誌級別為 INFO（只輸出到檔案）
     logging.getLogger().setLevel(logging.INFO)
 
     pipeline = YOLOInferencePipeline(
