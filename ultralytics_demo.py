@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 class YOLOInferencePipeline:
     DISPLAY_SIZE = (720, 480)
-    WINDOW_NAME = "Demo - YOLO Async Inference"
+    WINDOW_NAME = "Demo 1153"
     
     def __init__(self, model_path: str, min_workers: int = 1, max_workers: int = 8, queue_size: int = 10):
         # 基本配置
@@ -311,7 +311,7 @@ class YOLOInferencePipeline:
                             cv2.imshow(self.WINDOW_NAME, display_frame)
                             
                             # 檢查使用者輸入
-                            if key == 27 or key == ord('q'):
+                            if cv2.waitKey(1) == 27 or 0xFF == ord('q'):
                                 logger.info("使用者要求退出")
                                 self.should_stop = True
                                 break
