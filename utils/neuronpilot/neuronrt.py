@@ -20,8 +20,8 @@ class Interpreter():
     def allocate_tensors(self):
         self.bin_dir = f'./bin'
         try:
-            # 使用 echo 管道將密碼傳給 sudo，如果不需要密碼就會被忽略
-            command = f"echo '{self.admin_password}' | sudo -S neuronrt -a {self.dla_path} -d"
+            # 修正密碼輸入格式
+            command = f"printf '{self.admin_password}\\n' | sudo -S neuronrt -a {self.dla_path} -d"
             process = subprocess.run(
                 command,
                 shell=True,
@@ -35,7 +35,7 @@ class Interpreter():
             raise RuntimeError(f"Failed to load DLA model: {e.stderr}")
 
         if os.path.exists(self.bin_dir):
-           shutil.rmtree(self.bin_dir)
+        shutil.rmtree(self.bin_dir)
         os.mkdir(self.bin_dir)
 
     def get_input_details(self):
