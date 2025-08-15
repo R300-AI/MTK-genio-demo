@@ -463,12 +463,12 @@ class AutoBackend(nn.Module):
             else:  # TFLite
                 LOGGER.info(f"Loading {w} for TensorFlow Lite inference...")
                 # === 原始 TFLite 解釋器 ===
-                #interpreter = Interpreter(model_path=w)
+                interpreter = Interpreter(model_path=w)
                 
                 # === 錯誤提示：需要手動配置後端 ===
-                raise RuntimeError(
-                    f"Genio Backend not configured! Please edit {__file__} and uncomment one of the backend options above. Please see the tutorial at docs/ultralytics_streaming_tutorial.md for detailed instructions."
-                )
+                #raise RuntimeError(
+                #    f"Genio Backend not configured! Please edit {__file__} and uncomment one of the backend options above. Please see the tutorial at docs/ultralytics_streaming_tutorial.md for detailed instructions."
+                #)
                 # === 選項 A: 使用 ArmNN 加速 (CPU/ GPU) ===
                 # import tensorflow as tf
                 #

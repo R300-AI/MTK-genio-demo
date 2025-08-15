@@ -86,8 +86,8 @@ def main():
     """主函數"""
     parser = argparse.ArgumentParser(description="NNStreamer - Ultralytics YOLO 串流推論系統")
     parser.add_argument("--model", type=str, default="./models/yolov8n_float32.tflite", help="YOLO模型路徑")
-    parser.add_argument("--input", type=str, default="./data/video.mp4", help="輸入來源")
-    parser.add_argument("--workers", type=int, default=4, help="最大工作者數量")
+    parser.add_argument("--input", type=str, default="0", help="輸入來源") #"./data/video.mp4"
+    parser.add_argument("--workers", type=int, default=5, help="最大工作者數量")
     parser.add_argument("--queue_size", type=int, default=32, help="隊列大小")
     parser.add_argument("--no_display", action="store_true", help="禁用視覺輸出")
     args = parser.parse_args()
