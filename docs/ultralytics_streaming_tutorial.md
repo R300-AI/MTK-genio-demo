@@ -44,7 +44,6 @@ else:  # TFLite
     #     tflite_path=w, 
     #     dla_path="<path_to_your_dla_model>",       
     #     device= "<mdla3.0, mdla2.0 or vpu>"
-    #     admin_password='<enter_your_admin_password_here>'
     # )
     # LOGGER.info("Successfully loaded NeuronRT delegate for DLA inference")
 ```
