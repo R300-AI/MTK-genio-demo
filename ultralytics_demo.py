@@ -11,37 +11,35 @@ from collections import deque
 import numpy as np
 import logging
 import warnings
-import sys
-import signal
+import gc
 
-# 取消警告
+# 配置設定
 warnings.filterwarnings("ignore")
 
-# 配置日誌 - 只寫入檔案，不在終端顯示
+# 日誌配置 - 僅輸出到檔案
 logging.basicConfig(
     level=logging.INFO,
-    format='[%(asctime)s %(threadName)s] - %(message)s',
+    format='[%(asctime)s] %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('performance_stats.txt', mode='w', encoding='utf-8')
+        logging.FileHandler('yolo_inference.log', mode='w', encoding='utf-8')
     ]
 )
 
-logger = logging.getLogger('ultralytics_demo')
+logger = logging.getLogger(__name__)
 
-class InferencePipeline:
-    """高性能自適應 YOLO 並發推理管道"""
+class YOLOInferencePipeline:
+    DISPLAY_SIZE = (720, 480)
+    WINDOW_NAME = "YOLO 物件檢測"
     
-    def __init__(self, model_path, min_workers=1, max_workers=8, queue_size=10):
+    def __init__(self, model_path: str, min_workers: int = 1, max_workers: int = 8, queue_size: int = 10):
         # 基本配置
         self.model_path = model_path
         self.min_workers = min_workers
         self.max_workers = max_workers
-        self.current_workers = min_workers
+        self.current_workers = 0
         
-        # 線程池
-        self.executor = ThreadPoolExecutor(max_workers=max_workers)
-        
-        # 隊列系統
+        # 執行器和隊列
+        self.executor = ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="YOLO-Worker")
         self.frame_queue = asyncio.Queue(maxsize=queue_size * 2)
         self.result_queue = asyncio.Queue(maxsize=queue_size)
         
@@ -54,61 +52,62 @@ class InferencePipeline:
         self.worker_counter = 0
         self.workers_lock = asyncio.Lock()
         
-        # 控制標誌
+        # 控制狀態
         self.should_stop = False
         self.shutdown_timer = None
         
-        # 初始化
-        self._log_initialization()
+        # 初始化系統
+        self._initialize_system()
+        
+    def _initialize_system(self) -> None:
+        """初始化系統組件"""
+        logger.info("=== YOLO 推理系統啟動 ===")
+        logger.info(f"模型: {self.model_path}")
+        logger.info(f"工作者範圍: {self.min_workers}-{self.max_workers}")
         self._preload_models()
         
-    def _log_initialization(self):
-        """記錄初始化信息"""
-        logger.info("=== Performance Stats Started ===")
-        logger.info(f"Model: {self.model_path}")
-        logger.info(f"Workers: {self.min_workers}-{self.max_workers}")
+    def load_model(index: int) -> tuple:
+        """載入單一模型實例"""
+        thread_id = f"preload_{index}"
+        logger.debug(f"載入模型實例 {index}")
         
-    def _preload_models(self):
-        """預載入模型池"""
-        logger.info("Preloading YOLO models...")
-        
-        def load_model(i):
-            dummy_thread_id = f"preload_{i}"
-            logger.info(f"Loading {self.model_path}...")
-            model = YOLO(self.model_path, task="detect")
-            # 預熱模型
-            dummy_input = np.random.randint(0, 255, (640, 640, 3), dtype=np.uint8)
-            model.predict(dummy_input, verbose=False)
-            return dummy_thread_id, model
-        
+        # 模型載入+預熱
+        model = YOLO(self.model_path, task="detect")
+        model.predict(np.random.randint(0, 255, (640, 640, 3), dtype=np.uint8), verbose=False)
+        return thread_id, model
+
+    def _preload_models(self) -> None:
+        """預載入模型池以提升推理效能"""
+        logger.info("預載入 YOLO 模型...")
+        # 平行載入模型
         with ThreadPoolExecutor(max_workers=self.max_workers) as preload_executor:
-            futures = [preload_executor.submit(load_model, i) for i in range(self.max_workers)]
+            futures = [preload_executor.submit(self.load_model, i) for i in range(self.max_workers)]
+            
             for future in futures:
                 thread_id, model = future.result()
                 self.models[thread_id] = model
         
-        logger.info(f"Preloaded {len(self.models)} YOLO models")
+        logger.info(f"成功預載入 {len(self.models)} 個模型實例")
         
-    def get_model_for_thread(self):
-        """為當前線程獲取模型實例"""
+    def get_model_for_thread(self) -> YOLO:
         thread_id = threading.current_thread().ident
         
         with self.models_lock:
             if thread_id not in self.models:
-                # 嘗試重用預載入的模型
+                # 優先重用預載入的模型
                 preload_keys = [k for k in self.models.keys() if str(k).startswith("preload_")]
                 if preload_keys:
                     preload_key = preload_keys[0]
                     self.models[thread_id] = self.models.pop(preload_key)
-                    logger.debug(f"Reused preloaded model for thread {thread_id}")
+                    logger.debug(f"重用預載入模型 (執行緒 {thread_id})")
                 else:
+                    # 建立新模型實例
                     self.models[thread_id] = YOLO(self.model_path, task="detect")
-                    logger.info(f"Created new model for thread {thread_id}")
+                    logger.info(f"建立新模型實例 (執行緒 {thread_id})")
         
         return self.models[thread_id]
     
-    def predict_frame(self, frame_data):
-        """推理函數"""
+    def predict_frame(self, frame_data: tuple) -> tuple:
         frame, frame_id, worker_id = frame_data
         model = self.get_model_for_thread()
         
@@ -116,158 +115,148 @@ class InferencePipeline:
         result = model.predict(frame, verbose=False)[0]
         processing_time = time.time() - start_time
         
-        logger.info(f"PROCESSING_TIME,{frame_id},{worker_id},{processing_time:.4f}")
+        logger.debug(f"幀 {frame_id} 處理完成: {processing_time:.4f}s (工作者 {worker_id})")
         return result, frame_id, processing_time
     
-    def start_shutdown_timer(self, delay):
-        """啟動強制關閉定時器"""
-        def force_exit():
-            logger.warning("Force shutdown timer triggered!")
-            cv2.destroyAllWindows()
-            os._exit(1)
-        
-        if self.shutdown_timer is None:
-            self.shutdown_timer = threading.Timer(delay, force_exit)
-            self.shutdown_timer.daemon = True
-            self.shutdown_timer.start()
-            logger.info(f"Shutdown timer started: {delay} seconds")
-
-    async def producer(self, cap):
-        """生產者：讀取視頻幀並放入隊列"""
+    async def producer(self, cap: cv2.VideoCapture) -> None:
         frame_id = 0
+        logger.info("生產者啟動 - 開始讀取視頻幀")
         
         try:
             while not self.should_stop:
                 ret, frame = cap.read()
                 if not ret:
-                    logger.info("Video ended, starting shutdown sequence")
+                    logger.info("視頻讀取完畢，啟動關閉程序")
                     self.should_stop = True
                     break
                 
                 frame_id += 1
                 
                 try:
-                    queue_size = self.frame_queue.qsize()
-                    logger.info(f"QUEUE_LENGTH,{frame_id},{queue_size}")
-                    await asyncio.wait_for(self.frame_queue.put((frame, frame_id)), timeout=0.1)
+                    await asyncio.wait_for(
+                        self.frame_queue.put((frame, frame_id)), 
+                        timeout=0.1
+                    )
                     
+                    # 定期記錄隊列狀態
+                    if frame_id % 30 == 0:
+                        queue_size = self.frame_queue.qsize()
+                        logger.debug(f"隊列狀態: {queue_size} 幀待處理")
+                        
                 except (asyncio.QueueFull, asyncio.TimeoutError):
-                    logger.info(f"QUEUE_FULL,{frame_id}")
+                    logger.warning(f"幀 {frame_id} 跳過 (隊列已滿)")
                     continue
                     
-                # 減少讓出頻率
+                # 控制讀取速度
                 if frame_id % 5 == 0:
                     await asyncio.sleep(0.001)
         
         finally:
-            # Producer 負責清理自己的資源
-            for _ in range(self.max_workers):
-                try:
-                    await asyncio.wait_for(self.frame_queue.put(None), timeout=0.1)
-                except:
-                    pass
-            logger.info("Producer finished")
+            # 發送結束信號給所有工作者
+            await self._send_stop_signals()
+            logger.info("生產者結束")
+            
+    async def _send_stop_signals(self) -> None:
+        """發送停止信號給所有工作者"""
+        for _ in range(self.max_workers):
+            try:
+                await asyncio.wait_for(self.frame_queue.put(None), timeout=0.1)
+            except asyncio.TimeoutError:
+                continue
     
-    def _start_shutdown_timer(self, delay):
-        """啟動強制關閉定時器"""
-        def force_exit():
-            logger.warning("Force shutdown timer triggered!")
-            cv2.destroyAllWindows()
-            os._exit(1)
-        
-        if self.shutdown_timer is None:
-            self.shutdown_timer = threading.Timer(delay, force_exit)
-            self.shutdown_timer.daemon = True
-            self.shutdown_timer.start()
-            logger.info(f"Shutdown timer started: {delay} seconds")
-    
-    async def worker(self, worker_id):
-        """推理工作者 - 移除空閒超時退出邏輯"""
+    async def worker(self, worker_id: int) -> None:
+        logger.info(f"工作者 {worker_id} 啟動")
         consecutive_errors = 0
+        max_errors = 10
         
         try:
             while not self.should_stop:
                 try:
-                    frame_data = await asyncio.wait_for(self.frame_queue.get(), timeout=1.0)  # 減少超時時間
+                    # 等待新任務
+                    frame_data = await asyncio.wait_for(
+                        self.frame_queue.get(), 
+                        timeout=1.0
+                    )
                     
-                    if frame_data is None:
+                    if frame_data is None:  # 停止信號
                         break
                     
                     frame, frame_id = frame_data
                     consecutive_errors = 0
                     
+                    # 執行推理
                     loop = asyncio.get_event_loop()
-                    result, result_frame_id, processing_time = await loop.run_in_executor(
-                        self.executor, self.predict_frame, (frame, frame_id, worker_id)
+                    result = await loop.run_in_executor(
+                        self.executor, 
+                        self.predict_frame, 
+                        (frame, frame_id, worker_id)
                     )
                     
-                    await self.result_queue.put((result, result_frame_id, frame, processing_time))
-                    try:
-                        self.frame_queue.task_done()
-                    except ValueError:
-                        # 如果 task_done() 被調用次數過多，忽略錯誤
-                        pass
+                    # 提交結果 (不再需要傳遞原始幀，因為 result.plot() 包含所有需要的資訊)
+                    await self.result_queue.put(result)
                     
                 except asyncio.TimeoutError:
-                    # 記錄超時並檢查是否應該停止
-                    logger.info(f"WORKER_TIMEOUT,{worker_id}")
                     if self.should_stop:
                         break
                     continue
                         
                 except Exception as e:
                     consecutive_errors += 1
-                    logger.info(f"WORKER_ERROR,{worker_id},{consecutive_errors},{str(e)}")
-                    logger.error(f"Worker {worker_id} error: {str(e)}")
-                    if consecutive_errors > 10:  # 增加容錯次數
-                        logger.warning(f"Worker {worker_id} exiting due to consecutive errors")
+                    logger.error(f"工作者 {worker_id} 錯誤 ({consecutive_errors}/{max_errors}): {e}")
+                    
+                    if consecutive_errors >= max_errors:
+                        logger.warning(f"工作者 {worker_id} 因連續錯誤退出")
                         break
-                    continue
                     
         finally:
-            # Worker 負責清理自己的狀態
-            async with self.workers_lock:
-                if worker_id in self.workers:
-                    del self.workers[worker_id]
-                    self.current_workers -= 1
-                    logger.info(f"WORKER_TERMINATED,{worker_id},{self.current_workers}")
-                    logger.info(f"Worker {worker_id} terminated, remaining workers: {self.current_workers}")
+            await self._remove_worker(worker_id)
+            
+    async def _remove_worker(self, worker_id: int) -> None:
+        """從工作者清單中移除指定工作者"""
+        async with self.workers_lock:
+            if worker_id in self.workers:
+                del self.workers[worker_id]
+                self.current_workers -= 1
+                logger.info(f"工作者 {worker_id} 已移除 (剩餘: {self.current_workers})")
     
-    async def workers_manager(self):
-        """改進的動態工作者管理器 - 只增不減模式，無冷卻限制"""
-        queue_stats = deque(maxlen=5)  # 減少統計窗口，更快響應
+    async def workers_manager(self) -> None:
+        queue_stats = deque(maxlen=5)
+        check_interval = 0.1
+        min_stats_count = 3
+        load_threshold = 0.5
         
+        logger.info("工作者管理器啟動")
         try:
             while not self.should_stop:
-                await asyncio.sleep(0.1)  # 減少睡眠時間，更快響應停止信號
+                await asyncio.sleep(check_interval)
                 
-                if self.should_stop:  # 睡眠後立即檢查停止條件
+                if self.should_stop:
                     break
                 
+                # 收集隊列統計
                 current_queue_size = self.frame_queue.qsize()
                 queue_stats.append(current_queue_size)
                 
-                if len(queue_stats) < 3:  # 減少最小統計數量
+                if len(queue_stats) < min_stats_count:
                     continue
                 
+                # 計算平均負載
                 avg_queue_length = sum(queue_stats) / len(queue_stats)
                 
-                # 記錄管理器狀態
-                logger.info(f"MANAGER_STATUS,{self.current_workers},{avg_queue_length:.2f}")
-                
+                # 動態調整工作者
                 async with self.workers_lock:
-                    # 只增加工作者的邏輯 - 移除冷卻時間限制
-                    if avg_queue_length > 0.5 and self.current_workers < self.max_workers:
-                        # 降低閾值到2.0，更積極地增加工作者
+                    if (avg_queue_length > load_threshold and 
+                        self.current_workers < self.max_workers):
                         await self._add_worker()
-                        logger.info(f"WORKER_ADDED,{self.current_workers}")
-                        logger.info(f"Added worker, current workers: {self.current_workers}")
+                        logger.info(f"新增工作者 (總數: {self.current_workers})")
+                        
+        except Exception as e:
+            logger.error(f"工作者管理器錯誤: {e}")
         finally:
-            # Workers Manager 負責清理自己的管理狀態
-            logger.info("Workers manager finished")
+            logger.info("工作者管理器結束")
     
-    async def _add_worker(self):
-        """添加新的工作者"""
+    async def _add_worker(self) -> None:
+        """新增工作者"""
         self.worker_counter += 1
         worker_id = self.worker_counter
         
@@ -275,41 +264,47 @@ class InferencePipeline:
         self.workers[worker_id] = worker_task
         self.current_workers += 1
     
-    async def consumer(self):
-        """消費者：顯示推理結果"""
-        processed_frames = {}
-        next_display_frame = 1
+    async def consumer(self) -> None:
+        frame_count = 0
+        total_processing_time = 0
+        display_interval = 30
+        
+        logger.info("消費者啟動 - 開始顯示結果")
         
         try:
             while not self.should_stop:
                 try:
-                    result_data = await asyncio.wait_for(self.result_queue.get(), timeout=1.0)
+                    # 等待結果
+                    result_data = await asyncio.wait_for(
+                        self.result_queue.get(), 
+                        timeout=1.0
+                    )
+                    
                     if result_data is None:
                         break
                     
-                    result, frame_id, original_frame, processing_time = result_data
-                    processed_frames[frame_id] = (result, original_frame)
+                    result, frame_id, processing_time = result_data
                     
-                    logger.info(f"RESULT_RECEIVED,{frame_id},{len(processed_frames)}")
+                    # 使用 YOLO 內建的 plot() 方法繪製並顯示
+                    display_frame = cv2.resize(result.plot(), self.DISPLAY_SIZE)
+                    cv2.imshow(self.WINDOW_NAME, display_frame)
                     
-                    # 按順序顯示結果
-                    while next_display_frame in processed_frames:
-                        display_result, display_frame = processed_frames.pop(next_display_frame)
-                        
-                        display_img = cv2.resize(display_result.plot(), (720, 480))
-                        cv2.imshow("Adaptive YOLO Inference", display_img)
-                        
-                        key = cv2.waitKey(1) & 0xFF
-                        if key == 27 or key == ord('q'):  # ESC 或 Q 鍵
-                            logger.info("User pressed ESC or Q, starting shutdown sequence")
-                            self.should_stop = True
-                            return
-                        next_display_frame += 1
+                    # 更新統計
+                    frame_count += 1
+                    total_processing_time += processing_time
                     
-                    try:
-                        self.result_queue.task_done()
-                    except ValueError:
-                        pass  # 忽略 task_done() 錯誤
+                    if frame_count % display_interval == 0:
+                        avg_time = total_processing_time / display_interval
+                        fps = display_interval / total_processing_time if total_processing_time > 0 else 0
+                        logger.info(f"處理統計: {frame_count} 幀, 平均: {avg_time:.3f}s, FPS: {fps:.1f}")
+                        total_processing_time = 0
+                    
+                    # 檢查使用者輸入
+                    key = cv2.waitKey(1) & 0xFF
+                    if key in [27, ord('q')]:  # ESC 或 Q
+                        logger.info("使用者要求退出")
+                        self.should_stop = True
+                        break
                         
                 except asyncio.TimeoutError:
                     if self.should_stop:
@@ -317,113 +312,175 @@ class InferencePipeline:
                     continue
                     
         finally:
-            # Consumer 負責清理自己的 OpenCV 視窗
-            cv2.destroyAllWindows()
-            # 確保視窗完全關閉
-            for _ in range(5):
-                cv2.waitKey(1)
-            logger.info("Consumer finished")
+            self._cleanup_display()
+            logger.info(f"消費者結束 - 總共處理 {frame_count} 幀")
+        
+    def _cleanup_display(self) -> None:
+        """清理顯示視窗"""
+        cv2.destroyAllWindows()
+        for _ in range(5):
+            cv2.waitKey(1)
 
-    async def run(self, video_path):
-        """主要的推理流程"""
+    async def run(self, video_path: str) -> None:
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
-            logger.error(f"Cannot open video: {video_path}")
-            return
+            logger.error(f"無法開啟視頻: {video_path}")
+            raise ValueError(f"無法開啟視頻檔案: {video_path}")
         
         try:
-            logger.info(f"Starting pipeline with video: {video_path}")
-            logger.info(f"PIPELINE_STARTED,{video_path}")
+            logger.info(f"開始處理視頻: {video_path}")
             
-            # 初始化工作者
-            async with self.workers_lock:
-                for i in range(self.min_workers):
-                    await self._add_worker()
+            # 啟動初始工作者
+            await self._start_initial_workers()
             
-            # 創建主要任務
+            # 建立主要任務
             tasks = [
-                asyncio.create_task(self.producer(cap)),
-                asyncio.create_task(self.consumer()),
-                asyncio.create_task(self.workers_manager())
+                asyncio.create_task(self.producer(cap), name="Producer"),
+                asyncio.create_task(self.consumer(), name="Consumer"),
+                asyncio.create_task(self.workers_manager(), name="WorkersManager")
             ]
             
-            # 等待主要任務完成
+            # 等待所有任務完成
             await asyncio.gather(*tasks, return_exceptions=True)
             
-            # 等待所有工作者完成，設置超時
-            async with self.workers_lock:
-                remaining_workers = list(self.workers.values())
-            
-            if remaining_workers:
-                try:
-                    await asyncio.wait_for(
-                        asyncio.gather(*remaining_workers, return_exceptions=True),
-                        timeout=2.0
-                    )
-                except asyncio.TimeoutError:
-                    logger.warning("Workers didn't finish in time")
+            # 等待剩餘工作者完成
+            await self._wait_for_workers()
             
         except Exception as e:
-            logger.error(f"Pipeline error: {str(e)}")
+            logger.error(f"推理管道錯誤: {e}")
+            raise
         finally:
             await self._cleanup_resources(cap)
+            
+    async def _start_initial_workers(self) -> None:
+        """啟動初始工作者"""
+        async with self.workers_lock:
+            for i in range(self.min_workers):
+                await self._add_worker()
+        logger.info(f"啟動了 {self.min_workers} 個初始工作者")
+    
+    async def _wait_for_workers(self) -> None:
+        """等待所有工作者完成"""
+        async with self.workers_lock:
+            remaining_workers = list(self.workers.values())
+        
+        if remaining_workers:
+            try:
+                await asyncio.wait_for(
+                    asyncio.gather(*remaining_workers, return_exceptions=True),
+                    timeout=2.0
+                )
+                logger.info("所有工作者已完成")
+            except asyncio.TimeoutError:
+                logger.warning("部分工作者未及時完成")
 
-    async def _cleanup_resources(self, cap):
-        """清理所有資源"""
+    async def _cleanup_resources(self, cap: cv2.VideoCapture) -> None:
+        """清理所有系統資源"""
         self.should_stop = True
-        logger.info("Starting cleanup process")
+        logger.info("開始清理系統資源")
         
-        # 關閉線程池
+        # 1. 取消剩餘的 asyncio 任務
         try:
+            current_task = asyncio.current_task()
+            all_tasks = [task for task in asyncio.all_tasks() if task != current_task]
+            
+            if all_tasks:
+                for task in all_tasks:
+                    task.cancel()
+                
+                try:
+                    await asyncio.wait_for(
+                        asyncio.gather(*all_tasks, return_exceptions=True), 
+                        timeout=0.5
+                    )
+                except asyncio.TimeoutError:
+                    pass
+            logger.debug("✓ 取消asyncio任務")
+        except Exception as e:
+            logger.warning(f"✗ 取消asyncio任務: {e}")
+        
+        # 2. 關閉執行緒池
+        try:
+            if hasattr(self.executor, '_threads'):
+                for thread in self.executor._threads:
+                    if thread.is_alive():
+                        thread.join(timeout=0.1)
+            
             self.executor.shutdown(wait=False, cancel_futures=True)
-            logger.info("Thread pool shutdown completed")
+            logger.debug("✓ 關閉執行緒池")
         except Exception as e:
-            logger.warning(f"Error shutting down executor: {e}")
+            logger.warning(f"✗ 關閉執行緒池: {e}")
         
-        # 釋放視頻捕獲器
+        # 3. 釋放視頻捕獲器
         try:
-            cap.release()
-            logger.info("Video capture released")
+            if cap and cap.isOpened():
+                cap.release()
+            logger.debug("✓ 釋放視頻捕獲器")
         except Exception as e:
-            logger.warning(f"Error releasing video capture: {e}")
+            logger.warning(f"✗ 釋放視頻捕獲器: {e}")
         
-        # 清理模型快取
+        # 4. 清理模型快取
         try:
             with self.models_lock:
+                model_count = len(self.models)
+                for model_key in list(self.models.keys()):
+                    del self.models[model_key]
                 self.models.clear()
-            logger.info("Model cache cleared")
+                logger.debug(f"✓ 清理模型快取 ({model_count} 個實例)")
         except Exception as e:
-            logger.warning(f"Error clearing models: {e}")
+            logger.warning(f"✗ 清理模型快取: {e}")
         
-        # 取消關閉定時器
-        if self.shutdown_timer and hasattr(self.shutdown_timer, 'is_alive') and self.shutdown_timer.is_alive():
-            self.shutdown_timer.cancel()
-            logger.info("Shutdown timer cancelled")
+        # 5. 強制垃圾回收
+        try:
+            gc.collect()
+            logger.debug("✓ 強制垃圾回收")
+        except Exception as e:
+            logger.warning(f"✗ 強制垃圾回收: {e}")
         
-        logger.info("Cleanup completed")
-
-async def main():
-    parser = argparse.ArgumentParser(description="自適應 YOLO 並發推理")
-    parser.add_argument("--video_path", type=str, default="./data/video.mp4")
-    parser.add_argument("--tflite_model", type=str, default="./models/yolov8n_float32.tflite")
-    parser.add_argument("--min_workers", type=int, default=1, help="最小工作者數量")
-    parser.add_argument("--max_workers", type=int, default=8, help="最大工作者數量")
-    parser.add_argument("--queue_size", type=int, default=32, help="幀隊列大小")
-    parser.add_argument("--log_level", type=str, default="INFO", 
-                        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
-                        help="日誌級別")
+        logger.info("資源清理完成")
+async def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="YOLO 高性能並發推理演示程式",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        "--video_path", 
+        type=str, 
+        default="./data/video.mp4",
+        help="輸入視頻檔案路徑"
+    )
+    parser.add_argument(
+        "--model_path", 
+        type=str, 
+        default="./models/yolov8n_float32.tflite",
+        help="YOLO 模型檔案路徑"
+    )
+    parser.add_argument(
+        "--min_workers", 
+        type=int, 
+        default=1,
+        help="最小工作者數量"
+    )
+    parser.add_argument(
+        "--max_workers", 
+        type=int, 
+        default=8,
+        help="最大工作者數量"
+    )
+    parser.add_argument(
+        "--queue_size", 
+        type=int, 
+        default=32,
+        help="處理隊列大小"
+    )
     args = parser.parse_args()
     
-    # 設置日誌級別
-    logging.getLogger().setLevel(getattr(logging, args.log_level))
-    
-    bin_dir = './bin'
-    if os.path.exists(bin_dir):
-        shutil.rmtree(bin_dir)
-    os.mkdir(bin_dir)
-    
-    pipeline = InferencePipeline(
-        model_path=args.tflite_model,
+    # 設定日誌級別
+    logging.getLogger().setLevel(getattr(logging, "INFO"))
+
+    # 建立推理管道
+    pipeline = YOLOInferencePipeline(
+        model_path=args.model_path,
         min_workers=args.min_workers,
         max_workers=args.max_workers,
         queue_size=args.queue_size
@@ -431,20 +488,22 @@ async def main():
     
     try:
         await pipeline.run(args.video_path)
+    except KeyboardInterrupt:
+        logger.info("使用者中斷程式執行")
+        print("程式被使用者中斷")
     except Exception as e:
-        logger.error(f"Main error: {e}")
-        print(f"執行發生錯誤: {e}")  # 只在錯誤時顯示到終端
+        logger.error(f"程式執行錯誤: {e}")
+        print(f"執行發生錯誤: {e}")
     finally:
-        # main() 只負責記錄程式完成，資源清理由 pipeline.run() 負責
-        logger.info("Main function completed")
+        logger.info("程式執行完成")
 
 if __name__ == "__main__":
+    """程式入口點 - 執行高性能 YOLO 推理演示"""
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
         print("程式被使用者中斷")
-    except Exception as e:
-        print(f"程式發生錯誤: {e}")
+    except Exception as error:
+        print(f"程式發生錯誤: {error}")
     finally:
-        # __main__ 只負責程式結束提示，不處理具體資源清理
         print("程式結束")
