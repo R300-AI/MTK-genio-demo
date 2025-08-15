@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 class YOLOInferencePipeline:
     DISPLAY_SIZE = (720, 480)
-    WINDOW_NAME = "YOLO 物件檢測"
+    WINDOW_NAME = "Demo - YOLO Async Inference"
     
     def __init__(self, model_path: str, min_workers: int = 1, max_workers: int = 8, queue_size: int = 10):
         # 基本配置
