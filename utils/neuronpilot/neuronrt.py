@@ -1,25 +1,47 @@
 from utils.neuronpilot.data import convert_to_binary, convert_to_numpy
 import numpy as np
-import tensorflow as tf
 import os, shutil, subprocess, uuid
+import tensorflow as tf
+import gc
 
 class Interpreter():
     """NeuronRT Interpreter - 專為單序列推論優化"""
-    def __init__(self, tflite_path, dla_path, device):
-        self.tflite_path = tflite_path
+    def __init__(self, dla_path):
         self.dla_path = dla_path
-        self.device = device
+
+        if not dla_path.endswith('.dla'):
+            raise ValueError("dla_path格式錯誤，應為 <model_name>.tflite.<device>.dla")
+            
+        parts = dla_path.split('.tflite.')
+        if len(parts) != 2 or not parts[1].endswith('.dla'):
+            raise ValueError("dla_path格式錯誤，應為 <model_name>.tflite.<device>.dla")
         
+        # 取得 device 並轉換格式
+        device_name = parts[1][:-4]  # 去掉.dla
+        if device_name.startswith('mdla') and '.' not in device_name:
+            self.device = device_name + '.0'  # mdla3 -> mdla3.0, mdla2 -> mdla2.0
+        else:
+            self.device = device_name  # vpu 等其他 device 保持不變
+
+        self.tflite_path = parts[0] + '.tflite'
+
+        if not os.path.exists(self.dla_path):
+            raise FileNotFoundError(f"找不到DLA模型檔案: {self.dla_path}")
+        if not os.path.exists(self.tflite_path):
+            raise FileNotFoundError(f"找不到{self.dla_path}對應的TFLite檔案: {self.tflite_path}")
+
         # 為每個 interpreter 實例創建唯一的 bin 目錄
         self.id = str(uuid.uuid4())
         self.bin_dir = f'./bin/{self.id}'
         os.makedirs(self.bin_dir, exist_ok=True)
 
-        # 使用 TFLite 解釋器獲取模型資訊
-        interpreter = tf.lite.Interpreter(model_path=tflite_path)
+        # 輕量取得 TFLite 模型的 input/output details (不載入模型權重)
+        interpreter = tf.lite.Interpreter(model_path=self.tflite_path)
         self.input_details = interpreter.get_input_details()
         self.output_details = interpreter.get_output_details()
-        
+        del interpreter  # 立即釋放
+        gc.collect()     # 強制垃圾回收，釋放記憶體
+
         # 單序列使用固定的檔案處理器
         self.input_handlers = [f'{self.bin_dir}/input_{i}.bin' for i in range(len(self.input_details))]
         self.output_handlers = {

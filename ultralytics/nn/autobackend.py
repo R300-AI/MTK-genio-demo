@@ -464,25 +464,25 @@ class AutoBackend(nn.Module):
                 LOGGER.info(f"Loading {w} for TensorFlow Lite inference...")
 
                 # === 原始 TFLite 解釋器 ===
-                # interpreter = Interpreter(model_path=w)
-                # raise RuntimeError(
-                #     f"Genio Backend not configured! Please edit {__file__} and uncomment one of the backend options above. Please see the tutorial at docs/ultralytics_streaming_tutorial.md for detailed instructions."
-                # )
-                if '.dla' in w:
-                    from utils.neuronpilot import neuronrt
-                    interpreter = neuronrt.Interpreter(dla_path=w, device= "mdla3.0")
-                else:
-                    import tensorflow as tf
-                    interpreter = Interpreter(model_path=w)
-                #    interpreter = tf.lite.Interpreter(
-                #        model_path=w,
-                #        experimental_delegates=[
-                #            armnn_delegate = tf.lite.experimental.load_delegate(
-                #                library="<path to libarmnnDelegate.so>",
-                #                options={"backends": "GpuAcc", "logging-severity": "fatal"}
-                #            )
-                #        ]
-                #    )
+                interpreter = Interpreter(model_path=w)
+                raise RuntimeError(
+                    f"Genio Backend not configured! Please edit {__file__} and uncomment one of the backend options above. Please see the tutorial at docs/ultralytics_streaming_tutorial.md for detailed instructions."
+                )
+                #if '.dla' in w:
+                #    from utils.neuronpilot import neuronrt
+                #    interpreter = neuronrt.Interpreter(dla_path=w)
+                #else:
+                #    import tensorflow as tf
+                #
+                #   interpreter = tf.lite.Interpreter(
+                #       model_path=w,
+                #       experimental_delegates=[
+                #           armnn_delegate = tf.lite.experimental.load_delegate(
+                #               library="/ArmNN-linux-aarch64/libarmnnDelegate.so",
+                #               options={"backends": "GpuAcc", "logging-severity": "fatal"}
+                #           )
+                #       ]
+                #   )
 
             interpreter.allocate_tensors()  # allocate
             input_details = interpreter.get_input_details()  # inputs
