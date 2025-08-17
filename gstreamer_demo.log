@@ -1,77 +1,100 @@
-[2025-08-18 01:20:35,842] INFO - Starting GStreamer Demo
-[2025-08-18 01:20:35,843] INFO - [MONITOR] log interval set to 10 frames
-[2025-08-18 01:20:35,843] INFO - [BALANCER] Initialized.
-[2025-08-18 01:20:35,843] INFO - [MAIN] Balancer enabled for dynamic rate control
-[2025-08-18 01:20:35,860] INFO - [PRODUCER] video source - ./data/video.mp4
-[2025-08-18 01:20:35,860] INFO - [WORKERPOOL] streaming with 3 workers
-[2025-08-18 01:20:35,860] INFO - [PROCESSOR] model - ./models/yolov8n_float32.tflite
-[2025-08-18 01:20:39,637] INFO - [PROCESSOR] model - ./models/yolov8n_float32.tflite
-[2025-08-18 01:20:39,740] INFO - [PROCESSOR] model - ./models/yolov8n_float32.tflite
-[2025-08-18 01:20:39,847] INFO - [CONSUMER] window name - Hetegeneous Integrated Chip Inference Demo
-[2025-08-18 01:20:39,847] INFO - Creating pipeline...
-[2025-08-18 01:20:39,847] INFO - ========【Starting pipeline execution】========
-[2025-08-18 01:20:40,159] INFO - [Monitor] -> Produced: 10, Queued: 3, Processing: 3, Processed: 4, Pending: 0, Consumed: 4 | produced
-[2025-08-18 01:20:40,159] INFO - [BALANCER] Producer interval auto-adjust: 0.033s -> 0.047s (target by processed_fps=21.22)
-[2025-08-18 01:20:40,208] INFO - [BALANCER] Producer interval auto-adjust: 0.047s -> 0.054s (target by processed_fps=18.54)
-[2025-08-18 01:20:40,264] INFO - [BALANCER] Producer interval auto-adjust: 0.054s -> 0.041s (target by processed_fps=24.62)
-[2025-08-18 01:20:40,346] INFO - [BALANCER] Producer interval auto-adjust: 0.041s -> 0.046s (target by processed_fps=21.63)
-[2025-08-18 01:20:40,395] INFO - [BALANCER] Producer interval auto-adjust: 0.046s -> 0.049s (target by processed_fps=20.60)
-[2025-08-18 01:20:40,406] INFO - [Monitor] -> Produced: 15, Queued: 2, Processing: 3, Processed: 10, Pending: 1, Consumed: 9 | processed
-[2025-08-18 01:20:40,409] INFO - [Monitor] -> Produced: 15, Queued: 2, Processing: 3, Processed: 10, Pending: 0, Consumed: 10 | consumed
-[2025-08-18 01:20:40,442] INFO - [BALANCER] Producer interval auto-adjust: 0.049s -> 0.046s (target by processed_fps=21.58)
-[2025-08-18 01:20:40,537] INFO - [BALANCER] Producer interval auto-adjust: 0.047s -> 0.045s (target by processed_fps=22.23)
-[2025-08-18 01:20:40,631] INFO - [Monitor] -> Produced: 20, Queued: 3, Processing: 3, Processed: 14, Pending: 0, Consumed: 14 | produced
-[2025-08-18 01:20:40,676] INFO - [BALANCER] Producer interval auto-adjust: 0.045s -> 0.048s (target by processed_fps=20.62)
-[2025-08-18 01:20:40,728] INFO - [BALANCER] Producer interval auto-adjust: 0.048s -> 0.046s (target by processed_fps=21.97)
-[2025-08-18 01:20:40,836] INFO - [Monitor] -> Produced: 24, Queued: 1, Processing: 3, Processed: 20, Pending: 1, Consumed: 19 | processed
-[2025-08-18 01:20:40,839] INFO - [Monitor] -> Produced: 24, Queued: 1, Processing: 3, Processed: 20, Pending: 0, Consumed: 20 | consumed
-[2025-08-18 01:20:40,867] INFO - [BALANCER] Producer interval auto-adjust: 0.046s -> 0.045s (target by processed_fps=22.45)
-[2025-08-18 01:20:40,956] INFO - [BALANCER] Producer interval auto-adjust: 0.045s -> 0.048s (target by processed_fps=20.86)
-[2025-08-18 01:20:41,005] INFO - [BALANCER] Producer interval auto-adjust: 0.048s -> 0.045s (target by processed_fps=22.08)
-[2025-08-18 01:20:41,098] INFO - [Monitor] -> Produced: 30, Queued: 3, Processing: 3, Processed: 24, Pending: 0, Consumed: 24 | produced
-[2025-08-18 01:20:41,098] INFO - [BALANCER] Producer interval auto-adjust: 0.045s -> 0.048s (target by processed_fps=20.81)
-[2025-08-18 01:20:41,148] INFO - [BALANCER] Producer interval auto-adjust: 0.048s -> 0.046s (target by processed_fps=21.65)
-[2025-08-18 01:20:41,387] INFO - [Monitor] -> Produced: 36, Queued: 3, Processing: 3, Processed: 30, Pending: 1, Consumed: 29 | processed
-[2025-08-18 01:20:41,390] INFO - [Monitor] -> Produced: 36, Queued: 3, Processing: 3, Processed: 30, Pending: 0, Consumed: 30 | consumed
-[2025-08-18 01:20:41,576] INFO - [Monitor] -> Produced: 40, Queued: 3, Processing: 3, Processed: 34, Pending: 1, Consumed: 33 | produced
-[2025-08-18 01:20:41,576] INFO - [BALANCER] Producer interval auto-adjust: 0.046s -> 0.048s (target by processed_fps=20.82)
-[2025-08-18 01:20:41,623] INFO - [BALANCER] Producer interval auto-adjust: 0.048s -> 0.047s (target by processed_fps=21.37)
-[2025-08-18 01:20:41,850] INFO - [Monitor] -> Produced: 45, Queued: 2, Processing: 3, Processed: 40, Pending: 1, Consumed: 39 | processed
-[2025-08-18 01:20:41,860] INFO - [Monitor] -> Produced: 45, Queued: 1, Processing: 3, Processed: 41, Pending: 1, Consumed: 40 | consumed
-[2025-08-18 01:20:42,055] INFO - [Monitor] -> Produced: 50, Queued: 3, Processing: 3, Processed: 44, Pending: 0, Consumed: 44 | produced
-[2025-08-18 01:20:42,255] INFO - [Monitor] -> Produced: 54, Queued: 1, Processing: 3, Processed: 50, Pending: 1, Consumed: 49 | processed
-[2025-08-18 01:20:42,259] INFO - [Monitor] -> Produced: 54, Queued: 1, Processing: 3, Processed: 50, Pending: 0, Consumed: 50 | consumed
-[2025-08-18 01:20:42,391] INFO - [BALANCER] Producer interval auto-adjust: 0.046s -> 0.048s (target by processed_fps=21.05)
-[2025-08-18 01:20:42,496] INFO - [BALANCER] Producer interval auto-adjust: 0.048s -> 0.046s (target by processed_fps=21.56)
-[2025-08-18 01:20:42,557] INFO - [Monitor] -> Produced: 60, Queued: 1, Processing: 3, Processed: 56, Pending: 0, Consumed: 56 | produced
-[2025-08-18 01:20:42,809] INFO - [Monitor] -> Produced: 65, Queued: 2, Processing: 3, Processed: 60, Pending: 1, Consumed: 59 | processed
-[2025-08-18 01:20:42,811] INFO - [Monitor] -> Produced: 65, Queued: 2, Processing: 3, Processed: 60, Pending: 0, Consumed: 60 | consumed
-[2025-08-18 01:20:42,981] INFO - [BALANCER] Producer interval auto-adjust: 0.047s -> 0.049s (target by processed_fps=20.36)
-[2025-08-18 01:20:43,031] INFO - [Monitor] -> Produced: 70, Queued: 2, Processing: 3, Processed: 65, Pending: 0, Consumed: 65 | produced
-[2025-08-18 01:20:43,031] INFO - [BALANCER] Producer interval auto-adjust: 0.049s -> 0.048s (target by processed_fps=21.05)
-[2025-08-18 01:20:43,322] INFO - [BALANCER] Producer interval auto-adjust: 0.048s -> 0.050s (target by processed_fps=19.98)
-[2025-08-18 01:20:43,330] INFO - [Monitor] -> Produced: 76, Queued: 3, Processing: 3, Processed: 70, Pending: 1, Consumed: 69 | processed
-[2025-08-18 01:20:43,333] INFO - [Monitor] -> Produced: 76, Queued: 3, Processing: 3, Processed: 70, Pending: 0, Consumed: 70 | consumed
-[2025-08-18 01:20:43,374] INFO - [BALANCER] Producer interval auto-adjust: 0.050s -> 0.048s (target by processed_fps=20.70)
-[2025-08-18 01:20:43,541] INFO - [Monitor] -> Produced: 80, Queued: 3, Processing: 3, Processed: 74, Pending: 0, Consumed: 74 | produced
-[2025-08-18 01:20:43,734] INFO - [BALANCER] Producer interval auto-adjust: 0.048s -> 0.050s (target by processed_fps=20.06)
-[2025-08-18 01:20:43,762] INFO - [Monitor] -> Produced: 84, Queued: 1, Processing: 3, Processed: 80, Pending: 1, Consumed: 79 | processed
-[2025-08-18 01:20:43,765] INFO - [Monitor] -> Produced: 84, Queued: 1, Processing: 3, Processed: 80, Pending: 0, Consumed: 80 | consumed
-[2025-08-18 01:20:43,787] INFO - [BALANCER] Producer interval auto-adjust: 0.050s -> 0.048s (target by processed_fps=20.90)
-[2025-08-18 01:20:44,030] INFO - [Monitor] -> Produced: 90, Queued: 3, Processing: 3, Processed: 84, Pending: 0, Consumed: 84 | produced
-[2025-08-18 01:20:44,030] INFO - [BALANCER] Producer interval auto-adjust: 0.048s -> 0.050s (target by processed_fps=20.04)
-[2025-08-18 01:20:44,131] INFO - [BALANCER] Producer interval auto-adjust: 0.050s -> 0.049s (target by processed_fps=20.46)
-[2025-08-18 01:20:44,181] INFO - [BALANCER] Producer interval auto-adjust: 0.049s -> 0.050s (target by processed_fps=19.87)
-[2025-08-18 01:20:44,231] INFO - [BALANCER] Producer interval auto-adjust: 0.050s -> 0.049s (target by processed_fps=20.55)
-[2025-08-18 01:20:44,342] INFO - [Monitor] -> Produced: 96, Queued: 3, Processing: 3, Processed: 90, Pending: 1, Consumed: 89 | processed
-[2025-08-18 01:20:44,344] INFO - [Monitor] -> Produced: 96, Queued: 3, Processing: 3, Processed: 90, Pending: 0, Consumed: 90 | consumed
-[2025-08-18 01:20:44,534] INFO - [Monitor] -> Produced: 100, Queued: 3, Processing: 3, Processed: 94, Pending: 0, Consumed: 94 | produced
-[2025-08-18 01:20:44,688] INFO - [BALANCER] Producer interval auto-adjust: 0.051s -> 0.050s (target by processed_fps=20.14)
-[2025-08-18 01:20:44,788] INFO - [BALANCER] Producer interval auto-adjust: 0.050s -> 0.051s (target by processed_fps=19.44)
-[2025-08-18 01:20:44,802] INFO - [Monitor] -> Produced: 105, Queued: 2, Processing: 3, Processed: 100, Pending: 1, Consumed: 99 | processed
-[2025-08-18 01:20:44,805] INFO - [Monitor] -> Produced: 105, Queued: 2, Processing: 3, Processed: 100, Pending: 0, Consumed: 100 | consumed
-[2025-08-18 01:20:44,841] INFO - [BALANCER] Producer interval auto-adjust: 0.051s -> 0.050s (target by processed_fps=19.97)
-[2025-08-18 01:20:45,066] INFO - PRODUCER: Producer loop ended, total frames processed: 109
-[2025-08-18 01:20:45,066] INFO - PIPELINE_RUN: Video mode - waiting for all frames to be processed and consumed
-[2025-08-18 01:20:45,224] INFO - [Monitor] -> Produced: 109, Queued: 0, Processing: 0, Processed: 109, Pending: 1, Consumed: 108 | processing_end
-[2025-08-18 01:20:45,268] INFO - ========【Pipeline execution completed】========
+[2025-08-18 04:18:48,842] INFO - Starting GStreamer Demo
+[2025-08-18 04:18:48,844] INFO - [MONITOR] log interval set to 10 frames
+[2025-08-18 04:18:48,844] INFO - [BALANCER] Initialized.
+[2025-08-18 04:18:48,844] INFO - [MAIN] Balancer enabled for dynamic rate control
+[2025-08-18 04:18:48,863] INFO - [PRODUCER] video source - ./data/video.mp4
+[2025-08-18 04:18:48,864] INFO - [WORKERPOOL] streaming with 3 workers
+[2025-08-18 04:18:48,864] INFO - [PROCESSOR] model - ./models/yolov8n_float32.tflite
+[2025-08-18 04:18:54,653] INFO - [PROCESSOR] model - ./models/yolov8n_float32.tflite
+[2025-08-18 04:18:54,787] INFO - [PROCESSOR] model - ./models/yolov8n_float32.tflite
+[2025-08-18 04:18:54,925] INFO - [CONSUMER] window name - Hetegeneous Integrated Chip Inference Demo
+[2025-08-18 04:18:54,925] INFO - Creating pipeline...
+[2025-08-18 04:18:54,925] INFO - ========【Starting pipeline execution】========
+[2025-08-18 04:18:55,255] INFO - [Monitor] -> Produced: 10, Queued: 6, Processing: 2, Processed: 2, Pending: 0, Consumed: 2 | produced
+[2025-08-18 04:18:55,289] INFO - [BALANCER] Producer interval auto-adjust: 0.033s -> 0.070s (target by processed_fps=14.24)
+[2025-08-18 04:18:55,332] INFO - [BALANCER] Producer interval auto-adjust: 0.100s -> 0.070s (target by processed_fps=14.24)
+[2025-08-18 04:18:55,362] INFO - [BALANCER] Producer interval auto-adjust: 0.070s -> 0.078s (target by processed_fps=12.81)
+[2025-08-18 04:18:55,403] INFO - [BALANCER] Producer interval auto-adjust: 0.070s -> 0.078s (target by processed_fps=12.81)
+[2025-08-18 04:18:55,482] INFO - [BALANCER] Producer interval auto-adjust: 0.078s -> 0.085s (target by processed_fps=11.77)
+[2025-08-18 04:18:55,516] INFO - [BALANCER] Producer interval auto-adjust: 0.078s -> 0.085s (target by processed_fps=11.77)
+[2025-08-18 04:18:55,567] INFO - [BALANCER] Producer interval auto-adjust: 0.085s -> 0.083s (target by processed_fps=11.99)
+[2025-08-18 04:18:55,605] INFO - [BALANCER] Producer interval auto-adjust: 0.085s -> 0.083s (target by processed_fps=11.99)
+[2025-08-18 04:18:55,651] INFO - [BALANCER] Producer interval auto-adjust: 0.083s -> 0.087s (target by processed_fps=11.54)
+[2025-08-18 04:18:55,687] INFO - [BALANCER] Producer interval auto-adjust: 0.083s -> 0.087s (target by processed_fps=11.54)
+[2025-08-18 04:18:55,864] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.089s (target by processed_fps=11.28)
+[2025-08-18 04:18:55,888] INFO - [Monitor] -> Produced: 18, Queued: 6, Processing: 2, Processed: 10, Pending: 1, Consumed: 9 | processed
+[2025-08-18 04:18:55,891] INFO - [Monitor] -> Produced: 18, Queued: 7, Processing: 1, Processed: 10, Pending: 0, Consumed: 10 | consumed
+[2025-08-18 04:18:55,914] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.085s (target by processed_fps=11.78)
+[2025-08-18 04:18:55,949] INFO - [BALANCER] Producer interval auto-adjust: 0.089s -> 0.085s (target by processed_fps=11.78)
+[2025-08-18 04:18:56,037] INFO - [Monitor] -> Produced: 20, Queued: 7, Processing: 2, Processed: 11, Pending: 0, Consumed: 11 | produced
+[2025-08-18 04:18:56,086] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.084s (target by processed_fps=11.90)
+[2025-08-18 04:18:56,123] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.084s (target by processed_fps=11.90)
+[2025-08-18 04:18:56,721] INFO - [BALANCER] Producer interval auto-adjust: 0.085s -> 0.087s (target by processed_fps=11.53)
+[2025-08-18 04:18:56,768] INFO - [BALANCER] Producer interval auto-adjust: 0.085s -> 0.087s (target by processed_fps=11.53)
+[2025-08-18 04:18:56,777] INFO - [Monitor] -> Produced: 28, Queued: 5, Processing: 3, Processed: 20, Pending: 1, Consumed: 19 | processed
+[2025-08-18 04:18:56,781] INFO - [Monitor] -> Produced: 28, Queued: 6, Processing: 2, Processed: 20, Pending: 0, Consumed: 20 | consumed
+[2025-08-18 04:18:56,896] INFO - [Monitor] -> Produced: 30, Queued: 7, Processing: 2, Processed: 21, Pending: 0, Consumed: 21 | produced
+[2025-08-18 04:18:56,985] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.086s (target by processed_fps=11.63)
+[2025-08-18 04:18:57,327] INFO - [BALANCER] Producer interval auto-adjust: 0.085s -> 0.087s (target by processed_fps=11.54)
+[2025-08-18 04:18:57,372] INFO - [BALANCER] Producer interval auto-adjust: 0.085s -> 0.087s (target by processed_fps=11.54)
+[2025-08-18 04:18:57,417] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.088s (target by processed_fps=11.34)
+[2025-08-18 04:18:57,459] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.088s (target by processed_fps=11.34)
+[2025-08-18 04:18:57,548] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.087s (target by processed_fps=11.56)
+[2025-08-18 04:18:57,583] INFO - [Monitor] -> Produced: 37, Queued: 5, Processing: 2, Processed: 30, Pending: 1, Consumed: 29 | processed
+[2025-08-18 04:18:57,584] INFO - [Monitor] -> Produced: 37, Queued: 6, Processing: 1, Processed: 30, Pending: 0, Consumed: 30 | consumed
+[2025-08-18 04:18:57,593] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.085s (target by processed_fps=11.79)
+[2025-08-18 04:18:57,635] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.085s (target by processed_fps=11.79)
+[2025-08-18 04:18:57,763] INFO - [Monitor] -> Produced: 40, Queued: 7, Processing: 2, Processed: 31, Pending: 0, Consumed: 31 | produced
+[2025-08-18 04:18:58,025] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.47)
+[2025-08-18 04:18:58,065] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.47)
+[2025-08-18 04:18:58,112] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.085s (target by processed_fps=11.73)
+[2025-08-18 04:18:58,153] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.085s (target by processed_fps=11.73)
+[2025-08-18 04:18:58,537] INFO - [Monitor] -> Produced: 48, Queued: 5, Processing: 3, Processed: 40, Pending: 1, Consumed: 39 | processed
+[2025-08-18 04:18:58,539] INFO - [Monitor] -> Produced: 48, Queued: 6, Processing: 2, Processed: 40, Pending: 0, Consumed: 40 | consumed
+[2025-08-18 04:18:58,547] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.43)
+[2025-08-18 04:18:58,586] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.43)
+[2025-08-18 04:18:58,634] INFO - [Monitor] -> Produced: 50, Queued: 7, Processing: 2, Processed: 41, Pending: 0, Consumed: 41 | produced
+[2025-08-18 04:18:58,674] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.086s (target by processed_fps=11.64)
+[2025-08-18 04:18:58,722] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.086s (target by processed_fps=11.64)
+[2025-08-18 04:18:59,070] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.088s (target by processed_fps=11.41)
+[2025-08-18 04:18:59,108] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.088s (target by processed_fps=11.41)
+[2025-08-18 04:18:59,157] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.086s (target by processed_fps=11.69)
+[2025-08-18 04:18:59,195] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.086s (target by processed_fps=11.69)
+[2025-08-18 04:18:59,321] INFO - [Monitor] -> Produced: 57, Queued: 5, Processing: 2, Processed: 50, Pending: 1, Consumed: 49 | processed
+[2025-08-18 04:18:59,324] INFO - [Monitor] -> Produced: 57, Queued: 6, Processing: 1, Processed: 50, Pending: 0, Consumed: 50 | consumed
+[2025-08-18 04:18:59,455] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.46)
+[2025-08-18 04:18:59,505] INFO - [Monitor] -> Produced: 60, Queued: 7, Processing: 2, Processed: 51, Pending: 0, Consumed: 51 | produced
+[2025-08-18 04:18:59,505] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.46)
+[2025-08-18 04:18:59,597] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.088s (target by processed_fps=11.33)
+[2025-08-18 04:18:59,630] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.088s (target by processed_fps=11.33)
+[2025-08-18 04:18:59,719] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.086s (target by processed_fps=11.57)
+[2025-08-18 04:18:59,772] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.086s (target by processed_fps=11.57)
+[2025-08-18 04:19:00,228] INFO - [Monitor] -> Produced: 68, Queued: 6, Processing: 2, Processed: 60, Pending: 1, Consumed: 59 | processed
+[2025-08-18 04:19:00,230] INFO - [Monitor] -> Produced: 68, Queued: 7, Processing: 1, Processed: 60, Pending: 0, Consumed: 60 | consumed
+[2025-08-18 04:19:00,380] INFO - [Monitor] -> Produced: 70, Queued: 7, Processing: 2, Processed: 61, Pending: 0, Consumed: 61 | produced
+[2025-08-18 04:19:01,099] INFO - [Monitor] -> Produced: 78, Queued: 6, Processing: 2, Processed: 70, Pending: 1, Consumed: 69 | processed
+[2025-08-18 04:19:01,101] INFO - [Monitor] -> Produced: 78, Queued: 7, Processing: 1, Processed: 70, Pending: 0, Consumed: 70 | consumed
+[2025-08-18 04:19:01,256] INFO - [Monitor] -> Produced: 80, Queued: 7, Processing: 2, Processed: 71, Pending: 0, Consumed: 71 | produced
+[2025-08-18 04:19:01,866] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.46)
+[2025-08-18 04:19:01,957] INFO - [Monitor] -> Produced: 88, Queued: 6, Processing: 2, Processed: 80, Pending: 1, Consumed: 79 | processed
+[2025-08-18 04:19:01,959] INFO - [Monitor] -> Produced: 88, Queued: 7, Processing: 1, Processed: 80, Pending: 0, Consumed: 80 | consumed
+[2025-08-18 04:19:02,126] INFO - [Monitor] -> Produced: 90, Queued: 7, Processing: 1, Processed: 82, Pending: 1, Consumed: 81 | produced
+[2025-08-18 04:19:02,392] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.45)
+[2025-08-18 04:19:02,425] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.45)
+[2025-08-18 04:19:02,778] INFO - [BALANCER] Producer interval auto-adjust: 0.089s -> 0.086s (target by processed_fps=11.62)
+[2025-08-18 04:19:02,833] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.086s (target by processed_fps=11.62)
+[2025-08-18 04:19:02,860] INFO - [Monitor] -> Produced: 98, Queued: 6, Processing: 2, Processed: 90, Pending: 1, Consumed: 89 | processed
+[2025-08-18 04:19:02,862] INFO - [Monitor] -> Produced: 98, Queued: 7, Processing: 1, Processed: 90, Pending: 0, Consumed: 90 | consumed
+[2025-08-18 04:19:03,007] INFO - [Monitor] -> Produced: 100, Queued: 7, Processing: 1, Processed: 92, Pending: 0, Consumed: 92 | produced
+[2025-08-18 04:19:03,040] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.087s (target by processed_fps=11.56)
+[2025-08-18 04:19:03,271] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.086s (target by processed_fps=11.65)
+[2025-08-18 04:19:03,304] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.086s (target by processed_fps=11.65)
+[2025-08-18 04:19:03,477] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.088s (target by processed_fps=11.38)
+[2025-08-18 04:19:03,534] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.088s (target by processed_fps=11.38)
+[2025-08-18 04:19:03,707] INFO - [Monitor] -> Produced: 107, Queued: 5, Processing: 2, Processed: 100, Pending: 1, Consumed: 99 | processed
+[2025-08-18 04:19:03,709] INFO - [Monitor] -> Produced: 107, Queued: 6, Processing: 1, Processed: 100, Pending: 0, Consumed: 100 | consumed
+[2025-08-18 04:19:03,743] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.087s (target by processed_fps=11.47)
+[2025-08-18 04:19:03,905] INFO - PRODUCER: Producer loop ended, total frames processed: 109
+[2025-08-18 04:19:03,906] INFO - PIPELINE_RUN: Video mode - waiting for all frames to be processed and consumed
+[2025-08-18 04:19:03,950] INFO - [Monitor] -> Produced: 109, Queued: 6, Processing: 0, Processed: 103, Pending: 1, Consumed: 102 | processing_end
+[2025-08-18 04:19:05,010] INFO - ========【Pipeline execution completed】========

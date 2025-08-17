@@ -152,15 +152,29 @@ class WorkerPool:
         return False
 
     def _find_available_worker(self):
-        """找到可用的 worker，使用您的 is_busy 機制"""
-        available_count = 0
-        for worker in self.workers:
-            with worker.lock:
-                if not worker.is_busy:
-                    logger.debug(f"WORKERPOOL_FIND: Found available worker")
-                    return worker
-                else:
-                    available_count += 1
+        """使用 round-robin 策略找到可用的 worker，避免總是使用前面的 worker"""
+        if not hasattr(self, '_last_worker_index'):
+            self._last_worker_index = 0
+        
+        # 從上次使用的 worker 下一個位置開始搜索
+        start_index = (self._last_worker_index + 1) % len(self.workers)
+        
+        # 搜索兩輪：第一輪從 start_index 開始，第二輪從頭開始
+        for round_num in range(2):
+            start = start_index if round_num == 0 else 0
+            end = len(self.workers) if round_num == 0 else start_index
+            
+            for i in range(start, end):
+                worker = self.workers[i]
+                # 使用 trylock 避免阻塞，如果無法獲得鎖說明 worker 很忙
+                if worker.lock.acquire(blocking=False):
+                    try:
+                        if not worker.is_busy:
+                            self._last_worker_index = i
+                            logger.debug(f"WORKERPOOL_FIND: Found available worker {i} (round-robin)")
+                            return worker
+                    finally:
+                        worker.lock.release()
         return None
 
     def _processing_loop(self):
