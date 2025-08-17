@@ -473,15 +473,15 @@ class AutoBackend(nn.Module):
                     interpreter = neuronrt.Interpreter(dla_path=w)
                 else:
                     import tensorflow as tf
-                   interpreter = tf.lite.Interpreter(
-                       model_path=w,
-                       experimental_delegates=[
-                           tf.lite.experimental.load_delegate(
-                               library="/ArmNN-linux-aarch64/libarmnnDelegate.so",
-                               options={"backends": "GpuAcc", "logging-severity": "fatal"}
-                           )
-                       ]
-                   )
+                    interpreter = tf.lite.Interpreter(
+                        model_path=w,
+                        experimental_delegates=[
+                            tf.lite.experimental.load_delegate(
+                                library="/ArmNN-linux-aarch64/libarmnnDelegate.so",
+                                options={"backends": "GpuAcc", "logging-severity": "fatal"}
+                            )
+                        ]
+                    )
 
             interpreter.allocate_tensors()  # allocate
             input_details = interpreter.get_input_details()  # inputs
