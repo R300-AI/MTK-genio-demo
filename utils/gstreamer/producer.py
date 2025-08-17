@@ -9,7 +9,7 @@ class Producer:
     def __init__(self, source, filename = None, index = None, monitor=None, balancer=None):
         if isinstance(source, int) or (isinstance(source, str) and source.isdigit()):
             self.mode = "camera"
-            self.cap = cv2.VideoCapture(int(source), cv2.CAP_DSHOW)
+            self.cap = cv2.VideoCapture(int(source)) # , cv2.CAP_DSHOW
         else:
             self.mode = "video"
             self.cap = cv2.VideoCapture(source)

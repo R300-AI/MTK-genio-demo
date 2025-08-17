@@ -16,7 +16,7 @@ def main():
     parser.add_argument(
         "--video_path",
         type=str,
-        default="./data/video.mp4",#"./data/video.mp4"
+        default="0",#"./data/video.mp4"
         help=(
             "Defines the input source for frame acquisition via OpenCV VideoCapture. "
             "This parameter supports camera indices (e.g., 0), RTSP stream URLs, or file paths to local video assets."

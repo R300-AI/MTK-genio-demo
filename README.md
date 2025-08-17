@@ -127,7 +127,7 @@ $ uv run --with jupyter jupyter lab
 
 如果開發者想針對 MTK 加速器（DLA/VPU）設計可部署的模型，在實際進行開發前可以預先透過 **NeuronPilot AI Porting Platform** 線上平台驗證模型的相容性。
 
-🌐 **平台網址**：[https://neuronpilot-porting-platform.azurewebsites.net/](https://neuronpilot-ai-porting-platform.azurewebsites.net/)
+🌐 **平台網址**：[https://neuronpilot-ai-porting-platform.azurewebsites.net/](https://neuronpilot-ai-porting-platform.azurewebsites.net/)
 
 該平台提供兩種不同的驗證方案：
 
