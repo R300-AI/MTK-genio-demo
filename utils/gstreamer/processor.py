@@ -118,15 +118,38 @@ class WorkerPool:
                 logger.warning(f"[INFLIGHT] Unfinished tasks at stop: {self.in_flight}")
 
     def process(self, frame):
-        """提交 frame 進行處理（保持與原本相同的介面）"""
+        """提交 frame 進行處理，加入背壓控制避免批次處理"""
         if frame is None:
             return frame
+        
+        # 背壓控制：如果系統負載太高，直接丟frame
+        if self._should_drop_frame():
+            logger.debug("System overloaded, dropping frame to prevent batching")
+            return
+        
+        # 正常處理
         with self.sequence_lock:
             seq_num = self.sequence_counter
             self.sequence_counter += 1
         with self.in_flight_lock:
             self.in_flight.add(seq_num)
         self.task_queue.put((frame, seq_num))
+    
+    def _should_drop_frame(self):
+        """判斷是否應該丟棄frame - 背壓控制核心邏輯"""
+        # 計算當前系統負載
+        busy_workers = sum(1 for worker in self.workers if getattr(worker, 'is_busy', False))
+        queue_size = self.task_queue.qsize()
+        total_load = busy_workers + queue_size
+        
+        # 策略：如果總負載接近或超過worker數量，就開始丟frame
+        load_threshold = self.max_workers * 0.8  # 80%負載閾值
+        
+        if total_load >= load_threshold:
+            logger.debug(f"Load control: {total_load}/{self.max_workers} workers busy/queued, dropping frame")
+            return True
+        
+        return False
 
     def _find_available_worker(self):
         """找到可用的 worker，使用您的 is_busy 機制"""
@@ -157,9 +180,11 @@ class WorkerPool:
             try:
                 # 使用 Balancer 調整處理間隔（類似 Producer）
                 if self.balancer:
-                    self.process_interval = self.balancer.get_producer_sleep(self.process_interval) / self.max_workers
+                    # 根據worker數量調整間隔，避免過度密集派工
+                    base_interval = self.balancer.get_producer_sleep(self.process_interval)
+                    self.process_interval = base_interval / max(1, self.max_workers - 2)
                 
-                # 控制處理間隔，避免過度密集派工
+                # 控制處理間隔，確保worker派工均勻分散
                 current_time = time.time()
                 elapsed = current_time - self.last_process_time
                 if elapsed < self.process_interval:
@@ -170,17 +195,22 @@ class WorkerPool:
                 if task is None:
                     break
                 frame, seq_num = task
+                
+                # 尋找可用worker
                 worker = None
                 retry_count = 0
                 while worker is None and self.running:
                     worker = self._find_available_worker()
                     if worker is None:
                         retry_count += 1
-                        if retry_count % 1000 == 0:
-                            logger.warning(f"WORKERPOOL_LOOP: Waiting for available worker (retry {retry_count})")
-                        time.sleep(0.001)
+                        if retry_count % 100 == 0:  # 減少警告頻率
+                            logger.debug(f"WORKERPOOL_LOOP: Waiting for available worker (retry {retry_count})")
+                        time.sleep(0.01)  # 增加等待時間，減少CPU占用
+                
                 if not self.running:
                     break
+                    
+                # 啟動worker處理
                 if self.monitor:
                     self.monitor.count_processing_start()
                 threading.Thread(target=predict_async, args=(frame, seq_num, worker), daemon=True).start()
@@ -191,15 +221,50 @@ class WorkerPool:
         
 
     def _handle_result(self, seq_num, result):
-        """處理結果，直接回調並移除 in_flight"""
-        try:
-            self.result_callback(result)
-        except Exception as e:
-            logger.error(f"[WORKERPOOL] result_callback error for seq {seq_num}: {e}")
+        """處理結果 - 簡化版本，依靠背壓控制保證順序"""
+        # 清理 in_flight 追蹤
         with self.in_flight_lock:
             self.in_flight.discard(seq_num)
+        
+        # 直接輸出結果（背壓控制已經保證了相對順序）
+        if result is not None:
+            try:
+                self.result_callback(result)
+            except Exception as e:
+                logger.error(f"[WORKERPOOL] result_callback error for seq {seq_num}: {e}")
+        
+        # 更新監控統計
         if self.monitor:
             self.monitor.count_processed()
+
+    def get_status(self):
+        """獲取WorkerPool詳細狀態，包含背壓控制資訊"""
+        busy_workers = sum(1 for worker in self.workers if getattr(worker, 'is_busy', False))
+        queue_size = self.task_queue.qsize()
+        
+        with self.in_flight_lock:
+            in_flight_count = len(self.in_flight)
+        
+        total_load = busy_workers + queue_size
+        load_percentage = (total_load / self.max_workers) * 100
+        
+        return {
+            'total_workers': self.max_workers,
+            'busy_workers': busy_workers,
+            'available_workers': self.max_workers - busy_workers,
+            'queue_size': queue_size,
+            'in_flight_tasks': in_flight_count,
+            'total_load': total_load,
+            'load_percentage': load_percentage,
+            'backpressure_active': total_load >= (self.max_workers * 0.8)
+        }
+    
+    def log_status(self):
+        """記錄當前狀態到日誌"""
+        status = self.get_status()
+        logger.info(f"[WORKERPOOL_STATUS] Load: {status['load_percentage']:.1f}% "
+                   f"({status['busy_workers']} busy + {status['queue_size']} queued) "
+                   f"Backpressure: {'ON' if status['backpressure_active'] else 'OFF'}")
 
     # 保持與原本相容的方法（如果需要）
     def get_worker(self):

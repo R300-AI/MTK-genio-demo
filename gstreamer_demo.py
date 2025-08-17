@@ -25,6 +25,7 @@ def main():
     parser.add_argument("--model_path", type=str, default="./models/yolov8n_float32.tflite")
     parser.add_argument("--max_workers", type=int, default=3, help="Maximum number of concurrent processing workers")
     parser.add_argument("--disable_balancer", action="store_true", help="Disable dynamic frame rate balancing")
+    parser.add_argument("--enable_backpressure_logging", action="store_true", help="Enable detailed backpressure logging")
     args = parser.parse_args()
 
     monitor = Monitor()
