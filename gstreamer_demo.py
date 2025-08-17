@@ -38,7 +38,7 @@ def main():
         logger.info("[MAIN] Balancer disabled by user")
     
     producer = Producer(args.video_path, monitor=monitor, balancer=balancer)
-    worker_pool = WorkerPool(args.model_path, monitor=monitor, max_workers=args.max_workers)
+    worker_pool = WorkerPool(args.model_path, monitor=monitor, max_workers=args.max_workers, balancer=balancer)
     consumer = Consumer(window_name="Hetegeneous Integrated Chip Inference Demo", monitor=monitor, display_size = (720, 480))
 
     pipeline = Pipeline(

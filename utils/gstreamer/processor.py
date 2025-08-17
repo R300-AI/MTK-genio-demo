@@ -72,18 +72,23 @@ class Processor:
 class WorkerPool:
     """
     改良版 WorkerPool：基於您現有的 Processor 設計
-    提供多工處理 + 順序保證
+    提供多工處理 + 順序保證 + 處理間隔控制
     """
-    def __init__(self, model_path, monitor=None, max_workers=4):
+    def __init__(self, model_path, monitor=None, max_workers=4, balancer=None):
         logger.info(f"[WORKERPOOL] streaming with {max_workers} workers")
         self.monitor = monitor
         self.max_workers = max_workers
+        self.balancer = balancer  # 新增 Balancer 支援
         
         # 使用您的 Processor 設計
         self.workers = []
         for i in range(max_workers):
             worker = Processor(model_path)
             self.workers.append(worker)
+        
+        # 處理間隔控制（類似 Producer 的 frame_interval）
+        self.process_interval = 0.1  # 預設每個任務間隔 0.1 秒
+        self.last_process_time = 0
 
         # 任務管理
         self.task_queue = Queue()
@@ -136,7 +141,7 @@ class WorkerPool:
         return None
 
     def _processing_loop(self):
-        """主要處理迴圈：按順序分配任務，但允許多工執行"""
+        """主要處理迴圈：按順序分配任務，但允許多工執行 + 處理間隔控制"""
         def predict_async(frame, seq_num, worker):
             try:
                 result = worker.predict(frame)
@@ -150,6 +155,17 @@ class WorkerPool:
 
         while self.running:
             try:
+                # 使用 Balancer 調整處理間隔（類似 Producer）
+                if self.balancer:
+                    self.process_interval = self.balancer.get_producer_sleep(self.process_interval) / self.max_workers
+                
+                # 控制處理間隔，避免過度密集派工
+                current_time = time.time()
+                elapsed = current_time - self.last_process_time
+                if elapsed < self.process_interval:
+                    time.sleep(self.process_interval - elapsed)
+                self.last_process_time = time.time()
+                
                 task = self.task_queue.get(timeout=0.1)
                 if task is None:
                     break
