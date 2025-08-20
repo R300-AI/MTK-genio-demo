@@ -25,7 +25,7 @@ Producer類採用繼承架構，將通用邏輯抽象到基類，具體模式在
             ┌──────────────┴──────────────┐
             │                             │
     VideoProducer                  CameraProducer
-    (完整性優先)                   (實時性優先)
+    (完整性優先)                     (實時性優先)
 
 📊 職責分配：
 ┌─────────────────┬──────────────────┬─────────────────┬─────────────────┐
@@ -64,40 +64,12 @@ logger = logging.getLogger('gstreamer_demo')
 # ============================================================================
 # 🔧 配置類定義
 # ============================================================================
-
-@dataclass
-class ProducerConfig:
-    """Producer通用配置類"""
-    # FPS監控配置
-    fps_check_interval: int = 30
-    
-    # Capture配置
-    buffer_size: int = 1
-    timeout: float = 5.0
-    
-    # 錯誤處理配置
-    retry_count: int = 3
-    reconnect_delay: float = 1.0
+from utils.gstreamer.config import ProducerConfig
 
 # ============================================================================
 # ⚠️ 異常類定義
 # ============================================================================
-
-class ProducerException(Exception):
-    """Producer基礎異常"""
-    pass
-
-class CaptureInitializationError(ProducerException):
-    """Capture初始化失敗異常"""
-    pass
-
-class FrameReadError(ProducerException):
-    """幀讀取失敗異常"""
-    pass
-
-class CameraConnectionError(ProducerException):
-    """Camera連接錯誤異常"""
-    pass
+from utils.gstreamer.exceptions import CaptureInitializationError, FrameReadError, CameraConnectionError
 
 # ============================================================================
 # 🏗️ BaseProducer 抽象基類
