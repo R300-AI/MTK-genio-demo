@@ -1,14 +1,16 @@
+
 import threading
 import time
 import cv2
 import logging
 from collections import deque
+import psutil
 
 # 使用與 pipeline 相同的 logger
 logger = logging.getLogger('gstreamer_demo')
 
 class Monitor:
-    def __init__(self, log_interval=10, window_size=50):
+    def __init__(self, log_interval=10, window_size=8):
         logger.info(f"[MONITOR] log interval set to {log_interval} frames")
         self.lock = threading.Lock()
         self.start_time = time.time()
@@ -31,21 +33,28 @@ class Monitor:
         self.produced_times = deque(maxlen=window_size)
         self.processed_times = deque(maxlen=window_size)
         self.consumed_times = deque(maxlen=window_size)
+
+        # 跡象型 log: queue 停留時間追蹤
+        self.input_queue_times = deque(maxlen=100)
+        self.output_queue_times = deque(maxlen=100)
+        self.last_queue_warning = 0
+        self.last_queue_size = 0
         
         # FPS 計算結果初始值
         self.produced_fps = None
         self.processed_fps = None
         self.consumed_fps = None
 
+
     def draw_info(self, frame):
         with self.lock:
-            info = f"FPS: {self.consumed_fps} Active Workers: {self.processing}"        
+            info = f"FPS: {self.processed_fps}  Processors: {self.processing}"
         cv2.putText(frame, info, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
         return frame
 
     def fps(self, times):
-        # 需要至少3個時間點來計算穩定的FPS（2個間隔）
-        if len(times) < 3:
+        # 只有當 deque 填滿 window_size 時才計算 FPS
+        if len(times) < self.produced_times.maxlen:
             return None
         duration = times[-1] - times[0]
         # 如果時間間隔太短（小於0.1秒），認為數據不可靠
@@ -61,20 +70,21 @@ class Monitor:
         if event_type == "produced":
             self.produced_times.append(now)
             self.produced_fps = self.fps(self.produced_times)
+            # 跡象型 log: input queue 停留時間
+            self.input_queue_times.append(now)
         elif event_type == "processed":
             self.processed_times.append(now)
             self.processed_fps = self.fps(self.processed_times)
+            # 跡象型 log: output queue 停留時間
+            self.output_queue_times.append(now)
         elif event_type == "consumed":
             self.consumed_times.append(now)
             self.consumed_fps = self.fps(self.consumed_times)
         
         # 只在有新的FPS計算時才print（避免重複打印）
         if event_type in ["produced", "processed", "consumed"]:
-            print(
-                f"Produced (fps: {self.produced_fps}), "
-                f"Processed (fps: {self.processed_fps}), "
-                f"Consumed (fps: {self.consumed_fps}), "
-            )
+            # FPS 計算已完成，不需要額外處理
+            pass
 
         should_log = False
         if event_type == "produced":
@@ -114,6 +124,30 @@ class Monitor:
                 f" | {event_type}"
             )
             logger.info(status_msg)
+
+            # 跡象型 log: queue 停留時間統計
+            if len(self.input_queue_times) > 1:
+                avg_input_interval = (self.input_queue_times[-1] - self.input_queue_times[0]) / (len(self.input_queue_times) - 1)
+                logger.debug(f"[DEBUG] [MONITOR] Avg input queue frame interval: {avg_input_interval:.4f}s")
+            if len(self.output_queue_times) > 1:
+                avg_output_interval = (self.output_queue_times[-1] - self.output_queue_times[0]) / (len(self.output_queue_times) - 1)
+                logger.debug(f"[DEBUG] [MONITOR] Avg output queue frame interval: {avg_output_interval:.4f}s")
+
+            # 跡象型 log: FPS 變化
+            logger.debug(f"[DEBUG] [MONITOR] FPS: produced={self.produced_fps}, processed={self.processed_fps}, consumed={self.consumed_fps}")
+
+            # 跡象型 log: queue 長時間未下降警告
+            now = time.time()
+            if queued == self.last_queue_size and queued > 0 and now - self.last_queue_warning > 5:
+                logger.warning(f"[MONITOR] Queue size stagnant at {queued} for over 5s")
+                self.last_queue_warning = now
+            self.last_queue_size = queued
+            
+            # 添加系統資源使用率DEBUG日誌
+            cpu_percent = psutil.cpu_percent()
+            memory_percent = psutil.virtual_memory().percent
+            if cpu_percent > 80 or memory_percent > 80:
+                logger.debug(f"[DEBUG] [MONITOR] System resources: CPU={cpu_percent:.1f}%, Memory={memory_percent:.1f}%")
     
     # === 計數器更新方法 ===
     def count_produced(self):

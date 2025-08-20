@@ -15,55 +15,46 @@ class Processor:
     def __init__(self, model_path):
         logger.info(f"[PROCESSOR] model - {model_path}")
         self.model_path = model_path
-        
-        self.model = YOLO(model_path, task="detect")
-        
+        self.model = YOLO(model_path)
         # 預熱模型
         try:
             dummy_input = np.random.randint(0, 255, (640, 640, 3), dtype=np.uint8)
-            _ = self.model.predict(dummy_input, verbose=False)
+            _ = self.model.predict(dummy_input, verbose=False, stream=True)
         except Exception as e:
             raise
-        
         self.is_busy = False
         self.lock = threading.Lock()
 
     def predict(self, frame):
-        """執行推論，自動管理 busy 狀態"""
+        """執行推論，自動管理 busy 狀態"""        
         with self.lock:
             if self.is_busy:
                 return None
             self.is_busy = True
-        
-        
+
         try:
-            # 使用 timeout 來避免無限等待
-            import signal
-            import time
-            
-            def timeout_handler(signum, frame):
-                raise TimeoutError("YOLO prediction timeout")
-            
-            # 設置 10 秒超時（Windows 不支持 signal，所以改用 threading.Timer）
-            import threading
             timeout_occurred = threading.Event()
-            
             def timeout_func():
                 timeout_occurred.set()
-            
+                logger.warning(f"[PROCESSOR] Prediction timeout (10s) occurred!")
+
             timer = threading.Timer(10.0, timeout_func)
             timer.start()
-            
             try:
                 results = self.model.predict(frame, verbose=False, save=False, show=False)
+                
                 if timeout_occurred.is_set():
+                    logger.warning(f"[PROCESSOR] Prediction timed out, returning None")
                     return None
-                processed_frame = results[0].plot()
+                
+                processed_frame = results[0].plot(boxes=False)
                 return processed_frame
             finally:
                 timer.cancel()
-                
         except Exception as e:
+            import traceback
+            logger.error(f"[PROCESSOR] Prediction failed: {e}")
+            logger.error(f"[PROCESSOR] Traceback: {traceback.format_exc()}")
             return None
         finally:
             with self.lock:
@@ -71,30 +62,34 @@ class Processor:
 
 class WorkerPool:
     """
-    改良版 WorkerPool：基於您現有的 Processor 設計
     提供多工處理 + 順序保證 + 處理間隔控制
     """
-    def __init__(self, model_path, monitor=None, max_workers=4, balancer=None):
-        logger.info(f"[WORKERPOOL] streaming with {max_workers} workers")
+    def __init__(self, model_path, monitor=None, max_workers=4, balancer=None, mode='camera'):
+        logger.info(f"[WORKERPOOL] streaming with {max_workers} workers, mode={mode}")
         self.monitor = monitor
         self.max_workers = max_workers
         self.balancer = balancer  # 新增 Balancer 支援
-        
+        self.mode = mode
+
         # 使用您的 Processor 設計
         self.workers = []
         for i in range(max_workers):
             worker = Processor(model_path)
             self.workers.append(worker)
-        
-        # 處理間隔控制（類似 Producer 的 frame_interval）
-        self.process_interval = 0.1  # 預設每個任務間隔 0.1 秒
-        self.last_process_time = 0
 
-        # 任務管理
-        self.task_queue = Queue()
+        # 任務管理（queue buffer 設定 maxlen，video mode 需要更大的 buffer）
+        from collections import deque
+        if mode == 'video':
+            # video mode: 大 buffer，確保所有幀都能處理
+            self.queue_maxlen = 200  # 足夠處理大多數短片
+        else:
+            # camera mode: 小 buffer，保持即時性
+            self.queue_maxlen = max_workers * 2
+        self.task_queue = deque(maxlen=self.queue_maxlen)
+        self.task_queue_lock = threading.Lock()
         self.processing_thread = threading.Thread(target=self._processing_loop, daemon=True)
         self.running = False
-        
+
         # 任務序號與 in-flight 追蹤
         self.sequence_counter = 1
         self.sequence_lock = threading.Lock()
@@ -102,6 +97,18 @@ class WorkerPool:
         self.in_flight_lock = threading.Lock()
         self.result_callback = None
         
+        # Video mode 專用的順序保證機制
+        if mode == 'video':
+            self.result_buffer = {}  # {seq_num: result}
+            self.next_output_seq = 1
+            self.result_buffer_lock = threading.Lock()
+            
+        # 添加處理速率追蹤變數
+        self.processed_counter = 0
+        self.last_processing_fps_time = time.time()
+        self.processing_fps_check_interval = 20  # 每20幀檢查一次處理fps
+        self.queue_size_log_counter = 0  # queue size記錄計數器
+
 
     def start(self, result_callback=None):
         """啟動 WorkerPool"""
@@ -112,43 +119,64 @@ class WorkerPool:
     def stop(self):
         """停止 WorkerPool"""
         self.running = False
-        self.task_queue.put(None)
+        with self.task_queue_lock:
+            self.task_queue.append(None)
         with self.in_flight_lock:
             if self.in_flight:
                 logger.warning(f"[INFLIGHT] Unfinished tasks at stop: {self.in_flight}")
 
-    def process(self, frame):
-        """提交 frame 進行處理，加入背壓控制避免批次處理"""
+    def process(self, frame_tuple):
+        """提交 (frame, timestamp) 進行處理，queue buffer 滿時自動丟棄最舊 frame"""
+        process_start_time = time.time()
+        
+        # 支援 (frame, timestamp) 或單一 frame
+        if isinstance(frame_tuple, tuple) and len(frame_tuple) == 2:
+            frame, timestamp = frame_tuple
+        else:
+            frame = frame_tuple
+            timestamp = time.time()
+
         if frame is None:
             return frame
-        
-        # 背壓控制：如果系統負載太高，直接丟frame
-        if self._should_drop_frame():
-            logger.debug("System overloaded, dropping frame to prevent batching")
+
+        # 僅 camera mode 才允許 drop frame
+        if self.mode == 'camera' and self._should_drop_frame():
+            # ...移除開發階段 debug log...
             return
-        
-        # 正常處理
+
+        # video mode 一律強制入列
         with self.sequence_lock:
             seq_num = self.sequence_counter
             self.sequence_counter += 1
         with self.in_flight_lock:
             self.in_flight.add(seq_num)
-        self.task_queue.put((frame, seq_num))
+        with self.task_queue_lock:
+            if len(self.task_queue) == self.queue_maxlen:
+                pass  # queue 滿時可在此處理丟棄或警告
+            self.task_queue.append(((frame, timestamp), seq_num))
+            queue_size = len(self.task_queue)
+            
+        # 每50幀記錄一次queue狀態的DEBUG資訊
+        self.queue_size_log_counter += 1
+        if self.queue_size_log_counter % 50 == 0:
+            process_time = time.time() - process_start_time
+            logger.debug(f"[DEBUG] [WORKERPOOL] Mode={self.mode}, Queue_size={queue_size}/{self.queue_maxlen}, "
+                        f"Process_submit_time={process_time:.4f}s, Task#{seq_num}")
     
     def _should_drop_frame(self):
         """判斷是否應該丟棄frame - 背壓控制核心邏輯"""
         # 計算當前系統負載
         busy_workers = sum(1 for worker in self.workers if getattr(worker, 'is_busy', False))
-        queue_size = self.task_queue.qsize()
+        queue_size = len(self.task_queue)
         total_load = busy_workers + queue_size
-        
+
         # 策略：如果總負載接近或超過worker數量，就開始丟frame
         load_threshold = self.max_workers * 0.8  # 80%負載閾值
-        
+
         if total_load >= load_threshold:
-            logger.debug(f"Load control: {total_load}/{self.max_workers} workers busy/queued, dropping frame")
+            # ...移除開發階段 debug log...
             return True
-        
+
         return False
 
     def _find_available_worker(self):
@@ -171,17 +199,29 @@ class WorkerPool:
                     try:
                         if not worker.is_busy:
                             self._last_worker_index = i
-                            logger.debug(f"WORKERPOOL_FIND: Found available worker {i} (round-robin)")
+                            # ...移除開發階段 debug log...
                             return worker
                     finally:
                         worker.lock.release()
         return None
 
     def _processing_loop(self):
-        """主要處理迴圈：按順序分配任務，但允許多工執行 + 處理間隔控制"""
-        def predict_async(frame, seq_num, worker):
+        """主要處理迴圈：按順序分配任務，但允許多工執行，並根據 timestamp 丟棄過時 frame"""
+        # 設定最大允許延遲（秒），超過則丟棄 frame
+        MAX_LATENESS = 0.5  # 可依需求調整
+
+        def predict_async(frame, timestamp, seq_num, worker):
+            # video mode 不檢查過時，camera mode 才檢查
+            now = time.time()
+            if self.mode == 'camera' and now - timestamp > MAX_LATENESS:
+                # ...移除開發階段 debug log...
+                self._handle_result(seq_num, None)
+                if self.monitor:
+                    self.monitor.count_processing_end()
+                return
             try:
                 result = worker.predict(frame)
+                # ...移除開發階段 debug/info log...
                 self._handle_result(seq_num, result)
             except Exception as e:
                 logger.error(f"[WORKERPOOL] Worker error for seq {seq_num}: {e}")
@@ -190,26 +230,20 @@ class WorkerPool:
                 if self.monitor:
                     self.monitor.count_processing_end()
 
+        import time
         while self.running:
             try:
-                # 使用 Balancer 調整處理間隔（類似 Producer）
-                if self.balancer:
-                    # 根據worker數量調整間隔，避免過度密集派工
-                    base_interval = self.balancer.get_producer_sleep(self.process_interval)
-                    self.process_interval = base_interval / max(1, self.max_workers - 2)
-                
-                # 控制處理間隔，確保worker派工均勻分散
-                current_time = time.time()
-                elapsed = current_time - self.last_process_time
-                if elapsed < self.process_interval:
-                    time.sleep(self.process_interval - elapsed)
-                self.last_process_time = time.time()
-                
-                task = self.task_queue.get(timeout=0.1)
+                with self.task_queue_lock:
+                    if not self.task_queue:
+                        time.sleep(0.01)
+                        continue
+                    task = self.task_queue.popleft()
+                    
                 if task is None:
+                    # ...移除開發階段 debug/info log...
                     break
-                frame, seq_num = task
-                
+                (frame, timestamp), seq_num = task
+
                 # 尋找可用worker
                 worker = None
                 retry_count = 0
@@ -217,35 +251,68 @@ class WorkerPool:
                     worker = self._find_available_worker()
                     if worker is None:
                         retry_count += 1
-                        if retry_count % 100 == 0:  # 減少警告頻率
-                            logger.debug(f"WORKERPOOL_LOOP: Waiting for available worker (retry {retry_count})")
-                        time.sleep(0.01)  # 增加等待時間，減少CPU占用
-                
+                        if retry_count % 100 == 0:
+                            pass  # 可在此處加警告或統計
+                        time.sleep(0.01)
+
                 if not self.running:
                     break
-                    
+
                 # 啟動worker處理
                 if self.monitor:
                     self.monitor.count_processing_start()
-                threading.Thread(target=predict_async, args=(frame, seq_num, worker), daemon=True).start()
-            except Empty:
-                continue
+                threading.Thread(target=predict_async, args=(frame, timestamp, seq_num, worker), daemon=True).start()
             except Exception as e:
                 logger.error(f"WORKERPOOL_LOOP: Error in processing loop: {e}")
-        
 
     def _handle_result(self, seq_num, result):
-        """處理結果 - 簡化版本，依靠背壓控制保證順序"""
+        """處理結果 - 增強版本，video mode 保證順序"""
+        result_start_time = time.time()
+        
         # 清理 in_flight 追蹤
         with self.in_flight_lock:
             self.in_flight.discard(seq_num)
         
-        # 直接輸出結果（背壓控制已經保證了相對順序）
-        if result is not None:
-            try:
-                self.result_callback(result)
-            except Exception as e:
-                logger.error(f"[WORKERPOOL] result_callback error for seq {seq_num}: {e}")
+        self.processed_counter += 1
+        
+        if self.mode == 'video':
+            # video mode: 需要按順序輸出
+            with self.result_buffer_lock:
+                self.result_buffer[seq_num] = result
+                
+                # 按順序輸出可以輸出的結果
+                while self.next_output_seq in self.result_buffer:
+                    buffered_result = self.result_buffer.pop(self.next_output_seq)
+                    # video mode: 即使結果是 None 也要回調，讓 Consumer 知道這幀處理完了
+                    try:
+                        if buffered_result is not None:
+                            self.result_callback(buffered_result)
+                        else:
+                            pass  # result is None 時不做任何事
+                    except Exception as e:
+                        logger.error(f"[WORKERPOOL] result_callback error for seq {self.next_output_seq}: {e}")
+                    self.next_output_seq += 1
+        else:
+            # camera mode: 直接輸出（保持原有邏輯）
+            if result is not None:
+                try:
+                    self.result_callback(result)
+                except Exception as e:
+                    logger.error(f"[WORKERPOOL] result_callback error for seq {seq_num}: {e}")
+            else:
+                pass  # result is None 時不做任何事
+                
+        # 定期記錄處理fps的DEBUG資訊
+        if self.processed_counter % self.processing_fps_check_interval == 0:
+            current_time = time.time()
+            actual_interval = (current_time - self.last_processing_fps_time) / self.processing_fps_check_interval
+            actual_processing_fps = 1.0 / actual_interval if actual_interval > 0 else 0
+            result_time = current_time - result_start_time
+            
+            logger.debug(f"[DEBUG] [WORKERPOOL] Mode={self.mode}, Processed#{self.processed_counter}, "
+                        f"Actual_Processing_FPS={actual_processing_fps:.2f}, Result_handle_time={result_time:.4f}s, "
+                        f"Result_success={'Yes' if result is not None else 'No'}, Seq#{seq_num}")
+            self.last_processing_fps_time = current_time
         
         # 更新監控統計
         if self.monitor:
@@ -254,14 +321,14 @@ class WorkerPool:
     def get_status(self):
         """獲取WorkerPool詳細狀態，包含背壓控制資訊"""
         busy_workers = sum(1 for worker in self.workers if getattr(worker, 'is_busy', False))
-        queue_size = self.task_queue.qsize()
-        
+        queue_size = len(self.task_queue)
+
         with self.in_flight_lock:
             in_flight_count = len(self.in_flight)
-        
+
         total_load = busy_workers + queue_size
         load_percentage = (total_load / self.max_workers) * 100
-        
+
         return {
             'total_workers': self.max_workers,
             'busy_workers': busy_workers,

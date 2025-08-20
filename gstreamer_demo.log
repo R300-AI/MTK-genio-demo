@@ -1,100 +1,349 @@
-[2025-08-18 04:18:48,842] INFO - Starting GStreamer Demo
-[2025-08-18 04:18:48,844] INFO - [MONITOR] log interval set to 10 frames
-[2025-08-18 04:18:48,844] INFO - [BALANCER] Initialized.
-[2025-08-18 04:18:48,844] INFO - [MAIN] Balancer enabled for dynamic rate control
-[2025-08-18 04:18:48,863] INFO - [PRODUCER] video source - ./data/video.mp4
-[2025-08-18 04:18:48,864] INFO - [WORKERPOOL] streaming with 3 workers
-[2025-08-18 04:18:48,864] INFO - [PROCESSOR] model - ./models/yolov8n_float32.tflite
-[2025-08-18 04:18:54,653] INFO - [PROCESSOR] model - ./models/yolov8n_float32.tflite
-[2025-08-18 04:18:54,787] INFO - [PROCESSOR] model - ./models/yolov8n_float32.tflite
-[2025-08-18 04:18:54,925] INFO - [CONSUMER] window name - Hetegeneous Integrated Chip Inference Demo
-[2025-08-18 04:18:54,925] INFO - Creating pipeline...
-[2025-08-18 04:18:54,925] INFO - ========【Starting pipeline execution】========
-[2025-08-18 04:18:55,255] INFO - [Monitor] -> Produced: 10, Queued: 6, Processing: 2, Processed: 2, Pending: 0, Consumed: 2 | produced
-[2025-08-18 04:18:55,289] INFO - [BALANCER] Producer interval auto-adjust: 0.033s -> 0.070s (target by processed_fps=14.24)
-[2025-08-18 04:18:55,332] INFO - [BALANCER] Producer interval auto-adjust: 0.100s -> 0.070s (target by processed_fps=14.24)
-[2025-08-18 04:18:55,362] INFO - [BALANCER] Producer interval auto-adjust: 0.070s -> 0.078s (target by processed_fps=12.81)
-[2025-08-18 04:18:55,403] INFO - [BALANCER] Producer interval auto-adjust: 0.070s -> 0.078s (target by processed_fps=12.81)
-[2025-08-18 04:18:55,482] INFO - [BALANCER] Producer interval auto-adjust: 0.078s -> 0.085s (target by processed_fps=11.77)
-[2025-08-18 04:18:55,516] INFO - [BALANCER] Producer interval auto-adjust: 0.078s -> 0.085s (target by processed_fps=11.77)
-[2025-08-18 04:18:55,567] INFO - [BALANCER] Producer interval auto-adjust: 0.085s -> 0.083s (target by processed_fps=11.99)
-[2025-08-18 04:18:55,605] INFO - [BALANCER] Producer interval auto-adjust: 0.085s -> 0.083s (target by processed_fps=11.99)
-[2025-08-18 04:18:55,651] INFO - [BALANCER] Producer interval auto-adjust: 0.083s -> 0.087s (target by processed_fps=11.54)
-[2025-08-18 04:18:55,687] INFO - [BALANCER] Producer interval auto-adjust: 0.083s -> 0.087s (target by processed_fps=11.54)
-[2025-08-18 04:18:55,864] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.089s (target by processed_fps=11.28)
-[2025-08-18 04:18:55,888] INFO - [Monitor] -> Produced: 18, Queued: 6, Processing: 2, Processed: 10, Pending: 1, Consumed: 9 | processed
-[2025-08-18 04:18:55,891] INFO - [Monitor] -> Produced: 18, Queued: 7, Processing: 1, Processed: 10, Pending: 0, Consumed: 10 | consumed
-[2025-08-18 04:18:55,914] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.085s (target by processed_fps=11.78)
-[2025-08-18 04:18:55,949] INFO - [BALANCER] Producer interval auto-adjust: 0.089s -> 0.085s (target by processed_fps=11.78)
-[2025-08-18 04:18:56,037] INFO - [Monitor] -> Produced: 20, Queued: 7, Processing: 2, Processed: 11, Pending: 0, Consumed: 11 | produced
-[2025-08-18 04:18:56,086] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.084s (target by processed_fps=11.90)
-[2025-08-18 04:18:56,123] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.084s (target by processed_fps=11.90)
-[2025-08-18 04:18:56,721] INFO - [BALANCER] Producer interval auto-adjust: 0.085s -> 0.087s (target by processed_fps=11.53)
-[2025-08-18 04:18:56,768] INFO - [BALANCER] Producer interval auto-adjust: 0.085s -> 0.087s (target by processed_fps=11.53)
-[2025-08-18 04:18:56,777] INFO - [Monitor] -> Produced: 28, Queued: 5, Processing: 3, Processed: 20, Pending: 1, Consumed: 19 | processed
-[2025-08-18 04:18:56,781] INFO - [Monitor] -> Produced: 28, Queued: 6, Processing: 2, Processed: 20, Pending: 0, Consumed: 20 | consumed
-[2025-08-18 04:18:56,896] INFO - [Monitor] -> Produced: 30, Queued: 7, Processing: 2, Processed: 21, Pending: 0, Consumed: 21 | produced
-[2025-08-18 04:18:56,985] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.086s (target by processed_fps=11.63)
-[2025-08-18 04:18:57,327] INFO - [BALANCER] Producer interval auto-adjust: 0.085s -> 0.087s (target by processed_fps=11.54)
-[2025-08-18 04:18:57,372] INFO - [BALANCER] Producer interval auto-adjust: 0.085s -> 0.087s (target by processed_fps=11.54)
-[2025-08-18 04:18:57,417] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.088s (target by processed_fps=11.34)
-[2025-08-18 04:18:57,459] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.088s (target by processed_fps=11.34)
-[2025-08-18 04:18:57,548] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.087s (target by processed_fps=11.56)
-[2025-08-18 04:18:57,583] INFO - [Monitor] -> Produced: 37, Queued: 5, Processing: 2, Processed: 30, Pending: 1, Consumed: 29 | processed
-[2025-08-18 04:18:57,584] INFO - [Monitor] -> Produced: 37, Queued: 6, Processing: 1, Processed: 30, Pending: 0, Consumed: 30 | consumed
-[2025-08-18 04:18:57,593] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.085s (target by processed_fps=11.79)
-[2025-08-18 04:18:57,635] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.085s (target by processed_fps=11.79)
-[2025-08-18 04:18:57,763] INFO - [Monitor] -> Produced: 40, Queued: 7, Processing: 2, Processed: 31, Pending: 0, Consumed: 31 | produced
-[2025-08-18 04:18:58,025] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.47)
-[2025-08-18 04:18:58,065] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.47)
-[2025-08-18 04:18:58,112] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.085s (target by processed_fps=11.73)
-[2025-08-18 04:18:58,153] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.085s (target by processed_fps=11.73)
-[2025-08-18 04:18:58,537] INFO - [Monitor] -> Produced: 48, Queued: 5, Processing: 3, Processed: 40, Pending: 1, Consumed: 39 | processed
-[2025-08-18 04:18:58,539] INFO - [Monitor] -> Produced: 48, Queued: 6, Processing: 2, Processed: 40, Pending: 0, Consumed: 40 | consumed
-[2025-08-18 04:18:58,547] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.43)
-[2025-08-18 04:18:58,586] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.43)
-[2025-08-18 04:18:58,634] INFO - [Monitor] -> Produced: 50, Queued: 7, Processing: 2, Processed: 41, Pending: 0, Consumed: 41 | produced
-[2025-08-18 04:18:58,674] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.086s (target by processed_fps=11.64)
-[2025-08-18 04:18:58,722] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.086s (target by processed_fps=11.64)
-[2025-08-18 04:18:59,070] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.088s (target by processed_fps=11.41)
-[2025-08-18 04:18:59,108] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.088s (target by processed_fps=11.41)
-[2025-08-18 04:18:59,157] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.086s (target by processed_fps=11.69)
-[2025-08-18 04:18:59,195] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.086s (target by processed_fps=11.69)
-[2025-08-18 04:18:59,321] INFO - [Monitor] -> Produced: 57, Queued: 5, Processing: 2, Processed: 50, Pending: 1, Consumed: 49 | processed
-[2025-08-18 04:18:59,324] INFO - [Monitor] -> Produced: 57, Queued: 6, Processing: 1, Processed: 50, Pending: 0, Consumed: 50 | consumed
-[2025-08-18 04:18:59,455] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.46)
-[2025-08-18 04:18:59,505] INFO - [Monitor] -> Produced: 60, Queued: 7, Processing: 2, Processed: 51, Pending: 0, Consumed: 51 | produced
-[2025-08-18 04:18:59,505] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.46)
-[2025-08-18 04:18:59,597] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.088s (target by processed_fps=11.33)
-[2025-08-18 04:18:59,630] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.088s (target by processed_fps=11.33)
-[2025-08-18 04:18:59,719] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.086s (target by processed_fps=11.57)
-[2025-08-18 04:18:59,772] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.086s (target by processed_fps=11.57)
-[2025-08-18 04:19:00,228] INFO - [Monitor] -> Produced: 68, Queued: 6, Processing: 2, Processed: 60, Pending: 1, Consumed: 59 | processed
-[2025-08-18 04:19:00,230] INFO - [Monitor] -> Produced: 68, Queued: 7, Processing: 1, Processed: 60, Pending: 0, Consumed: 60 | consumed
-[2025-08-18 04:19:00,380] INFO - [Monitor] -> Produced: 70, Queued: 7, Processing: 2, Processed: 61, Pending: 0, Consumed: 61 | produced
-[2025-08-18 04:19:01,099] INFO - [Monitor] -> Produced: 78, Queued: 6, Processing: 2, Processed: 70, Pending: 1, Consumed: 69 | processed
-[2025-08-18 04:19:01,101] INFO - [Monitor] -> Produced: 78, Queued: 7, Processing: 1, Processed: 70, Pending: 0, Consumed: 70 | consumed
-[2025-08-18 04:19:01,256] INFO - [Monitor] -> Produced: 80, Queued: 7, Processing: 2, Processed: 71, Pending: 0, Consumed: 71 | produced
-[2025-08-18 04:19:01,866] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.46)
-[2025-08-18 04:19:01,957] INFO - [Monitor] -> Produced: 88, Queued: 6, Processing: 2, Processed: 80, Pending: 1, Consumed: 79 | processed
-[2025-08-18 04:19:01,959] INFO - [Monitor] -> Produced: 88, Queued: 7, Processing: 1, Processed: 80, Pending: 0, Consumed: 80 | consumed
-[2025-08-18 04:19:02,126] INFO - [Monitor] -> Produced: 90, Queued: 7, Processing: 1, Processed: 82, Pending: 1, Consumed: 81 | produced
-[2025-08-18 04:19:02,392] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.45)
-[2025-08-18 04:19:02,425] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.087s (target by processed_fps=11.45)
-[2025-08-18 04:19:02,778] INFO - [BALANCER] Producer interval auto-adjust: 0.089s -> 0.086s (target by processed_fps=11.62)
-[2025-08-18 04:19:02,833] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.086s (target by processed_fps=11.62)
-[2025-08-18 04:19:02,860] INFO - [Monitor] -> Produced: 98, Queued: 6, Processing: 2, Processed: 90, Pending: 1, Consumed: 89 | processed
-[2025-08-18 04:19:02,862] INFO - [Monitor] -> Produced: 98, Queued: 7, Processing: 1, Processed: 90, Pending: 0, Consumed: 90 | consumed
-[2025-08-18 04:19:03,007] INFO - [Monitor] -> Produced: 100, Queued: 7, Processing: 1, Processed: 92, Pending: 0, Consumed: 92 | produced
-[2025-08-18 04:19:03,040] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.087s (target by processed_fps=11.56)
-[2025-08-18 04:19:03,271] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.086s (target by processed_fps=11.65)
-[2025-08-18 04:19:03,304] INFO - [BALANCER] Producer interval auto-adjust: 0.087s -> 0.086s (target by processed_fps=11.65)
-[2025-08-18 04:19:03,477] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.088s (target by processed_fps=11.38)
-[2025-08-18 04:19:03,534] INFO - [BALANCER] Producer interval auto-adjust: 0.086s -> 0.088s (target by processed_fps=11.38)
-[2025-08-18 04:19:03,707] INFO - [Monitor] -> Produced: 107, Queued: 5, Processing: 2, Processed: 100, Pending: 1, Consumed: 99 | processed
-[2025-08-18 04:19:03,709] INFO - [Monitor] -> Produced: 107, Queued: 6, Processing: 1, Processed: 100, Pending: 0, Consumed: 100 | consumed
-[2025-08-18 04:19:03,743] INFO - [BALANCER] Producer interval auto-adjust: 0.088s -> 0.087s (target by processed_fps=11.47)
-[2025-08-18 04:19:03,905] INFO - PRODUCER: Producer loop ended, total frames processed: 109
-[2025-08-18 04:19:03,906] INFO - PIPELINE_RUN: Video mode - waiting for all frames to be processed and consumed
-[2025-08-18 04:19:03,950] INFO - [Monitor] -> Produced: 109, Queued: 6, Processing: 0, Processed: 103, Pending: 1, Consumed: 102 | processing_end
-[2025-08-18 04:19:05,010] INFO - ========【Pipeline execution completed】========
+[2025-08-20 17:15:02,237] INFO - ============================================================
+[2025-08-20 17:15:02,237] INFO - PRODUCER INITIALIZATION STARTED
+[2025-08-20 17:15:02,237] INFO - ------------------------------------------------------------
+[2025-08-20 17:15:02,237] INFO - [PRODUCER] Mode determined: video
+[2025-08-20 17:15:02,275] INFO -  - Video source - ./data/video.mp4
+[2025-08-20 17:15:02,275] INFO -  - Video duration: 3.64 seconds
+[2025-08-20 17:15:02,275] INFO -  - Initial FPS: 29.97002997002997
+[2025-08-20 17:15:02,275] INFO -  - Image Size: 1920x1080
+[2025-08-20 17:15:02,275] INFO -  -  Streaming Mode: False
+[2025-08-20 17:15:02,275] INFO - ============================================================
+[2025-08-20 17:15:02,275] INFO - [WORKERPOOL] streaming with 2 workers, mode=camera
+[2025-08-20 17:15:02,275] INFO - [PROCESSOR] model - ./models/yolov8n-pose_float32.tflite
+[2025-08-20 17:15:06,644] DEBUG - Falling back to TensorFlow client; we recommended you install the Cloud TPU client directly with pip install cloud-tpu-client.
+[2025-08-20 17:15:07,560] DEBUG - Creating converter from 7 to 5
+[2025-08-20 17:15:07,560] DEBUG - Creating converter from 5 to 7
+[2025-08-20 17:15:07,561] DEBUG - Creating converter from 7 to 5
+[2025-08-20 17:15:07,561] DEBUG - Creating converter from 5 to 7
+[2025-08-20 17:15:10,702] DEBUG - matplotlib data path: C:\Users\B20447\Desktop\GitHub\MTK-genio-demo\.venv\Lib\site-packages\matplotlib\mpl-data
+[2025-08-20 17:15:10,727] DEBUG - CONFIGDIR=C:\Users\B20447\.matplotlib
+[2025-08-20 17:15:10,729] DEBUG - interactive is False
+[2025-08-20 17:15:10,729] DEBUG - platform is win32
+[2025-08-20 17:15:10,841] DEBUG - CACHEDIR=C:\Users\B20447\.matplotlib
+[2025-08-20 17:15:10,853] DEBUG - Using fontManager instance from C:\Users\B20447\.matplotlib\fontlist-v390.json
+[2025-08-20 17:15:12,995] INFO - [PROCESSOR] model - ./models/yolov8n-pose_float32.tflite
+[2025-08-20 17:15:13,047] INFO - [CONSUMER] window name - Hetegeneous Integrated Chip Inference Demo, mode=camera
+[2025-08-20 17:15:13,047] INFO - 🏭 ===== PIPELINE 工廠函數 =====
+[2025-08-20 17:15:13,047] INFO - 📝 檢測到Producer模式: video
+[2025-08-20 17:15:13,047] INFO - 🎬 創建VideoPipeline - 完整性優先策略
+[2025-08-20 17:15:13,047] INFO - 📋 Video模式特性: 確保無丟幀、硬體適應性、等待完整處理
+[2025-08-20 17:15:13,047] INFO - 🚀 ===== PIPELINE 初始化開始 =====
+[2025-08-20 17:15:13,047] INFO - 📝 Producer類型: Producer
+[2025-08-20 17:15:13,047] INFO - 📝 WorkerPool類型: WorkerPool
+[2025-08-20 17:15:13,047] INFO - 📝 Consumer類型: Consumer
+[2025-08-20 17:15:13,047] INFO - 📝 Monitor設置: 未設置
+[2025-08-20 17:15:13,047] INFO - 🔧 初始化硬體檢測器...
+[2025-08-20 17:15:13,165] INFO - 硬體性能等級檢測完成: EXTREME (CPU核心: 16, 記憶體: 31.8GB, 總分: 60.21)
+[2025-08-20 17:15:13,165] INFO - 📊 硬體性能等級: EXTREME
+[2025-08-20 17:15:13,165] INFO - 📊 適應性參數: {'queue_high_watermark': 80, 'queue_low_watermark': 60, 'batch_timeout': 0.001, 'max_queue_size': 100, 'fps_check_interval': 50, 'worker_check_interval': 0.005}
+[2025-08-20 17:15:13,165] INFO - 📈 初始化Timeline調試工具...
+[2025-08-20 17:15:13,165] INFO - 🔧 配置Queue - 最大大小: 100
+[2025-08-20 17:15:13,165] INFO - ✅ Input/Output Queue 創建完成
+[2025-08-20 17:15:13,165] INFO - ⏱️ 性能監控間隔設定: 50秒
+[2025-08-20 17:15:13,165] INFO - 📸 Producer狀態追蹤器初始化完成
+[2025-08-20 17:15:13,165] INFO - 📊 性能歷史數據緩存: 最大100筆記錄
+[2025-08-20 17:15:13,165] INFO - 🛡️ 系統信號處理器註冊完成
+[2025-08-20 17:15:13,165] INFO - ⚙️ 執行模式特定初始化...
+[2025-08-20 17:15:13,165] INFO - 📹 ===== VIDEO模式 特定初始化 =====
+[2025-08-20 17:15:13,165] INFO - 🔧 Video模式參數配置:
+[2025-08-20 17:15:13,165] INFO -   └─ Queue預載: 啟用
+[2025-08-20 17:15:13,165] INFO -   └─ 最小Queue深度: 10
+[2025-08-20 17:15:13,166] INFO -   └─ 預載批次大小: 5
+[2025-08-20 17:15:13,166] INFO -   └─ 預載檢查間隔: 0.1秒
+[2025-08-20 17:15:13,166] INFO - ✅ Video模式初始化完成 - 確保無丟幀處理
+[2025-08-20 17:15:13,166] INFO - 🎉 ===== VideoPipeline 初始化完成 =====
+[2025-08-20 17:15:13,166] INFO - 📋 硬體等級: EXTREME | 隊列大小: 100 | FPS檢查間隔: 50
+[2025-08-20 17:15:13,166] INFO - ✅ Pipeline創建完成: VideoPipeline
+[2025-08-20 17:15:13,166] INFO - 🚀 ===== PIPELINE 執行開始 =====
+[2025-08-20 17:15:13,166] INFO - 🎯 Pipeline類型: VideoPipeline
+[2025-08-20 17:15:13,166] INFO - 📝 執行模式: Video完整性優先
+[2025-08-20 17:15:13,166] INFO - 📈 啟動Timeline監控線程...
+[2025-08-20 17:15:13,167] INFO - ⚙️ 啟動WorkerPool...
+[2025-08-20 17:15:13,168] INFO - 🖥️ 啟動Consumer顯示...
+[2025-08-20 17:15:13,168] INFO - [CONSUMER] Camera mode: using fixed fps=30, interval=0.0333s
+[2025-08-20 17:15:13,168] INFO - 🧵 創建執行緒...
+[2025-08-20 17:15:13,168] INFO - ✅ Producer/Worker/Consumer 執行緒創建完成
+[2025-08-20 17:15:13,168] INFO - 🎬 啟動所有執行緒...
+[2025-08-20 17:15:13,169] INFO - ⚙️ ===== VIDEO WORKER 啟動 =====
+[2025-08-20 17:15:13,169] INFO - 📝 Video Worker策略: 硬體適應性處理，確保完整性
+[2025-08-20 17:15:13,169] INFO - 📸 ===== VIDEO PRODUCER 啟動 =====
+[2025-08-20 17:15:13,169] INFO - 📝 Video Producer策略: 確保無丟幀，完整性優先
+[2025-08-20 17:15:13,170] INFO - ⏱️ 批次超時設定: 0.001秒
+[2025-08-20 17:15:13,170] INFO - 📦 Frame緩衝器大小: 10
+[2025-08-20 17:15:13,170] INFO - 📈 Timeline狀態更新: Producer已啟動
+[2025-08-20 17:15:13,170] INFO - 🎬 開始讀取幀數據...
+[2025-08-20 17:15:13,170] INFO - 🖥️ ===== VIDEO CONSUMER 啟動 =====
+[2025-08-20 17:15:13,170] INFO - 📝 Video Consumer策略: 完整顯示，不丟幀
+[2025-08-20 17:15:13,170] INFO - 🎯 所有執行緒已啟動，進入主執行循環
+[2025-08-20 17:15:13,170] INFO - ⏳ 等待Producer執行緒完成...
+[2025-08-20 17:15:13,252] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,252] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,252] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,253] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,253] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,253] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,254] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,255] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,255] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,256] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,256] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,283] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,284] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,284] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,284] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,284] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,285] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,285] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,286] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,286] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,286] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,287] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,311] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,311] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,311] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,313] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,313] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,313] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,313] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,314] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,314] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,315] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,315] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,347] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,348] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,348] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,349] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,349] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,350] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,350] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,350] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,350] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,351] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,351] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,382] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,383] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,384] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,385] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,385] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,386] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,386] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,387] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,387] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,388] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,388] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,419] DEBUG - [PRODUCER] Frame#30, Actual_FPS=2.69, Frame_read_time=0.0050
+[2025-08-20 17:15:13,419] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,421] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,421] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,422] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,422] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,422] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,422] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,423] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,423] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,424] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,424] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,448] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,448] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,449] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,449] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,449] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,451] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,451] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,451] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,452] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,452] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,452] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,477] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,478] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,479] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,480] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,480] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,480] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,480] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,481] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,481] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,482] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,482] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,504] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,506] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,506] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,506] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,507] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,507] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,507] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,508] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,508] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,509] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,509] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,531] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,532] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,532] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,533] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,533] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,533] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,533] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,535] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,535] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,535] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,535] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,560] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,562] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,562] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,563] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,563] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,564] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,564] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,565] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,565] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,566] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,566] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,586] DEBUG - [PRODUCER] Frame#60, Actual_FPS=180.65, Frame_read_time=0.0035
+[2025-08-20 17:15:13,587] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,587] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,587] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,588] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,588] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,589] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,589] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,590] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,590] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,591] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,592] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,614] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,615] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,615] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,616] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,616] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,616] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,616] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,616] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,616] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,618] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,619] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,639] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,640] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,640] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,641] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,641] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,642] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,642] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,643] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,643] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,644] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,644] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,667] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,668] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,668] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,669] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,669] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,670] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,670] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,670] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,670] INFO - [TIMELINE-DEBUG] t=0.5s | Producer:📸(Frame#75) | InputQ:[1(1%)] | Workers:0/2💤💤 | OutputQ:[0(0%)] | Consumer:⏹️(Result#0)
+[2025-08-20 17:15:13,671] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,671] WARNING - [TIMELINE-ALERT] t=0.5s - 所有Worker都處於非活動狀態! InputQueue=1, Workers=2, ActiveWorkers=0
+[2025-08-20 17:15:13,672] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,673] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,694] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,695] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,695] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,697] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,697] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,697] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,698] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,698] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,698] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,699] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,699] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,717] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,718] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,718] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,719] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,719] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,720] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,720] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,720] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,720] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,722] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,722] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,744] DEBUG - [PRODUCER] Frame#90, Actual_FPS=188.92, Frame_read_time=0.0050
+[2025-08-20 17:15:13,744] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,746] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,746] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,747] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,747] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,747] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,747] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,748] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,748] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,749] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,749] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,768] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,769] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,769] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,769] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,769] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,770] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,770] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,771] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,771] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,772] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,772] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,791] INFO - 📊 Video Producer狀態: 已處理 100 幀，緩衝器: 5
+[2025-08-20 17:15:13,791] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,792] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,792] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,792] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,792] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,793] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,793] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,794] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,794] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,794] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,795] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,813] DEBUG - 📦 執行批次處理: 5 幀
+[2025-08-20 17:15:13,814] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,814] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,815] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,815] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,815] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,815] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,817] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,817] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,818] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,818] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,850] INFO - 📦 處理剩餘 4 幀
+[2025-08-20 17:15:13,850] INFO - ✅ VIDEO PRODUCER 完成: 總共處理 109 幀
+[2025-08-20 17:15:13,850] INFO - 🎯 Video模式確保所有幀都已加入處理隊列
+[2025-08-20 17:15:13,851] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,851] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,852] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,852] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,852] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,852] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
+[2025-08-20 17:15:13,853] DEBUG - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-20 17:15:13,853] INFO - ✅ Producer已完成且Input Queue為空，Worker準備結束
+[2025-08-20 17:15:13,853] INFO - ✅ VIDEO WORKER 完成: 總共處理 0 幀
+[2025-08-20 17:15:13,854] INFO - ✅ Producer執行緒已完成
+[2025-08-20 17:15:13,854] INFO - 🏁 執行VideoPipeline完成處理...
+[2025-08-20 17:15:13,854] INFO - 🏁 ===== VIDEO模式 完成處理 =====
+[2025-08-20 17:15:13,854] INFO - ⏳ Video模式策略: 等待所有幀處理完成，確保完整性
+[2025-08-20 17:15:13,854] INFO - 🛑 停止WorkerPool...
+[2025-08-20 17:15:13,859] INFO - 📤 發送Consumer終止信號...
+[2025-08-20 17:15:13,859] INFO - ✅ Video模式完成處理結束 - 所有幀已處理完成
+[2025-08-20 17:15:13,859] INFO - ⏳ 等待Consumer執行緒完成...
+[2025-08-20 17:15:13,859] INFO - ⚠️ Consumer收到終止信號 (None result)
+[2025-08-20 17:15:13,859] INFO - ✅ VIDEO CONSUMER 完成: 總共消費 0 個結果
+[2025-08-20 17:15:13,859] INFO - ✅ Consumer執行緒已完成
+[2025-08-20 17:15:13,859] INFO - 🛑 停止Consumer顯示...
+[2025-08-20 17:15:13,902] INFO - 📊 ===== 最終性能摘要 =====
+[2025-08-20 17:15:13,902] INFO - 📈 Timeline摘要: === 最近 30 秒時間軸摘要 ===
+總快照數: 1
+Producer活動率: 1/1 (100.0%)
+Consumer活動率: 0/1 (0.0%)
+Worker活動率:
+  Worker-W1: 0/1 (0.0%)
+  Worker-W2: 0/1 (0.0%)
+[2025-08-20 17:15:13,905] INFO - 🧹 執行清理程序...
+[2025-08-20 17:15:13,975] INFO - 🎉 ===== PIPELINE 執行完成 =====
