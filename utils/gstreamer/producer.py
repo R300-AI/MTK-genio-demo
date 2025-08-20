@@ -1,6 +1,6 @@
 """
 ================================================================================
-🎬 Producer 繼承架構設計
+🎬 Producer 架構設計
 ================================================================================
 
 Producer類採用繼承架構，將通用邏輯抽象到基類，具體模式在子類中實現。
@@ -106,13 +106,12 @@ class CameraConnectionError(ProducerException):
 class BaseProducer(ABC):
     """Producer抽象基類"""
     
-    def __init__(self, source, config: Optional[ProducerConfig] = None, monitor=None):
+    def __init__(self, source, config: Optional[ProducerConfig] = None):
         """初始化Producer - 添加詳細logging"""
         
         # 初始化基本屬性
         self.source = source
         self.config = config or ProducerConfig()
-        self.monitor = monitor
         self.frame_counter = 0
         self.last_fps_time = time.time()
         self.cap = None
@@ -129,15 +128,12 @@ class BaseProducer(ABC):
         logger.info("-" * 60)
         
         try:
-            logger.info("📋 步驟 1/3: 初始化Capture物件...")
+            logger.info("📋 步驟 1/2: 初始化Capture物件...")
             self._initialize_capture()
 
-            logger.info("📋 步驟 2/3: 配置系統串流參數...")
+            logger.info("📋 步驟 2/2: 配置系統串流參數...")
             self._configure_parameters()
             
-            logger.info("📋 步驟 3/3: 設置監控系統...")
-            self._setup_monitoring()
-
             logger.info("🎉 Producer初始化完成!")
             
         except Exception as e:
@@ -168,16 +164,6 @@ class BaseProducer(ABC):
     def _get_next_frame(self):
         """獲取下一幀"""
         pass
-    
-    def _setup_monitoring(self):
-        """設置監控系統"""
-        if self.monitor:
-            self.monitor.set_producer_info(
-                mode=self.mode,
-                total_frames=getattr(self, 'total_frames', -1),
-                fps=getattr(self, 'target_fps', 30)
-            )
-            logger.debug("Monitor integration completed")
 
     def __iter__(self):
         logger.debug(f"[{self.mode.upper()}] Starting frame iteration")
@@ -269,7 +255,6 @@ class VideoProducer(BaseProducer):
             raise StopIteration
         
         self.frame_counter += 1
-        self._handle_fps_monitoring(frame_start_time)
         
         # 每100幀記錄一次進度
         if self.frame_counter % 100 == 0:
@@ -277,34 +262,6 @@ class VideoProducer(BaseProducer):
             logger.info(f"📈 [VideoProducer] 處理進度: {progress:.1f}% ({self.frame_counter}/{self.total_frames})")
         
         return frame
-    
-    def _handle_fps_monitoring(self, frame_start_time):
-        """Video FPS監控 - 添加詳細logging"""
-        if self.frame_counter % self.config.fps_check_interval == 0:
-            current_time = time.time()
-            
-            # 計算實際處理性能
-            interval = (current_time - self.last_fps_time) / self.config.fps_check_interval
-            actual_fps = 1.0 / interval if interval > 0 else 0
-            frame_time = time.time() - frame_start_time
-            progress = (self.frame_counter / self.total_frames) * 100 if self.total_frames > 0 else 0
-            
-            # 計算預估完成時間
-            remaining_frames = self.total_frames - self.frame_counter
-            eta_seconds = (remaining_frames / actual_fps) if actual_fps > 0 else 0
-            eta_formatted = f"{eta_seconds/60:.1f}分鐘" if eta_seconds > 60 else f"{eta_seconds:.1f}秒"
-            
-            logger.info(f"📊 [VideoProducer] 性能報告 | Frame#{self.frame_counter}/{self.total_frames} | "
-                       f"進度={progress:.1f}% | 實際FPS={actual_fps:.2f} | "
-                       f"幀處理時間={frame_time:.4f}s | 預計完成={eta_formatted}")
-            
-            self.last_fps_time = current_time
-    
-    def get_progress(self) -> float:
-        """獲取播放進度百分比"""
-        if self.total_frames > 0:
-            return (self.frame_counter / self.total_frames) * 100
-        return 0.0
 
 # ============================================================================
 # 📷 CameraProducer 實現類
@@ -391,30 +348,8 @@ class CameraProducer(BaseProducer):
                 raise CameraConnectionError("Camera connection lost permanently")
         
         self.frame_counter += 1
-        self._handle_fps_monitoring(frame_start_time)
-        
         return frame
-    
-    def _handle_fps_monitoring(self, frame_start_time):
-        """Camera FPS監控 - 添加詳細logging"""
-        if self.frame_counter % self.config.fps_check_interval == 0:
-            current_time = time.time()
-            
-            # 計算實際捕獲性能
-            interval = (current_time - self.last_fps_time) / self.config.fps_check_interval
-            actual_fps = 1.0 / interval if interval > 0 else 0
-            frame_time = time.time() - frame_start_time
-            
-            # 計算運行時長
-            total_runtime = current_time - getattr(self, 'init_time', current_time)
-            runtime_formatted = f"{total_runtime/60:.1f}分鐘" if total_runtime > 60 else f"{total_runtime:.1f}秒"
-            
-            logger.info(f"📊 [CAMERA] 實時報告 | Frame#{self.frame_counter} | "
-                       f"實際FPS={actual_fps:.2f} | 幀捕獲時間={frame_time:.4f}s | "
-                       f"運行時長={runtime_formatted} | 重連次數={self.connection_lost_count}")
-            
-            self.last_fps_time = current_time
-    
+
     def _attempt_reconnection(self) -> bool:
         """嘗試重新連接Camera - 添加詳細logging"""
         logger.warning(f"🔄 [CAMERA] 檢測到連接中斷，開始重連程序...")
@@ -461,22 +396,22 @@ class CameraProducer(BaseProducer):
 # 🏭 工廠函數
 # ============================================================================
 
-def create_producer(source, config: Optional[ProducerConfig] = None, monitor=None) -> BaseProducer:
+def create_producer(source, config: Optional[ProducerConfig] = None) -> BaseProducer:
     """Producer工廠函數"""
     logger.info(f"🏭 [PRODUCER] 輸入來源: {source} (類型: {type(source).__name__})")
     # 自動判斷模式
     if isinstance(source, int) or (isinstance(source, str) and source.isdigit()):
-        producer = CameraProducer(source, config, monitor)
+        producer = CameraProducer(source, config)
     else:
-        producer = VideoProducer(source, config, monitor)
+        producer = VideoProducer(source, config)
     return producer
 
 class Producer(BaseProducer):
     """向後相容的Producer類"""
-    def __new__(cls, source, filename=None, index=None, monitor=None, mode=None):
+    def __new__(cls, source, filename=None, index=None, mode=None):
         logger.info("🔄 " + "="*60)
         logger.info("🔄 初始化Producer建構子")
         logger.info("🔄 " + "="*60)
         config = ProducerConfig()
-        result = create_producer(source, config, monitor)
+        result = create_producer(source, config)
         return result

@@ -1,6 +1,6 @@
 """
 ================================================================================
-🏗️ Pipeline 繼承架構設計
+🏗️ Pipeline 架構設計
 ================================================================================
 
 Pipeline類採用繼承架構，支援Video模式（完整性優先）和Camera模式（實時性優先）。
@@ -76,18 +76,16 @@ class BasePipeline(ABC):
     子類實現具體的Producer/Worker/Consumer邏輯
     """
     
-    def __init__(self, producer, worker_pool, consumer, monitor=None):
+    def __init__(self, producer, worker_pool, consumer):
         """通用初始化：硬體檢測、Queue配置、性能監控"""
         logger.info("🚀 ===== PIPELINE 初始化開始 =====")
         logger.info(f"📝 Producer類型: {type(producer).__name__}")
         logger.info(f"📝 WorkerPool類型: {type(worker_pool).__name__}")
         logger.info(f"📝 Consumer類型: {type(consumer).__name__}")
-        logger.info(f"📝 Monitor設置: {'已啟用' if monitor else '未設置'}")
         
         self.producer = producer
         self.worker_pool = worker_pool
         self.consumer = consumer
-        self.monitor = monitor
         
         # 硬體性能檢測和適應性參數
         logger.info("🔧 初始化硬體檢測器...")
