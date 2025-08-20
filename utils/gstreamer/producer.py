@@ -107,30 +107,46 @@ class BaseProducer(ABC):
     """Producer抽象基類"""
     
     def __init__(self, source, config: Optional[ProducerConfig] = None, monitor=None):
+        """初始化Producer - 添加詳細logging"""
+        
+        # 初始化基本屬性
         self.source = source
         self.config = config or ProducerConfig()
         self.monitor = monitor
-        
-        # 通用追蹤變數
         self.frame_counter = 0
         self.last_fps_time = time.time()
         self.cap = None
         
-        logger.info("=" * 60)
-        logger.info(f"{self.__class__.__name__.upper()} INITIALIZATION STARTED")
+        # 添加Producer工廠初始化日誌
+        logger.info(f"📝 來源輸入: {source}")
+        logger.info(f"📝 Producer類型: {self.__class__.__name__}")
+        logger.info(f"📝 模式識別: {self.mode}")
+        logger.info(f"📝 配置參數: FPS間隔={self.config.fps_check_interval}, "
+                f"緩衝大小={self.config.buffer_size}, 重試次數={self.config.retry_count}")
+        
+        # Template Method Pattern 初始化流程 logging
+        logger.info("🔧 開始 Template Method 初始化流程...")
         logger.info("-" * 60)
         
-        # Template Method Pattern
         try:
+            logger.info("📋 步驟 1/3: 初始化Capture物件...")
             self._initialize_capture()
+
+            logger.info("📋 步驟 2/3: 配置系統串流參數...")
             self._configure_parameters()
+            
+            logger.info("📋 步驟 3/3: 設置監控系統...")
             self._setup_monitoring()
-            self._log_initialization_summary()
+
+            logger.info("🎉 Producer初始化完成!")
+            
         except Exception as e:
-            logger.error(f"Producer initialization failed: {e}")
+            logger.error(f"❌ Producer初始化失敗: {e}")
+            logger.error(f"❌ 失敗的Producer類型: {self.__class__.__name__}")
+            logger.error(f"❌ 失敗的來源: {source}")
             raise CaptureInitializationError(f"Failed to initialize {self.__class__.__name__}: {e}")
         
-        logger.info("=" * 60)
+        logger.info("🏭 " + "="*60)
     
     @property
     @abstractmethod
@@ -162,18 +178,7 @@ class BaseProducer(ABC):
                 fps=getattr(self, 'target_fps', 30)
             )
             logger.debug("Monitor integration completed")
-    
-    def _log_initialization_summary(self):
-        """記錄初始化摘要"""
-        logger.info(f" - Mode: {self.mode}")
-        logger.info(f" - Source: {self.source}")
-        logger.info(f" - Target FPS: {getattr(self, 'target_fps', 'Unknown')}")
-        logger.info(f" - Resolution: {getattr(self, 'width', 'Unknown')}x{getattr(self, 'height', 'Unknown')}")
-        logger.info(f" - Live Stream: {getattr(self, 'is_live_stream', 'Unknown')}")
-        if hasattr(self, 'total_frames') and self.total_frames > 0:
-            duration = self.total_frames / getattr(self, 'target_fps', 30)
-            logger.info(f" - Duration: {duration:.2f}s ({self.total_frames} frames)")
-    
+
     def __iter__(self):
         logger.debug(f"[{self.mode.upper()}] Starting frame iteration")
         return self
@@ -206,71 +211,97 @@ class BaseProducer(ABC):
 # ============================================================================
 
 class VideoProducer(BaseProducer):
-    """Video文件Producer實現"""
-    
     @property
     def mode(self) -> str:
         return "video"
     
     def _initialize_capture(self):
-        logger.debug(f"[VIDEO] Initializing capture for: {self.source}")
+        """初始化Video文件capture"""
+        # 文件存在性檢查
+        import os
+        if isinstance(self.source, str) and not os.path.exists(self.source):
+            logger.error(f"❌ [VideoProducer] 文件不存在: {self.source}")
+            raise RuntimeError(f"Video file not found: {self.source}")
+        
+        logger.info("🔍 [VideoProducer] 正在建立VideoCapture連接...")
         
         try:
             self.cap = cv2.VideoCapture(self.source)
             if not self.cap.isOpened():
+                logger.error(f"❌ [VideoProducer] 無法開啟影片文件: {self.source}")
                 raise RuntimeError(f"Cannot open video file: {self.source}")
-            
-            logger.info(f" - Video file loaded: {self.source}")
+            logger.info(f"📁 [VideoProducer] 文件載入完成: {self.source}")
             self.cap.set(cv2.CAP_PROP_BUFFERSIZE, self.config.buffer_size)
-            logger.debug("Video capture optimization applied")
+            logger.debug(f"🔧 [VideoProducer] 緩衝區大小設為: {self.config.buffer_size}")
             
         except Exception as e:
-            logger.error(f"[VIDEO] Capture initialization failed: {e}")
+            logger.error(f"❌ [VideoProducer] Capture初始化失敗: {e}")
+            logger.error(f"❌ [VideoProducer] 問題文件: {self.source}")
             raise
     
     def _configure_parameters(self):
-        logger.debug("[VIDEO] Configuring video-specific parameters")
-        
+        """配置Video特定參數"""
+        # 基礎參數獲取
         self.target_fps = self.cap.get(cv2.CAP_PROP_FPS) or 30.0
         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        logger.info(f"📊 [VideoProducer] FPS: {self.target_fps}")
+        logger.info(f"📊 [VideoProducer] 解析度: {self.width}x{self.height}")
+        logger.info(f"📊 [VideoProducer] 總幀數: {self.total_frames}")
         
+        # Video模式特定屬性
         self.is_live_stream = False
         self.frame_duration = 1.0 / self.target_fps if self.target_fps > 0 else 0.033
-        
-        logger.debug(f"[VIDEO] Parameters configured - FPS: {self.target_fps}, "
-                    f"Resolution: {self.width}x{self.height}, Frames: {self.total_frames}")
+        duration = self.total_frames / self.target_fps if self.target_fps > 0 else 0
+        logger.info(f"⏱️ [VideoProducer] 影片時長: {duration:.2f} 秒")
+        logger.info(f"⏱️ [VideoProducer] 每幀間隔: {self.frame_duration:.4f} 秒")
     
     def _get_next_frame(self):
+        """Video幀獲取邏輯 - 添加詳細logging"""
         frame_start_time = time.time()
         
         ret, frame = self.cap.read()
         if not ret:
-            logger.info(f"[VIDEO] Playback completed. Total frames: {self.frame_counter}")
+            logger.info(f"🏁 [VideoProducer] 影片播放完成")
+            logger.info(f"🏁 [VideoProducer] 總共處理幀數: {self.frame_counter}")
+            logger.info(f"🏁 [VideoProducer] 完成率: 100% ({self.frame_counter}/{self.total_frames})")
             raise StopIteration
         
         self.frame_counter += 1
         self._handle_fps_monitoring(frame_start_time)
         
+        # 每100幀記錄一次進度
+        if self.frame_counter % 100 == 0:
+            progress = (self.frame_counter / self.total_frames) * 100 if self.total_frames > 0 else 0
+            logger.info(f"📈 [VideoProducer] 處理進度: {progress:.1f}% ({self.frame_counter}/{self.total_frames})")
+        
         return frame
     
     def _handle_fps_monitoring(self, frame_start_time):
+        """Video FPS監控 - 添加詳細logging"""
         if self.frame_counter % self.config.fps_check_interval == 0:
             current_time = time.time()
             
+            # 計算實際處理性能
             interval = (current_time - self.last_fps_time) / self.config.fps_check_interval
             actual_fps = 1.0 / interval if interval > 0 else 0
             frame_time = time.time() - frame_start_time
             progress = (self.frame_counter / self.total_frames) * 100 if self.total_frames > 0 else 0
             
-            logger.debug(f"[VIDEO] Frame#{self.frame_counter}/{self.total_frames}, "
-                        f"Progress={progress:.1f}%, FPS={actual_fps:.2f}, "
-                        f"Frame_time={frame_time:.4f}s")
+            # 計算預估完成時間
+            remaining_frames = self.total_frames - self.frame_counter
+            eta_seconds = (remaining_frames / actual_fps) if actual_fps > 0 else 0
+            eta_formatted = f"{eta_seconds/60:.1f}分鐘" if eta_seconds > 60 else f"{eta_seconds:.1f}秒"
+            
+            logger.info(f"📊 [VideoProducer] 性能報告 | Frame#{self.frame_counter}/{self.total_frames} | "
+                       f"進度={progress:.1f}% | 實際FPS={actual_fps:.2f} | "
+                       f"幀處理時間={frame_time:.4f}s | 預計完成={eta_formatted}")
             
             self.last_fps_time = current_time
     
     def get_progress(self) -> float:
+        """獲取播放進度百分比"""
         if self.total_frames > 0:
             return (self.frame_counter / self.total_frames) * 100
         return 0.0
@@ -280,55 +311,84 @@ class VideoProducer(BaseProducer):
 # ============================================================================
 
 class CameraProducer(BaseProducer):
-    """Camera實時Producer實現"""
-    
     @property
     def mode(self) -> str:
         return "camera"
     
     def _initialize_capture(self):
+        """初始化Camera capture - 添加詳細logging"""
         camera_id = int(self.source) if isinstance(self.source, str) and self.source.isdigit() else self.source
-        logger.debug(f"[CAMERA] Initializing capture for camera ID: {camera_id}")
+        
+        logger.info("📷 [CAMERA] =================================")
+        logger.info("📷 [CAMERA] 開始初始化Camera實時Producer")
+        logger.info("📷 [CAMERA] =================================")
+        logger.info(f"📷 [CAMERA] 目標攝像頭 ID: {camera_id}")
+        
+        logger.info("🔍 [CAMERA] 正在搜尋並連接攝像頭...")
         
         try:
             self.cap = cv2.VideoCapture(camera_id)
             if not self.cap.isOpened():
+                logger.error(f"❌ [CAMERA] 無法連接攝像頭 ID: {camera_id}")
+                logger.error(f"❌ [CAMERA] 可能原因: 攝像頭不存在、被其他程式使用、或驅動問題")
                 raise RuntimeError(f"Cannot open camera: {camera_id}")
             
-            logger.info(f" - Camera connected: ID {camera_id}")
+            logger.info("✅ [CAMERA] 攝像頭連接成功")
+            logger.info(f"📹 [CAMERA] 攝像頭 ID {camera_id} 已就緒")
+            
+            # Camera模式優化設置
+            logger.debug("🔧 [CAMERA] 應用Camera模式優化設置...")
             self.cap.set(cv2.CAP_PROP_BUFFERSIZE, self.config.buffer_size)
-            logger.debug(f"Camera buffer size set to: {self.config.buffer_size}")
+            logger.debug(f"🔧 [CAMERA] 緩衝區大小設為: {self.config.buffer_size} (減少延遲)")
+            logger.info("✅ [CAMERA] Camera capture優化完成")
             
         except Exception as e:
-            logger.error(f"[CAMERA] Capture initialization failed: {e}")
+            logger.error(f"❌ [CAMERA] Capture初始化失敗: {e}")
+            logger.error(f"❌ [CAMERA] 問題攝像頭 ID: {camera_id}")
             raise CameraConnectionError(f"Failed to connect to camera {camera_id}: {e}")
     
     def _configure_parameters(self):
-        logger.debug("[CAMERA] Configuring camera-specific parameters")
+        """配置Camera特定參數 - 添加詳細logging"""
+        logger.info("⚙️ [CAMERA] 開始配置Camera模式參數...")
         
+        # 基礎參數獲取
         self.target_fps = self.cap.get(cv2.CAP_PROP_FPS) or 30.0
         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         
-        self.is_live_stream = True
-        self.total_frames = -1
-        self.connection_lost_count = 0
+        logger.info(f"📊 [CAMERA] 攝像頭規格獲取完成:")
+        logger.info(f"📊 [CAMERA]   - FPS: {self.target_fps}")
+        logger.info(f"📊 [CAMERA]   - 解析度: {self.width}x{self.height}")
         
-        logger.debug(f"[CAMERA] Parameters configured - FPS: {self.target_fps}, "
-                    f"Resolution: {self.width}x{self.height}")
+        # Camera模式特定屬性
+        self.is_live_stream = True
+        self.total_frames = -1  # 無限流
+        self.connection_lost_count = 0
+        self.init_time = time.time()  # 記錄初始化時間
+        
+        logger.info(f"🎯 [CAMERA] 模式設定: 實時性優先 (即時串流)")
+        logger.info(f"⚡ [CAMERA] 串流特性: 無限幀數、自動重連、低延遲優化")
+        logger.info(f"🔄 [CAMERA] 重連配置: 最大重試{self.config.retry_count}次, 間隔{self.config.reconnect_delay}秒")
+        
+        logger.info("✅ [CAMERA] Camera模式參數配置完成")
     
     def _get_next_frame(self):
+        """Camera幀獲取邏輯 - 添加詳細logging"""
         frame_start_time = time.time()
         
         ret, frame = self.cap.read()
         if not ret:
-            logger.warning("[CAMERA] Frame read failed, attempting reconnection...")
+            logger.warning("⚠️ [CAMERA] 幀讀取失敗，可能是連接問題")
+            logger.info("🔄 [CAMERA] 嘗試自動重連...")
+            
             if self._attempt_reconnection():
+                logger.info("✅ [CAMERA] 重連成功，繼續讀取幀")
                 ret, frame = self.cap.read()
             
             if not ret:
-                logger.error("[CAMERA] Camera connection lost permanently")
-                raise CameraConnectionError("Camera connection lost")
+                logger.error("❌ [CAMERA] 攝像頭連接永久丟失")
+                logger.error(f"❌ [CAMERA] 總重連次數: {self.connection_lost_count}")
+                raise CameraConnectionError("Camera connection lost permanently")
         
         self.frame_counter += 1
         self._handle_fps_monitoring(frame_start_time)
@@ -336,44 +396,65 @@ class CameraProducer(BaseProducer):
         return frame
     
     def _handle_fps_monitoring(self, frame_start_time):
+        """Camera FPS監控 - 添加詳細logging"""
         if self.frame_counter % self.config.fps_check_interval == 0:
             current_time = time.time()
             
+            # 計算實際捕獲性能
             interval = (current_time - self.last_fps_time) / self.config.fps_check_interval
             actual_fps = 1.0 / interval if interval > 0 else 0
             frame_time = time.time() - frame_start_time
             
-            logger.debug(f"[CAMERA] Frame#{self.frame_counter}, "
-                        f"FPS={actual_fps:.2f}, Frame_time={frame_time:.4f}s, "
-                        f"Reconnects={self.connection_lost_count}")
+            # 計算運行時長
+            total_runtime = current_time - getattr(self, 'init_time', current_time)
+            runtime_formatted = f"{total_runtime/60:.1f}分鐘" if total_runtime > 60 else f"{total_runtime:.1f}秒"
+            
+            logger.info(f"📊 [CAMERA] 實時報告 | Frame#{self.frame_counter} | "
+                       f"實際FPS={actual_fps:.2f} | 幀捕獲時間={frame_time:.4f}s | "
+                       f"運行時長={runtime_formatted} | 重連次數={self.connection_lost_count}")
             
             self.last_fps_time = current_time
     
     def _attempt_reconnection(self) -> bool:
-        logger.info(f"[CAMERA] Connection lost, attempting reconnection...")
+        """嘗試重新連接Camera - 添加詳細logging"""
+        logger.warning(f"🔄 [CAMERA] 檢測到連接中斷，開始重連程序...")
+        logger.info(f"🔄 [CAMERA] 重連配置: 最大嘗試{self.config.retry_count}次, 每次間隔{self.config.reconnect_delay}秒")
         
         for attempt in range(self.config.retry_count):
-            logger.info(f"[CAMERA] Reconnection attempt {attempt + 1}/{self.config.retry_count}")
+            logger.info(f"🔄 [CAMERA] 重連嘗試 {attempt + 1}/{self.config.retry_count}")
             
+            # 清理舊連接
             if self.cap:
                 self.cap.release()
+                logger.debug("🧹 [CAMERA] 舊連接已釋放")
             
+            logger.debug(f"⏱️ [CAMERA] 等待 {self.config.reconnect_delay} 秒後重連...")
             time.sleep(self.config.reconnect_delay)
             
+            # 嘗試重新連接
             try:
                 camera_id = int(self.source) if isinstance(self.source, str) and self.source.isdigit() else self.source
+                logger.debug(f"🔍 [CAMERA] 嘗試重新連接攝像頭 ID {camera_id}...")
+                
                 self.cap = cv2.VideoCapture(camera_id)
                 
                 if self.cap.isOpened():
+                    # 重新應用優化設置
                     self.cap.set(cv2.CAP_PROP_BUFFERSIZE, self.config.buffer_size)
                     self.connection_lost_count += 1
-                    logger.info(f"[CAMERA] Reconnection successful on attempt {attempt + 1}")
+                    
+                    logger.info(f"✅ [CAMERA] 重連成功! (嘗試 {attempt + 1}/{self.config.retry_count})")
+                    logger.info(f"📊 [CAMERA] 累計重連次數: {self.connection_lost_count}")
                     return True
+                else:
+                    logger.debug(f"❌ [CAMERA] 嘗試 {attempt + 1} 失敗: 無法開啟攝像頭")
                     
             except Exception as e:
-                logger.warning(f"[CAMERA] Reconnection attempt {attempt + 1} failed: {e}")
+                logger.warning(f"⚠️ [CAMERA] 重連嘗試 {attempt + 1} 發生異常: {e}")
         
-        logger.error("[CAMERA] All reconnection attempts failed")
+        logger.error("❌ [CAMERA] 所有重連嘗試都失敗了")
+        logger.error(f"❌ [CAMERA] 總共嘗試了 {self.config.retry_count} 次重連")
+        logger.error(f"❌ [CAMERA] 攝像頭 ID {self.source} 可能已斷線或損壞")
         return False
 
 # ============================================================================
@@ -382,23 +463,20 @@ class CameraProducer(BaseProducer):
 
 def create_producer(source, config: Optional[ProducerConfig] = None, monitor=None) -> BaseProducer:
     """Producer工廠函數"""
-    logger.info(f"[FACTORY] Creating producer for source: {source}")
-    
+    logger.info(f"🏭 [PRODUCER] 輸入來源: {source} (類型: {type(source).__name__})")
+    # 自動判斷模式
     if isinstance(source, int) or (isinstance(source, str) and source.isdigit()):
         producer = CameraProducer(source, config, monitor)
-        logger.info("[FACTORY] Created CameraProducer for real-time processing")
     else:
         producer = VideoProducer(source, config, monitor)
-        logger.info("[FACTORY] Created VideoProducer for file processing")
-    
     return producer
 
-# ============================================================================
-# 🔄 向後相容性
-# ============================================================================
-
 class Producer(BaseProducer):
+    """向後相容的Producer類"""
     def __new__(cls, source, filename=None, index=None, monitor=None, mode=None):
-        logger.debug("[COMPATIBILITY] Using legacy Producer constructor, forwarding to factory")
+        logger.info("🔄 " + "="*60)
+        logger.info("🔄 初始化Producer建構子")
+        logger.info("🔄 " + "="*60)
         config = ProducerConfig()
-        return create_producer(source, config, monitor)
+        result = create_producer(source, config, monitor)
+        return result
