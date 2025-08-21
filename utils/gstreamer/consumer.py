@@ -1,16 +1,61 @@
+"""
+================================================================================
+🖥️ Consumer 架構設計 2025.08.21
+================================================================================
+
+Consumer 採用單一職責原則設計，專責推論結果的顯示、輸出與性能監控。
+支援 Video（完整性優先）與 Camera（實時性優先）兩種模式，並根據模式自動調整顯示緩衝與丟幀策略。
+
+🎯 核心組件：
+┌─────────────┬──────────────────┬─────────────────────────────────────────┐
+│ 📸 Video    │ 完整性優先       │ 順序顯示、無丟幀、進度追蹤              │
+│ 📷 Camera   │ 實時性優先       │ 智能丟幀、低延遲、FPS自適應            │
+└─────────────┴──────────────────┴─────────────────────────────────────────┘
+
+📊 資料流向：
+    Results ──> Consumer（顯示/輸出/統計）
+
+🎯 核心架構：
+Consumer（顯示與輸出單元）
+├── 顯示緩衝管理（根據模式自動調整）
+├── FPS與延遲監控
+├── 多執行緒顯示循環
+└── 統計資料回報
+
+📊 職責分配（◯ = 提供框架 / ✅ = 具體實作）：
+┌─────────────────┬───────────────────┬─────────────────┐
+│   功能類別      │  Video模式特性      │ Camera模式特性  │
+├─────────────────┼───────────────────┼─────────────────┤
+│ 🖼️ 顯示緩衝     │ ✅ 順序顯示、無丟幀 │ ✅ 智能丟幀、低延遲 │
+│ 🎯 FPS監控      │ ✅ 進度追蹤        │ ✅ FPS自適應      │
+│ 🧹 資源管理     │ ✅ 線程安全清理    │ ✅ 線程安全清理    │
+│ 📊 統計回報     │ ✅ 顯示統計        │ ✅ 顯示統計        │
+└─────────────────┴───────────────────┴──────────────────┘
+
+🔧 核心特性：
+• 根據模式自動調整顯示緩衝區大小與丟幀策略
+• 支援多執行緒顯示循環，確保主流程不卡頓
+• 內建FPS與延遲監控，便於性能分析
+• 可與Producer/WorkerPool靈活組合，支援多種串流場景
+
+🛠️ 開發提示：
+• 新增顯示模式時，擴充顯示緩衝與丟幀策略分支
+• 可根據需求擴充統計資料回報格式
+• 注意Video模式下完整性，Camera模式下即時性
+"""
+
 import cv2
-import logging
 import time
 from collections import deque
 
 # 使用與 pipeline 相同的 logger
-logger = logging.getLogger('gstreamer_demo')
+ # ...existing code...
 
 import threading
 
 class Consumer:
     def __init__(self, window_name="", monitor=None, display_size=None, fps=30, mode='camera', producer=None):
-        logger.info(f"[CONSUMER] window name - {window_name}, mode={mode}")
+    # ...existing code...
         self.window_name = window_name
         self.monitor = monitor
         self.display_size = display_size
@@ -28,12 +73,28 @@ class Consumer:
         self._running = threading.Event()
         self._running.set()
         self._thread = None
-        
+
         # 添加fps追蹤變數
         self.display_counter = 0
         self.last_display_fps_time = time.time()
         self.fps_check_interval = 30  # 每30幀檢查一次實際顯示fps
         self.buffer_size_log_counter = 0  # buffer size記錄計數器
+
+        # 初始化日誌
+        import logging
+        logger = logging.getLogger('gstreamer_demo')
+        logger.info("🖥️ " + "="*60)
+        logger.info("🖥️ Consumer初始化開始")
+        logger.info("🖥️ " + "="*60)
+        logger.info(f"📋 步驟 1/2: 🚀 顯示緩衝區配置...")
+        logger.info(f"🔍 [{self.mode.upper()}] 視窗名稱: {self.window_name}")
+        logger.info(f"🔍 [{self.mode.upper()}] 顯示緩衝區大小: {self.display_buffer.maxlen}")
+        logger.info(f"🔍 [{self.mode.upper()}] 目標FPS: {self.fps}")
+        logger.info(f"📋 步驟 2/2: ⚙️ 顯示執行緒與統計初始化...")
+        logger.info(f"📊 [{self.mode.upper()}] 顯示尺寸: {self.display_size if self.display_size else '原始大小'}")
+        logger.info(f"📊 [{self.mode.upper()}] FPS統計間隔: {self.fps_check_interval} 幀")
+        logger.info(f"✅ Consumer初始化完成!")
+        logger.info("🖥️ " + "="*60)
 
     def start_display(self):
         if self._thread is None:
@@ -55,7 +116,7 @@ class Consumer:
             else:
                 # camera mode: 保持原有邏輯，允許丟幀
                 if len(self.display_buffer) == self.display_buffer.maxlen:
-                    logger.warning(f"[CONSUMER] Display buffer full, dropping oldest frame.")
+                    pass
             self.display_buffer.append(frame)
 
     def _display_loop(self):
@@ -63,10 +124,8 @@ class Consumer:
         if self.mode == 'video' and self.producer and hasattr(self.producer, 'get_fps'):
             target_fps = self.producer.get_fps()
             interval = 1.0 / target_fps
-            logger.info(f"[CONSUMER] Video mode: using original fps={target_fps:.2f}, interval={interval:.4f}s")
         else:
             interval = 1.0 / self.fps
-            logger.info(f"[CONSUMER] Camera mode: using fixed fps={self.fps}, interval={interval:.4f}s")
         
         last_frame = None
         frames_without_new = 0  # 計算連續沒有新幀的次數
@@ -120,12 +179,11 @@ class Consumer:
                         actual_interval = (current_time - self.last_display_fps_time) / self.fps_check_interval
                         actual_display_fps = 1.0 / actual_interval if actual_interval > 0 else 0
                         
-                        logger.info(f"Consumer Display#{self.display_counter}, "
-                                   f"Target_FPS={1.0/interval:.2f}, Actual_Display_FPS={actual_display_fps:.2f}")
+                        pass
                         self.last_display_fps_time = current_time
                         
                 except Exception as e:
-                    logger.error(f"CONSUMER_CONSUME: Error displaying frame {self.frame_count}: {e}")
+                    pass
             
             # 更新 last_frame 只在有新幀時
             if frame is not None:

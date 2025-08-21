@@ -41,13 +41,13 @@ def main():
     args = parser.parse_args()
     if (isinstance(args.video_path, str) and (args.video_path.isdigit() or
         args.video_path.lower().startswith(('rtsp://', 'rtmp://')))):
-        mode = 'camera'
+        mode = 'CAMERA'
     else:
-        mode = 'video'
+        mode = 'VIDEO'
 
     producer = Producer(args.video_path, mode=mode)
     worker_pool = WorkerPool(model_path=args.model_path, mode=mode, max_workers=args.max_workers)
-    """
+    
     consumer = Consumer(
         window_name="Hetegeneous Integrated Chip Inference Demo", 
         display_size=(720, 480), 
@@ -64,6 +64,6 @@ def main():
     print("[系統] Pipeline 執行中...")
     pipeline.run()
     print("[系統] Pipeline 執行結束")
-    """
+
 if __name__ == "__main__":
     main()

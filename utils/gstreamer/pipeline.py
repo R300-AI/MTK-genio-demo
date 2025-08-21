@@ -59,7 +59,7 @@ from abc import ABC, abstractmethod
 from .metric import TimelineLogger, HardwarePerformanceLogger
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='[%(asctime)s] %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('gstreamer_demo.log', mode='w', encoding='utf-8')

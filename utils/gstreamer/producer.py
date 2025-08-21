@@ -28,26 +28,26 @@ Producer 採用抽象基類（BaseProducer）+ 工廠模式（Producer）的設�
     (完整性優先)                     (實時性優先)
 
 📊 職責分配（◯ = 提供框架 / ✅ = 具體實作）：
-┌─────────────────┬──────────────────┬─────────────────┬─────────────────┬─────────────────┐
-│   功能類別      │   BaseProducer   │  VideoProducer   │ CameraProducer   │   Producer      │
-├─────────────────┼──────────────────┼─────────────────┼─────────────────┼─────────────────┤
-│ 🏭 工廠創建     │ ◯ 抽象基類       │ 🔹 子類被動使用 │ 🔹 子類被動使用 │ ✅ 統一入口     │
-│ 🚀 初始化管理   │ ✅ 模板方法流程   │ ◯ 文件驗證框架 │ ◯ 攝像頭偵測框架 │ ✅ 類型選擇     │
-│ 🎯 Capture設置  │ ✅ 通用設置       │ ✅ 讀取優化     │ ✅ 緩衝區配置   │ 🔹 委託實現     │
-│ 📊 參數配置     │ ✅ 基礎參數框架   │ ✅ 進度追蹤     │ ✅ 實時參數     │ 🔹 委託實現     │
-│ 🎬 幀生產邏輯   │ ◯ 抽象方法       │ ✅ 順序讀取     │ ✅ 實時捕獲     │ 🔹 委託實現     │
-│ 📈 性能監控     │ ◯ FPS 追蹤框架  │ ✅ 進度報告     │ ✅ 延遲監控     │ 🔹 委託實現     │
-│ 🔄 錯誤處理     │ ◯ 基礎處理框架  │ ✅ 文件錯誤處理 │ ✅ 重連機制       │ ✅ 統一處理     │
-│ 🧹 資源清理     │ ✅ 統一清理       │ 🔹 繼承使用     │ 🔹 繼承使用     │ 🔹 委託實現     │
-└─────────────────┴──────────────────┴─────────────────┴─────────────────┴─────────────────┘
+┌─────────────────┬──────────────────┬─────────────────┬─────────────────┐
+│   功能類別      │   BaseProducer   │  VideoProducer   │ CameraProducer  │
+├─────────────────┼──────────────────┼─────────────────┼─────────────────┤
+│ 🏭 工廠創建     │ ◯ 抽象基類       │ 🔹 子類被動使用 │ 🔹 子類被動使用  │
+│ 🚀 初始化管理   │ ✅ 模板方法流程   │ ◯ 文件驗證框架 │ ◯ 攝像頭偵測框架  │
+│ 🎯 Capture設置  │ ✅ 通用設置       │ ✅ 讀取優化     │ ✅ 緩衝區配置   │
+│ 📊 參數配置     │ ✅ 基礎參數框架   │ ✅ 進度追蹤     │ ✅ 實時參數      │
+│ 🎬 幀生產邏輯   │ ◯ 抽象方法       │ ✅ 順序讀取     │ ✅ 實時捕獲      │ 
+│ 📈 性能監控     │ ◯ FPS 追蹤框架  │ ✅ 進度報告     │ ✅ 延遲監控       │ 
+│ 🔄 錯誤處理     │ ◯ 基礎處理框架  │ ✅ 文件錯誤處理 │ ✅ 重連機制        │
+│ 🧹 資源清理     │ ✅ 統一清理       │ 🔹 繼承使用     │ 🔹 繼承使用     │
+└─────────────────┴──────────────────┴─────────────────┴─────────────────┘
 
 🛠️ 使用方式：
 producer = Producer(args.video_path, mode=mode)
 
 # 範例：
-producer = Producer("./video.mp4", mode="video")      # 視頻文件處理
-producer = Producer("0", mode="camera")               # 攝像頭即時流
-producer = Producer("rtsp://...", mode="camera")      # RTSP 即時流
+producer = Producer("./video.mp4", mode="VIDEO")      # 視頻文件處理
+producer = Producer("0", mode="CAMERA")               # 攝像頭即時流
+producer = Producer("rtsp://...", mode="CAMERA")      # RTSP 即時流
 """
 
 import cv2
@@ -104,10 +104,9 @@ class BaseProducer(ABC):
 
             logger.info("📋 步驟 2/2: ⚙️ 配置管理 - 設置系統串流參數...")
             self._configure_parameters()
-            
+
             logger.info("✅ Producer初始化完成!")
-            logger.info("🏭 " + "="*60)
-            
+
         except Exception as e:
             logger.error(f"❌ Producer初始化失敗: {e}")
             logger.error(f"❌ 失敗的Producer類型: {self.__class__.__name__}")
@@ -614,7 +613,7 @@ class Producer:
         Args:
             source: 輸入來源 (文件路徑或攝像頭ID)
             config: ProducerConfig配置對象 (可選)
-            mode: 模式 ("video" 或 "camera") - 必須指定
+            mode: 模式 ("VIDEO" 或 "CAMERA") - 必須指定
             
         Returns:
             BaseProducer: VideoProducer或CameraProducer實例
@@ -625,19 +624,19 @@ class Producer:
         # 檢查必要參數
         if mode is None:
             logger.error("❌ 缺少必要參數: mode")
-            logger.error("❌ 正確調用方式: Producer(source, mode='video') 或 Producer(source, mode='camera')")
-            raise ValueError("必須指定 mode 參數 ('video' 或 'camera')")
+            logger.error("❌ 正確調用方式: Producer(source, mode='VIDEO') 或 Producer(source, mode='CAMERA')")
+            raise ValueError("必須指定 mode 參數 ('VIDEO' 或 'CAMERA')")
         
         # 處理配置對象
         if config is None:
             config = ProducerConfig()
         
         # 🎯 根據mode參數選擇Producer類型
-        if mode == "video":
+        if mode == "VIDEO":
             return VideoProducer(source, config)
-        elif mode == "camera":
+        elif mode == "CAMERA":
             return CameraProducer(source, config)
         else:
             logger.error(f"❌ 不支援的模式: {mode}")
-            logger.error("❌ 支援的模式: 'video' 或 'camera'")
-            raise ValueError(f"不支援的模式: {mode}。請使用 'video' 或 'camera'")
+            logger.error("❌ 支援的模式: 'VIDEO' 或 'CAMERA'")
+            raise ValueError(f"不支援的模式: {mode}。請使用 'VIDEO' 或 'CAMERA'")
