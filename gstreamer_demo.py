@@ -2,7 +2,7 @@ import argparse
 import logging
 import time
 from utils.gstreamer.producer import Producer
-from utils.gstreamer.processor import WorkerPool
+from utils.gstreamer.workerpool import WorkerPool
 from utils.gstreamer.consumer import Consumer
 from utils.gstreamer.pipeline import create_pipeline
 
@@ -46,11 +46,13 @@ def main():
         mode = 'video'
 
     producer = Producer(args.video_path, mode=mode)
-    worker_pool = WorkerPool(args.model_path, max_workers=args.max_workers)
+    worker_pool = WorkerPool(model_path=args.model_path, mode=mode, max_workers=args.max_workers)
+    """
     consumer = Consumer(
         window_name="Hetegeneous Integrated Chip Inference Demo", 
         display_size=(720, 480), 
-        fps=30
+        fps=30,
+        mode=mode
     )
 
     pipeline = create_pipeline(
@@ -62,6 +64,6 @@ def main():
     print("[系統] Pipeline 執行中...")
     pipeline.run()
     print("[系統] Pipeline 執行結束")
-
+    """
 if __name__ == "__main__":
     main()

@@ -1,364 +1,100 @@
-[2025-08-20 18:48:22,331] INFO - 🔄 ============================================================
-[2025-08-20 18:48:22,332] INFO - 🔄 初始化Producer建構子
-[2025-08-20 18:48:22,332] INFO - 🔄 ============================================================
-[2025-08-20 18:48:22,332] INFO - 🏭 [PRODUCER] 輸入來源: ./data/video.mp4 (類型: str)
-[2025-08-20 18:48:22,332] INFO - 📝 來源輸入: ./data/video.mp4
-[2025-08-20 18:48:22,332] INFO - 📝 Producer類型: VideoProducer
-[2025-08-20 18:48:22,332] INFO - 📝 模式識別: video
-[2025-08-20 18:48:22,332] INFO - 📝 配置參數: FPS間隔=30, 緩衝大小=1, 重試次數=3
-[2025-08-20 18:48:22,332] INFO - 🔧 開始 Template Method 初始化流程...
-[2025-08-20 18:48:22,332] INFO - ------------------------------------------------------------
-[2025-08-20 18:48:22,332] INFO - 📋 步驟 1/2: 初始化Capture物件...
-[2025-08-20 18:48:22,332] INFO - 🔍 [VideoProducer] 正在建立VideoCapture連接...
-[2025-08-20 18:48:22,376] INFO - 📁 [VideoProducer] 文件載入完成: ./data/video.mp4
-[2025-08-20 18:48:22,376] DEBUG - 🔧 [VideoProducer] 緩衝區大小設為: 1
-[2025-08-20 18:48:22,376] INFO - 📋 步驟 2/2: 配置系統串流參數...
-[2025-08-20 18:48:22,376] INFO - 📊 [VideoProducer] FPS: 29.97002997002997
-[2025-08-20 18:48:22,376] INFO - 📊 [VideoProducer] 解析度: 1920x1080
-[2025-08-20 18:48:22,376] INFO - 📊 [VideoProducer] 總幀數: 109
-[2025-08-20 18:48:22,376] INFO - ⏱️ [VideoProducer] 影片時長: 3.64 秒
-[2025-08-20 18:48:22,376] INFO - ⏱️ [VideoProducer] 每幀間隔: 0.0334 秒
-[2025-08-20 18:48:22,377] INFO - 🎉 Producer初始化完成!
-[2025-08-20 18:48:22,377] INFO - 🏭 ============================================================
-[2025-08-20 18:48:22,377] INFO - [WORKERPOOL] streaming with 2 workers, mode=camera
-[2025-08-20 18:48:22,377] INFO - [PROCESSOR] model - ./models/yolov8n-pose_float32.tflite
-[2025-08-20 18:48:26,565] DEBUG - Falling back to TensorFlow client; we recommended you install the Cloud TPU client directly with pip install cloud-tpu-client.
-[2025-08-20 18:48:27,676] DEBUG - Creating converter from 7 to 5
-[2025-08-20 18:48:27,676] DEBUG - Creating converter from 5 to 7
-[2025-08-20 18:48:27,676] DEBUG - Creating converter from 7 to 5
-[2025-08-20 18:48:27,677] DEBUG - Creating converter from 5 to 7
-[2025-08-20 18:48:30,846] DEBUG - matplotlib data path: C:\Users\B20447\Desktop\GitHub\MTK-genio-demo\.venv\Lib\site-packages\matplotlib\mpl-data
-[2025-08-20 18:48:30,871] DEBUG - CONFIGDIR=C:\Users\B20447\.matplotlib
-[2025-08-20 18:48:30,875] DEBUG - interactive is False
-[2025-08-20 18:48:30,875] DEBUG - platform is win32
-[2025-08-20 18:48:30,973] DEBUG - CACHEDIR=C:\Users\B20447\.matplotlib
-[2025-08-20 18:48:30,985] DEBUG - Using fontManager instance from C:\Users\B20447\.matplotlib\fontlist-v390.json
-[2025-08-20 18:48:32,859] INFO - [PROCESSOR] model - ./models/yolov8n-pose_float32.tflite
-[2025-08-20 18:48:32,908] INFO - [CONSUMER] window name - Hetegeneous Integrated Chip Inference Demo, mode=camera
-[2025-08-20 18:48:32,908] INFO - 🏭 ===== PIPELINE 工廠函數 =====
-[2025-08-20 18:48:32,908] INFO - 📝 檢測到Producer模式: video
-[2025-08-20 18:48:32,908] INFO - 🎬 創建VideoPipeline - 完整性優先策略
-[2025-08-20 18:48:32,908] INFO - 📋 Video模式特性: 確保無丟幀、硬體適應性、等待完整處理
-[2025-08-20 18:48:32,908] INFO - 🚀 ===== PIPELINE 初始化開始 =====
-[2025-08-20 18:48:32,908] INFO - 📝 Producer類型: VideoProducer
-[2025-08-20 18:48:32,908] INFO - 📝 WorkerPool類型: WorkerPool
-[2025-08-20 18:48:32,908] INFO - 📝 Consumer類型: Consumer
-[2025-08-20 18:48:32,908] INFO - 🔧 初始化硬體檢測器...
-[2025-08-20 18:48:33,012] INFO - 硬體性能等級檢測完成: EXTREME (CPU核心: 16, 記憶體: 31.8GB, 總分: 63.84)
-[2025-08-20 18:48:33,012] INFO - 📊 硬體性能等級: EXTREME
-[2025-08-20 18:48:33,012] INFO - 📊 適應性參數: {'queue_high_watermark': 80, 'queue_low_watermark': 60, 'batch_timeout': 0.001, 'max_queue_size': 100, 'fps_check_interval': 50, 'worker_check_interval': 0.005}
-[2025-08-20 18:48:33,012] INFO - 📈 初始化Timeline調試工具...
-[2025-08-20 18:48:33,013] INFO - 🔧 配置Queue - 最大大小: 100
-[2025-08-20 18:48:33,013] INFO - ✅ Input/Output Queue 創建完成
-[2025-08-20 18:48:33,013] INFO - ⏱️ 性能監控間隔設定: 50秒
-[2025-08-20 18:48:33,013] INFO - 📸 Producer狀態追蹤器初始化完成
-[2025-08-20 18:48:33,013] INFO - 📊 性能歷史數據緩存: 最大100筆記錄
-[2025-08-20 18:48:33,013] INFO - 🛡️ 系統信號處理器註冊完成
-[2025-08-20 18:48:33,013] INFO - ⚙️ 執行模式特定初始化...
-[2025-08-20 18:48:33,013] INFO - 📹 ===== VIDEO模式 特定初始化 =====
-[2025-08-20 18:48:33,013] INFO - 🔧 Video模式參數配置:
-[2025-08-20 18:48:33,013] INFO -   └─ Queue預載: 啟用
-[2025-08-20 18:48:33,013] INFO -   └─ 最小Queue深度: 10
-[2025-08-20 18:48:33,013] INFO -   └─ 預載批次大小: 5
-[2025-08-20 18:48:33,013] INFO -   └─ 預載檢查間隔: 0.1秒
-[2025-08-20 18:48:33,013] INFO - ✅ Video模式初始化完成 - 確保無丟幀處理
-[2025-08-20 18:48:33,013] INFO - 🎉 ===== VideoPipeline 初始化完成 =====
-[2025-08-20 18:48:33,013] INFO - 📋 硬體等級: EXTREME | 隊列大小: 100 | FPS檢查間隔: 50
-[2025-08-20 18:48:33,014] INFO - ✅ Pipeline創建完成: VideoPipeline
-[2025-08-20 18:48:33,014] INFO - 🚀 ===== PIPELINE 執行開始 =====
-[2025-08-20 18:48:33,014] INFO - 🎯 Pipeline類型: VideoPipeline
-[2025-08-20 18:48:33,014] INFO - 📝 執行模式: Video完整性優先
-[2025-08-20 18:48:33,014] INFO - 📈 啟動Timeline監控線程...
-[2025-08-20 18:48:33,015] INFO - ⚙️ 啟動WorkerPool...
-[2025-08-20 18:48:33,016] INFO - 🖥️ 啟動Consumer顯示...
-[2025-08-20 18:48:33,016] INFO - [CONSUMER] Camera mode: using fixed fps=30, interval=0.0333s
-[2025-08-20 18:48:33,016] INFO - 🧵 創建執行緒...
-[2025-08-20 18:48:33,016] INFO - ✅ Producer/Worker/Consumer 執行緒創建完成
-[2025-08-20 18:48:33,016] INFO - 🎬 啟動所有執行緒...
-[2025-08-20 18:48:33,017] INFO - ⚙️ ===== VIDEO WORKER 啟動 =====
-[2025-08-20 18:48:33,017] INFO - 📝 Video Worker策略: 硬體適應性處理，確保完整性
-[2025-08-20 18:48:33,017] INFO - 📸 ===== VIDEO PRODUCER 啟動 =====
-[2025-08-20 18:48:33,017] INFO - 📝 Video Producer策略: 確保無丟幀，完整性優先
-[2025-08-20 18:48:33,017] INFO - ⏱️ 批次超時設定: 0.001秒
-[2025-08-20 18:48:33,017] INFO - 📦 Frame緩衝器大小: 10
-[2025-08-20 18:48:33,017] INFO - 📈 Timeline狀態更新: Producer已啟動
-[2025-08-20 18:48:33,017] INFO - 🖥️ ===== VIDEO CONSUMER 啟動 =====
-[2025-08-20 18:48:33,018] INFO - 📝 Video Consumer策略: 完整顯示，不丟幀
-[2025-08-20 18:48:33,018] INFO - 🎬 開始讀取幀數據...
-[2025-08-20 18:48:33,017] INFO - 🎯 所有執行緒已啟動，進入主執行循環
-[2025-08-20 18:48:33,018] INFO - ⏳ 等待Producer執行緒完成...
-[2025-08-20 18:48:33,018] DEBUG - [VIDEO] Starting frame iteration
-[2025-08-20 18:48:33,074] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,074] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,074] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,074] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,074] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,074] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,074] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,078] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,078] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,078] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,078] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,097] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,098] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,098] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,098] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,098] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,099] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,099] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,100] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,100] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,100] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,100] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,119] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,119] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,119] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,119] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,119] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,121] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,121] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,122] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,122] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,122] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,122] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,142] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,142] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,143] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,143] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,143] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,144] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,144] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,144] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,144] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,145] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,145] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,164] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,165] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,166] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,166] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,166] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,167] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,167] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,167] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,167] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,168] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,168] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,186] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,186] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,186] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,187] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,187] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,188] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,188] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,188] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,188] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,189] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,189] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,207] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,207] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,207] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,208] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,208] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,208] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,208] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,209] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,209] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,209] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,209] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,228] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,229] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,229] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,229] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,230] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,230] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,230] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,231] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,231] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,231] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,232] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,249] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,250] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,250] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,250] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,250] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,251] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,251] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,252] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,252] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,252] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,253] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,271] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,272] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,272] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,273] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,273] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,273] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,274] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,274] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,274] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,275] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,275] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,294] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,294] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,294] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,295] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,295] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,295] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,295] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,295] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,295] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,296] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,296] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,314] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,315] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,315] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,315] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,316] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,317] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,317] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,317] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,317] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,318] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,318] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,329] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,329] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,329] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,329] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,329] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,338] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,338] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,339] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,339] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,340] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,340] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,358] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,359] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,359] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,359] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,360] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,360] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,360] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,361] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,361] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,361] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,361] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,384] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,384] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,384] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,385] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,385] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,385] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,385] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,386] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,386] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,386] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,386] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,406] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,407] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,407] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,407] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,408] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,408] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,408] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,409] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,409] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,409] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,409] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,427] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,428] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,428] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,428] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,429] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,429] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,429] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,429] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,430] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,430] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,430] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,449] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,449] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,449] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,450] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,450] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,450] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,450] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,451] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,451] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,451] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,451] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,469] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,469] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,469] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,470] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,470] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,470] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,470] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,471] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,471] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,471] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,471] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,488] INFO - 📈 [VideoProducer] 處理進度: 91.7% (100/109)
-[2025-08-20 18:48:33,488] INFO - 📊 Video Producer狀態: 已處理 100 幀，緩衝器: 5
-[2025-08-20 18:48:33,488] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,488] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,489] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,489] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,489] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,489] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,489] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,489] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,489] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,491] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,491] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,507] DEBUG - 📦 執行批次處理: 5 幀
-[2025-08-20 18:48:33,507] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,507] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,508] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,508] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,508] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,508] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,508] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,509] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,509] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,509] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,519] INFO - [TIMELINE-DEBUG] t=0.5s | Producer:📸(Frame#108) | InputQ:[0(0%)] | Workers:0/2💤💤 | OutputQ:[0(0%)] | Consumer:⏹️(Result#0)
-[2025-08-20 18:48:33,519] WARNING - [TIMELINE-ALERT] t=0.5s - 所有Worker都處於非活動狀態! InputQueue=0, Workers=2, ActiveWorkers=0
-[2025-08-20 18:48:33,522] INFO - 🏁 [VideoProducer] 影片播放完成
-[2025-08-20 18:48:33,522] INFO - 🏁 [VideoProducer] 總共處理幀數: 109
-[2025-08-20 18:48:33,522] INFO - 🏁 [VideoProducer] 完成率: 100% (109/109)
-[2025-08-20 18:48:33,523] INFO - [VIDEO] Frame iteration completed. Total frames: 109
-[2025-08-20 18:48:33,544] INFO - [VIDEO] Capture resource released
-[2025-08-20 18:48:33,544] INFO - 📦 處理剩餘 4 幀
-[2025-08-20 18:48:33,544] INFO - ✅ VIDEO PRODUCER 完成: 總共處理 109 幀
-[2025-08-20 18:48:33,545] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,545] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,545] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,545] INFO - 🎯 Video模式確保所有幀都已加入處理隊列
-[2025-08-20 18:48:33,545] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,546] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,546] DEBUG - ⚠️ Worker超時等待: 'WorkerPool' object has no attribute 'submit'
-[2025-08-20 18:48:33,547] DEBUG - 📤 提交第 1 幀給WorkerPool處理
-[2025-08-20 18:48:33,547] INFO - ✅ Producer已完成且Input Queue為空，Worker準備結束
-[2025-08-20 18:48:33,547] INFO - ✅ VIDEO WORKER 完成: 總共處理 0 幀
-[2025-08-20 18:48:33,549] INFO - ✅ Producer執行緒已完成
-[2025-08-20 18:48:33,549] INFO - 🏁 執行VideoPipeline完成處理...
-[2025-08-20 18:48:33,549] INFO - 🏁 ===== VIDEO模式 完成處理 =====
-[2025-08-20 18:48:33,549] INFO - ⏳ Video模式策略: 等待所有幀處理完成，確保完整性
-[2025-08-20 18:48:33,549] INFO - 🛑 停止WorkerPool...
-[2025-08-20 18:48:33,559] INFO - 📤 發送Consumer終止信號...
-[2025-08-20 18:48:33,559] INFO - ✅ Video模式完成處理結束 - 所有幀已處理完成
-[2025-08-20 18:48:33,559] INFO - ⏳ 等待Consumer執行緒完成...
-[2025-08-20 18:48:33,559] INFO - ⚠️ Consumer收到終止信號 (None result)
-[2025-08-20 18:48:33,559] INFO - ✅ VIDEO CONSUMER 完成: 總共消費 0 個結果
-[2025-08-20 18:48:33,559] INFO - ✅ Consumer執行緒已完成
-[2025-08-20 18:48:33,559] INFO - 🛑 停止Consumer顯示...
-[2025-08-20 18:48:33,603] INFO - 📊 ===== 最終性能摘要 =====
-[2025-08-20 18:48:33,603] INFO - 📈 Timeline摘要: === 最近 30 秒時間軸摘要 ===
-總快照數: 1
-Producer活動率: 1/1 (100.0%)
-Consumer活動率: 0/1 (0.0%)
-Worker活動率:
-  Worker-W1: 0/1 (0.0%)
-  Worker-W2: 0/1 (0.0%)
-[2025-08-20 18:48:33,605] INFO - 🧹 執行清理程序...
-[2025-08-20 18:48:33,619] INFO - 🎉 ===== PIPELINE 執行完成 =====
+[2025-08-21 17:38:09,297] INFO - 🏭 創建VideoProducer (完整性優先)
+[2025-08-21 17:38:09,297] INFO - 🏭 來源: ./data/video.mp4
+[2025-08-21 17:38:09,297] INFO - 🏭 ============================================================
+[2025-08-21 17:38:09,297] INFO - 🏭 Producer初始化開始
+[2025-08-21 17:38:09,297] INFO - 🏭 ============================================================
+[2025-08-21 17:38:09,297] INFO - 📋 步驟 1/2: 🚀 初始化Capture物件...
+[2025-08-21 17:38:09,297] INFO - 🔍 [VIDEO] 目標文件: ./data/video.mp4
+[2025-08-21 17:38:09,297] INFO - 🔍 [VIDEO] 正在建立VideoCapture連接...
+[2025-08-21 17:38:09,404] DEBUG - 🔧 [VIDEO] 應用Video模式優化設置...
+[2025-08-21 17:38:09,404] DEBUG - 🔧 [VIDEO] 緩衝區大小設為: 1
+[2025-08-21 17:38:09,404] INFO - 📋 步驟 2/2: ⚙️ 配置管理 - 設置系統串流參數...
+[2025-08-21 17:38:09,404] INFO - 📊 [VIDEO]   - FPS: 29.97002997002997
+[2025-08-21 17:38:09,404] INFO - 📊 [VIDEO]   - 解析度: 1920x1080
+[2025-08-21 17:38:09,404] INFO - 📊 [VIDEO]   - 總幀數: 109
+[2025-08-21 17:38:09,404] INFO - 🎯 [VIDEO] 模式設定: 完整性優先
+[2025-08-21 17:38:09,404] INFO - ⏱️ [VIDEO] 影片時長: 3.64 秒
+[2025-08-21 17:38:09,404] INFO - ⏱️ [VIDEO] 每幀間隔: 0.0334 秒
+[2025-08-21 17:38:09,404] INFO - 📈 [VIDEO] 進度追蹤: 啟用 (每100幀報告一次)
+[2025-08-21 17:38:09,404] INFO - ✅ Producer初始化完成!
+[2025-08-21 17:38:09,404] INFO - 🏭 ============================================================
+[2025-08-21 17:38:09,404] INFO - 🏭 ============================================================
+[2025-08-21 17:38:09,404] INFO - 🏭 WorkerPool即時就緒初始化開始
+[2025-08-21 17:38:09,404] INFO - 🏭 ============================================================
+[2025-08-21 17:38:09,404] INFO - 📋 步驟 1/3: 🚀 配置驗證與基礎架構...
+[2025-08-21 17:38:09,404] INFO - 🔍 [VIDEO] 工作者數量: 2
+[2025-08-21 17:38:09,404] INFO - 🔍 [VIDEO] 緩衝區大小: 20
+[2025-08-21 17:38:09,404] INFO - 🎯 [VIDEO] 模式設定: 完整性優先
+[2025-08-21 17:38:09,404] INFO - 📊 [VIDEO]   - 順序保證: 開啟
+[2025-08-21 17:38:09,404] INFO - 📊 [VIDEO]   - 背壓控制: 停用 (無丟幀)
+[2025-08-21 17:38:09,405] INFO - 📊 [VIDEO]   - 緩衝策略: 大容量
+[2025-08-21 17:38:09,405] INFO - 📊 [VIDEO]   - 處理策略: 等待完整處理
+[2025-08-21 17:38:09,405] INFO - 📊 [VIDEO]   - 硬體性能等級: HIGH (CPU核心: 16, 記憶體: 31.8GB, 總分: 47.90)
+[2025-08-21 17:38:09,405] INFO - ✅ [VIDEO] 步驟 1/3 完成 - 配置驗證與基礎架構
+[2025-08-21 17:38:09,405] INFO - 📋 步驟 2/3: 🔧 配置Queue和內部結構...
+[2025-08-21 17:38:09,405] INFO - 🔧 [VIDEO] 任務佇列: 最大容量 20
+[2025-08-21 17:38:09,405] INFO - 🔧 [VIDEO] 順序佇列: 已初始化 (Video模式)
+[2025-08-21 17:38:09,405] INFO - ✅ [VIDEO] 步驟 2/3 完成 - Queue和內部結構配置
+[2025-08-21 17:38:09,405] INFO - 📋 步驟 3/3: ⚙️ 創建Processor池並載入YOLO模型...
+[2025-08-21 17:38:09,405] INFO - 🔍 [VIDEO] 準備創建並初始化 2 個Processor...
+[2025-08-21 17:38:09,405] INFO - 🔍 [VIDEO] 正在初始化 Processor#1/2...
+[2025-08-21 17:38:09,405] INFO - 🔧 ============================================================
+[2025-08-21 17:38:09,405] INFO - 🔧 Processor初始化開始
+[2025-08-21 17:38:09,405] INFO - 🔧 ============================================================
+[2025-08-21 17:38:09,405] INFO - 📋 步驟 1/2: 🚀 YOLO模型配置...
+[2025-08-21 17:38:09,405] INFO - 🔍 [VIDEO] 模型路徑: ./models/yolov8n-pose_float32.tflite
+[2025-08-21 17:38:09,405] INFO - 🔍 [VIDEO] 推論超時: 15.0s
+[2025-08-21 17:38:09,405] INFO - 🎯 [VIDEO] 模式設定: 完整性優先
+[2025-08-21 17:38:09,405] INFO - 📊 [VIDEO]   - 詳細記錄: 開啟
+[2025-08-21 17:38:09,405] INFO - 📊 [VIDEO]   - 超時策略: 寬鬆 (確保完整處理)
+[2025-08-21 17:38:09,405] INFO - 📊 [VIDEO]   - 模式特性: 順序保證、無丟幀
+[2025-08-21 17:38:09,405] INFO - 📋 步驟 2/2: 🚀 YOLO模型載入與預熱...
+[2025-08-21 17:38:09,405] INFO - 🔍 [VIDEO] 正在載入YOLO模型...
+[2025-08-21 17:38:10,039] INFO - ✅ [VIDEO] 模型載入成功
+[2025-08-21 17:38:10,039] INFO - 🔥 [VIDEO] 執行預熱推論...
+[2025-08-21 17:38:15,053] DEBUG - Falling back to TensorFlow client; we recommended you install the Cloud TPU client directly with pip install cloud-tpu-client.
+[2025-08-21 17:38:16,507] DEBUG - Creating converter from 7 to 5
+[2025-08-21 17:38:16,507] DEBUG - Creating converter from 5 to 7
+[2025-08-21 17:38:16,507] DEBUG - Creating converter from 7 to 5
+[2025-08-21 17:38:16,507] DEBUG - Creating converter from 5 to 7
+[2025-08-21 17:38:20,539] DEBUG - matplotlib data path: C:\Users\B20447\Desktop\GitHub\MTK-genio-demo\.venv\Lib\site-packages\matplotlib\mpl-data
+[2025-08-21 17:38:20,575] DEBUG - CONFIGDIR=C:\Users\B20447\.matplotlib
+[2025-08-21 17:38:20,575] DEBUG - interactive is False
+[2025-08-21 17:38:20,575] DEBUG - platform is win32
+[2025-08-21 17:38:20,689] DEBUG - CACHEDIR=C:\Users\B20447\.matplotlib
+[2025-08-21 17:38:20,713] DEBUG - Using fontManager instance from C:\Users\B20447\.matplotlib\fontlist-v390.json
+[2025-08-21 17:38:22,910] INFO - ✅ [VIDEO] 預熱完成
+[2025-08-21 17:38:22,910] INFO - ⏱️ [VIDEO] 初始化時間: 13.506s (完整載入)
+[2025-08-21 17:38:22,910] INFO - 📈 [VIDEO] 推論準備: 完整性模式就緒
+[2025-08-21 17:38:22,910] INFO - ✅ Processor初始化完成!
+[2025-08-21 17:38:22,910] INFO - 🔧 ============================================================
+[2025-08-21 17:38:22,910] INFO - ✅ [VIDEO] Processor#1 就緒 (YOLO模型已載入)
+[2025-08-21 17:38:22,910] INFO - 🔍 [VIDEO] 正在初始化 Processor#2/2...
+[2025-08-21 17:38:22,919] INFO - 🔧 ============================================================
+[2025-08-21 17:38:22,919] INFO - 🔧 Processor初始化開始
+[2025-08-21 17:38:22,919] INFO - 🔧 ============================================================
+[2025-08-21 17:38:22,919] INFO - 📋 步驟 1/2: 🚀 YOLO模型配置...
+[2025-08-21 17:38:22,919] INFO - 🔍 [VIDEO] 模型路徑: ./models/yolov8n-pose_float32.tflite
+[2025-08-21 17:38:22,919] INFO - 🔍 [VIDEO] 推論超時: 15.0s
+[2025-08-21 17:38:22,919] INFO - 🎯 [VIDEO] 模式設定: 完整性優先
+[2025-08-21 17:38:22,919] INFO - 📊 [VIDEO]   - 詳細記錄: 開啟
+[2025-08-21 17:38:22,919] INFO - 📊 [VIDEO]   - 超時策略: 寬鬆 (確保完整處理)
+[2025-08-21 17:38:22,919] INFO - 📊 [VIDEO]   - 模式特性: 順序保證、無丟幀
+[2025-08-21 17:38:22,919] INFO - 📋 步驟 2/2: 🚀 YOLO模型載入與預熱...
+[2025-08-21 17:38:22,919] INFO - 🔍 [VIDEO] 正在載入YOLO模型...
+[2025-08-21 17:38:22,920] INFO - ✅ [VIDEO] 模型載入成功
+[2025-08-21 17:38:22,920] INFO - 🔥 [VIDEO] 執行預熱推論...
+[2025-08-21 17:38:22,954] INFO - ✅ [VIDEO] 預熱完成
+[2025-08-21 17:38:22,954] INFO - ⏱️ [VIDEO] 初始化時間: 0.035s (完整載入)
+[2025-08-21 17:38:22,954] INFO - 📈 [VIDEO] 推論準備: 完整性模式就緒
+[2025-08-21 17:38:22,954] INFO - ✅ Processor初始化完成!
+[2025-08-21 17:38:22,954] INFO - 🔧 ============================================================
+[2025-08-21 17:38:22,954] INFO - ✅ [VIDEO] Processor#2 就緒 (YOLO模型已載入)
+[2025-08-21 17:38:22,954] INFO - 📈 [VIDEO] 所有Processor已就緒，模型載入完成!
+[2025-08-21 17:38:22,954] INFO - 📊 [VIDEO] 可用Processor: 2 (每個都已載入YOLO)
+[2025-08-21 17:38:22,954] INFO - ⏱️ [VIDEO] 模型載入總時間: 13.550s
+[2025-08-21 17:38:22,954] INFO - 🎯 [VIDEO] 執行模式: 順序處理模式
+[2025-08-21 17:38:22,954] INFO - 📈 [VIDEO] 系統準備: 完整性保證就緒
+[2025-08-21 17:38:22,954] INFO - ✅ WorkerPool即時就緒初始化完成! (隨時可以開始工作)
+[2025-08-21 17:38:22,954] INFO - 💡 [提示] 系統已完全就緒，首次任務提交時將自動啟動線程池
+[2025-08-21 17:38:22,954] INFO - 🏭 ============================================================
