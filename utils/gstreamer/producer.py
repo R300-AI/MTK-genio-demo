@@ -307,9 +307,9 @@ class VideoProducer(BaseProducer):
                 raise RuntimeError(f"Cannot open video file: {self.source}")
 
             # 應用Video模式優化設置
-            logger.debug("🔧 [VIDEO] 應用Video模式優化設置...")
+            logger.info("🔧 [VIDEO] 應用Video模式優化設置...")
             self.cap.set(cv2.CAP_PROP_BUFFERSIZE, self.config.buffer_size)
-            logger.debug(f"🔧 [VIDEO] 緩衝區大小設為: {self.config.buffer_size}")
+            logger.info(f"🔧 [VIDEO] 緩衝區大小設為: {self.config.buffer_size}")
             
         except Exception as e:
             logger.error(f"❌ [VIDEO] Capture初始化失敗: {e}")
@@ -634,12 +634,8 @@ class Producer:
         
         # 🎯 根據mode參數選擇Producer類型
         if mode == "video":
-            logger.info("🏭 創建VideoProducer (完整性優先)")
-            logger.info(f"🏭 來源: {source}")
             return VideoProducer(source, config)
         elif mode == "camera":
-            logger.info("🏭 創建CameraProducer (實時性優先)")
-            logger.info(f"🏭 來源: {source}")
             return CameraProducer(source, config)
         else:
             logger.error(f"❌ 不支援的模式: {mode}")
