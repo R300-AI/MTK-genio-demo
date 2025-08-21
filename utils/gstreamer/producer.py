@@ -333,9 +333,9 @@ class VideoProducer(BaseProducer):
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
         
-        logger.info(f"📊 [VIDEO]   - FPS: {self.target_fps}")
-        logger.info(f"📊 [VIDEO]   - 解析度: {self.width}x{self.height}")
-        logger.info(f"📊 [VIDEO]   - 總幀數: {self.total_frames}")
+        logger.info(f"📊 [VIDEO]  - FPS: {self.target_fps}")
+        logger.info(f"📊 [VIDEO]  - 解析度: {self.width}x{self.height}")
+        logger.info(f"📊 [VIDEO]  - 總幀數: {self.total_frames}")
         
         # Video模式特定屬性
         self.is_live_stream = False
@@ -455,8 +455,8 @@ class CameraProducer(BaseProducer):
         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         
-        logger.info(f"📊 [CAMERA]   - FPS: {self.target_fps}")
-        logger.info(f"📊 [CAMERA]   - 解析度: {self.width}x{self.height}")
+        logger.info(f"📊 [CAMERA]  - FPS: {self.target_fps}")
+        logger.info(f"📊 [CAMERA]  - 解析度: {self.width}x{self.height}")
         
         # Camera模式特定屬性
         self.is_live_stream = True
