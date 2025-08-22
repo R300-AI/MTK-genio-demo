@@ -89,12 +89,15 @@ class SafeResultHandler:
             可顯示的幀（調用.plot()的結果），失敗時返回 None
         """
         try:
+            logger.info(f"🔍 [SAFE_HANDLER] 處理結果 #{self.processing_count + 1}，類型: {type(result)}")
+            
             if result is None:
                 logger.warning("⚠️ [SAFE_HANDLER] 收到 None 結果")
                 return None
             
             # 🔧 關鍵：安全處理 Generator
             if hasattr(result, '__iter__') and hasattr(result, '__next__'):
+                logger.info(f"🔍 [SAFE_HANDLER] 檢測到 Generator，開始安全提取...")
                 yolo_results = self._safe_extract_generator(result)
             elif hasattr(result, '__iter__') and not isinstance(result, (str, bytes)):
                 logger.info(f"🔍 [SAFE_HANDLER] 處理可迭代結果...")
@@ -125,16 +128,17 @@ class SafeResultHandler:
             return None
     
     def _safe_extract_generator(self, generator: Any) -> list:
-        """帶超時保護的 Generator 安全提取（跨平台版本）"""
+        """帶超時保護的 Generator 安全提取（Windows 兼容版本）"""
         import threading
         import time
         
         results = []
-        exception_holder = [None]
-        finished = threading.Event()
+        extraction_complete = threading.Event()
+        extraction_error = None
         
         def extract_worker():
-            """工作線程：負責提取 Generator"""
+            """在子線程中執行 Generator 提取"""
+            nonlocal results, extraction_error
             try:
                 logger.info(f"🔍 [SAFE_HANDLER] 開始提取 Generator...")
                 
@@ -147,22 +151,23 @@ class SafeResultHandler:
                         logger.warning("⚠️ [SAFE_HANDLER] 達到最大提取限制 (10個項目)")
                         break
                 
-                finished.set()
                 logger.info(f"✅ [SAFE_HANDLER] Generator 提取成功: {len(results)} 個結果")
                 
             except Exception as e:
-                exception_holder[0] = e
-                finished.set()
+                extraction_error = e
+                logger.error(f"❌ [SAFE_HANDLER] Generator 提取失敗: {e}")
+            finally:
+                extraction_complete.set()
         
-        # 啟動工作線程
+        # 啟動提取線程
         worker_thread = threading.Thread(target=extract_worker, daemon=True)
         worker_thread.start()
         
         # 等待完成或超時
-        if finished.wait(timeout=self.config.timeout_seconds):
-            # 正常完成或發生異常
-            if exception_holder[0]:
-                logger.error(f"❌ [SAFE_HANDLER] Generator 提取失敗: {exception_holder[0]}")
+        if extraction_complete.wait(timeout=self.config.timeout_seconds):
+            # 提取完成
+            if extraction_error:
+                logger.error(f"❌ [SAFE_HANDLER] Generator 提取過程中出錯: {extraction_error}")
                 return []
             return results
         else:
@@ -270,7 +275,7 @@ class StatsCollector:
         # 線程安全
         self.stats_lock = threading.Lock()
         
-        logger.info(f"📊 統計收集器初始化，回調間隔: {config.stats_interval}")
+        logger.info(f"📊 [STATS] 統計收集器初始化，回調間隔: {config.stats_interval}")
     
     def count_processed(self):
         """計數處理的結果"""
@@ -362,8 +367,6 @@ class Consumer:
             logger.warning("⚠️ [CONSUMER] 系統已在運行")
             return
         
-        logger.info("🚀 [CONSUMER] 系統啟動中...")
-        
         # 初始化統計收集器
         self.stats = StatsCollector(self.config, callback)
         
@@ -373,7 +376,7 @@ class Consumer:
         self._display_thread.start()
         
         logger.info(f"🚀 [CONSUMER] 系統已啟動")
-        
+    
     def stop(self):
         """統一停止介面"""
         if not self._running.is_set():
@@ -404,12 +407,12 @@ class Consumer:
     
     def consume(self, result):
         """核心處理方法 - 簡化邏輯"""
-        logger.info(f"🔄 [CONSUMER] 開始處理結果...")
-        
         if not self._running.is_set() or not self.stats:
             logger.warning("⚠️ [CONSUMER] 系統未啟動，忽略結果")
             return
-
+        
+        logger.info(f"🔄 [CONSUMER] 開始處理結果...")
+        
         try:
             # Step 1: 安全提取並調用 .plot()
             display_frame = self.safe_handler.extract_and_plot(result)
@@ -436,6 +439,8 @@ class Consumer:
         """簡化的顯示循環"""
         target_fps = self.config.fps
         frame_interval = 1.0 / target_fps
+        
+        logger.info(f"🔄 [CONSUMER] 顯示循環開始 (目標FPS: {target_fps})")
         
         while self._running.is_set():
             try:

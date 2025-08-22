@@ -77,7 +77,8 @@ logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('gstreamer_demo.log', mode='w', encoding='utf-8')
+        logging.FileHandler('gstreamer_demo.log', mode='w', encoding='utf-8'),
+        logging.StreamHandler()
     ]
 )
 logger = logging.getLogger('gstreamer_demo')
@@ -245,7 +246,7 @@ class BasePipeline(ABC):
                     queue_size_before = self.output_queue.qsize()
                     self.output_queue.put(result, timeout=1.0)
                     queue_size_after = self.output_queue.qsize()
-                    logger.info(f"📤 [OUTPUT_QUEUE_PUT] 成功加入結果 Output queue: {queue_size_before}→{queue_size_after}/{self.output_queue.maxsize}")
+                    logger.info(f"📤 [OUTPUT_QUEUE_PUT] 成功加入結果 當前大小: {queue_size_before}→{queue_size_after}/{self.output_queue.maxsize}")
 
                     self.timeline_debugger.update_consumer_state(active=True)
 
@@ -456,7 +457,7 @@ class VideoPipeline(BasePipeline):
                 queue_size_before = self.input_queue.qsize()
                 self.input_queue.put(frame, timeout=timeout)
                 queue_size_after = self.input_queue.qsize()
-                logger.info(f"📥 [INPUT_QUEUE_PUT] 成功加入幀 #{i+1}/{len(frame_batch)}，Input Queue: {queue_size_before}→{queue_size_after}/{self.input_queue.maxsize}")
+                logger.info(f"📥 [INPUT_QUEUE_PUT] 成功加入幀 #{i+1}/{len(frame_batch)}，當前大小: {queue_size_before}→{queue_size_after}/{self.input_queue.maxsize}")
                 
             except Exception as e:
                 logger.warning(f"⚠️ [INPUT_QUEUE_PUT] Video模式幀put超時: maxsize={self.input_queue.maxsize}, timeout={timeout}s")
