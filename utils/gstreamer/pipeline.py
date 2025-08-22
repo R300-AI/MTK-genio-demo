@@ -1,6 +1,21 @@
 """
 ================================================================================
-🏗️ Pipeline 架構設計
+🏗        # 從WorkerPool獲取硬體資訊（避免重複檢測）
+        logger.info("📋 步驟 2/4: 🔧 從WorkerPool取得硬體資訊與適應性參數...")
+        if hasattr(self.worker_pool, '_performance_level'):
+            hardware_tier = getattr(self.worker_pool, '_performance_level', 'MEDIUM')
+            cpu_cores = getattr(self.worker_pool, '_cpu_cores', 4)
+            memory_gb = getattr(self.worker_pool, '_memory_gb', 8.0)
+            logger.info(f"📊 硬體資訊來源: WorkerPool")
+            logger.info(f"📊 硬體性能等級: {hardware_tier} (CPU核心: {cpu_cores}, 記憶體: {memory_gb:.1f}GB)")
+        else:
+            # 如果 WorkerPool 沒有硬體檢測，使用預設值
+            hardware_tier = 'MEDIUM'
+            logger.warning("⚠️ WorkerPool未提供硬體資訊，使用預設等級: MEDIUM")
+        
+        # 根據硬體等級生成Pipeline專用的適應性參數
+        self.adaptive_params = self._generate_pipeline_adaptive_params(hardware_tier)
+        logger.info(f"📊 Pipeline適應性參數: {self.adaptive_params}")line 架構設計
 ================================================================================
 
 Pipeline類採用繼承架構，支援Video模式（完整性優先）和Camera模式（實時性優先）。
@@ -78,24 +93,23 @@ class BasePipeline(ABC):
     
     def __init__(self, producer, worker_pool, consumer):
         """通用初始化：硬體檢測、Queue配置、性能監控"""
-        logger.info("🚀 ===== PIPELINE 初始化開始 =====")
-        logger.info(f"📝 Producer類型: {type(producer).__name__}")
-        logger.info(f"📝 WorkerPool類型: {type(worker_pool).__name__}")
-        logger.info(f"📝 Consumer類型: {type(consumer).__name__}")
+        logger.info("📋 步驟 1/4: 🚀 組件類型檢測與註冊...")
+        logger.info(f"� Producer類型: {type(producer).__name__}")
+        logger.info(f"� WorkerPool類型: {type(worker_pool).__name__}")
+        logger.info(f"� Consumer類型: {type(consumer).__name__}")
         
         self.producer = producer
         self.worker_pool = worker_pool
         self.consumer = consumer
         
         # 硬體性能檢測和適應性參數
-        logger.info("🔧 初始化硬體檢測器...")
+        logger.info("� 步驟 2/4: �🔧 初始化硬體檢測器與適應性參數...")
         self.hardware_detector = HardwarePerformanceLogger()
         self.adaptive_params = self.hardware_detector.get_adaptive_parameters()
-        logger.info(f"📊 硬體性能等級: {self.hardware_detector.performance_tier}")
         logger.info(f"📊 適應性參數: {self.adaptive_params}")
         
         # Timeline調試工具
-        logger.info("📈 初始化Timeline調試工具...")
+        logger.info("� 步驟 3/4: ⚙️ 初始化Timeline調試工具與性能監控...")
         self.timeline_debugger = TimelineLogger()
         
         # Queue配置（使用適應性參數）
@@ -116,7 +130,6 @@ class BasePipeline(ABC):
         self.producer_finished = False
         self.producer_last_activity = time.time()
         self.producer_activity_timeout = 2.0
-        logger.info("📸 Producer狀態追蹤器初始化完成")
         
         # 性能監控歷史數據
         self.performance_history = []
@@ -126,21 +139,49 @@ class BasePipeline(ABC):
         # 信號處理
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
-        logger.info("🛡️ 系統信號處理器註冊完成")
-        
+
         # 模式特定初始化
-        logger.info("⚙️ 執行模式特定初始化...")
+        logger.info("📋 步驟 4/4: 🎯 執行模式特定初始化...")
         self._mode_specific_init()
-        
-        logger.info(f"🎉 ===== {self.__class__.__name__} 初始化完成 =====")
-        logger.info(f"📋 硬體等級: {self.hardware_detector.performance_tier} | "
-                   f"隊列大小: {max_queue_size} | FPS檢查間隔: {self.pipeline_fps_check_interval}")
-        print(f"[系統] Pipeline 初始化完成 ({self.__class__.__name__})")
     
     @abstractmethod
     def _mode_specific_init(self):
         """模式特定的初始化（子類實現）"""
         pass
+    
+    def _generate_pipeline_adaptive_params(self, hardware_tier):
+        """根據硬體等級生成Pipeline專用的適應性參數"""
+        params_map = {
+            "EXTREME": {
+                "max_queue_size": 100,
+                "fps_check_interval": 50,
+                "batch_timeout": 0.001,
+                "queue_high_watermark": 80,
+                "queue_low_watermark": 60
+            },
+            "HIGH": {
+                "max_queue_size": 80,
+                "fps_check_interval": 35,
+                "batch_timeout": 0.002,
+                "queue_high_watermark": 70,
+                "queue_low_watermark": 50
+            },
+            "MEDIUM": {
+                "max_queue_size": 60,
+                "fps_check_interval": 25,
+                "batch_timeout": 0.005,
+                "queue_high_watermark": 60,
+                "queue_low_watermark": 40
+            },
+            "LOW": {
+                "max_queue_size": 40,
+                "fps_check_interval": 15,
+                "batch_timeout": 0.01,
+                "queue_high_watermark": 50,
+                "queue_low_watermark": 30
+            }
+        }
+        return params_map.get(hardware_tier, params_map["MEDIUM"])
     
     def _signal_handler(self, signum, frame):
         """處理系統終止信號"""
@@ -192,13 +233,8 @@ class BasePipeline(ABC):
     def run(self):
         """Template Method - 統一執行流程模板"""
         self.running = True
-        logger.info("🚀 ===== PIPELINE 執行開始 =====")
-        logger.info(f"🎯 Pipeline類型: {self.__class__.__name__}")
-        logger.info(f"📝 執行模式: {'Video完整性優先' if 'Video' in self.__class__.__name__ else 'Camera實時性優先'}")
-        print(f"[系統] {self.__class__.__name__} 啟動中...")
-        
-        # 啟動timeline logging
-        logger.info("📈 啟動Timeline監控線程...")
+        logger.info(" ---------------------------------------------------------")
+        logger.info("🚀 開始執行")
         self._start_timeline_logging()
         
         def result_handler(result):
@@ -206,28 +242,23 @@ class BasePipeline(ABC):
                 try:
                     self.output_queue.put(result, timeout=1.0)
                     self.timeline_debugger.update_consumer_state(active=True)
-                    logger.debug(f"📤 WorkerPool結果已加入output_queue (當前大小: {self.output_queue.qsize()})")
+                    logger.info(f"📤 WorkerPool結果已加入output_queue (當前大小: {self.output_queue.qsize()})")
                 except Exception as e:
                     logger.error(f"❌ PIPELINE_CALLBACK: Failed to queue result: {e}")
-        
-        # 啟動WorkerPool和Consumer
-        logger.info("⚙️ 啟動WorkerPool...")
+            else:
+                logger.warning("⚠️ WorkerPool返回了空結果 (None)")
+
+        logger.info("🔧 正在啟動WorkerPool...")
         self.worker_pool.start(result_handler)
-        logger.info("🖥️ 啟動Consumer顯示...")
+        logger.info("🔧 正在啟動Consumer顯示...")
         self.consumer.start_display()
-        
-        # 建立執行緒
-        logger.info("🧵 創建執行緒...")
+
         producer_thread = threading.Thread(target=self._producer_loop, daemon=True)
         worker_thread = threading.Thread(target=self._worker_loop, daemon=True)
         consumer_thread = threading.Thread(target=self._consumer_loop, daemon=True)
-        logger.info("✅ Producer/Worker/Consumer 執行緒創建完成")
-        
-        logger.info("🎬 啟動所有執行緒...")
         worker_thread.start()
         producer_thread.start() 
         consumer_thread.start()
-        logger.info("🎯 所有執行緒已啟動，進入主執行循環")
         
         try:
             logger.info("⏳ 等待Producer執行緒完成...")
@@ -246,10 +277,17 @@ class BasePipeline(ABC):
             self.consumer.stop_display()
             
             # 打印最終時間軸摘要
-            logger.info("📊 ===== 最終性能摘要 =====")
+            logger.info("📊 ============================================================")
+            logger.info("📊 最終性能摘要與清理")
+            logger.info("📊 ============================================================")
             timeline_summary = self.timeline_debugger.get_timeline_summary(last_n_seconds=30)
             logger.info(f"📈 Timeline摘要: {timeline_summary}")
-            self.timeline_debugger.print_visual_timeline(last_n_snapshots=15)
+            
+            # 輸出視覺化時間軸到 log
+            visual_timeline = self.timeline_debugger.get_visual_timeline_string(last_n_snapshots=15)
+            for line in visual_timeline.split('\n'):
+                if line.strip():  # 只輸出非空行
+                    logger.info(f"📊 {line}")
             
         except Exception as e:
             logger.error(f"❌ PIPELINE_RUN: Error during execution: {e}")
@@ -259,7 +297,8 @@ class BasePipeline(ABC):
             self.worker_pool.stop()
             if hasattr(self, 'timeline_thread'):
                 self.timeline_thread.join(timeout=1.0)
-            logger.info("🎉 ===== PIPELINE 執行完成 =====")
+            logger.info("✅ Pipeline執行完成!")
+            logger.info("📊 ============================================================")
     
     @abstractmethod
     def _producer_loop(self):
@@ -338,8 +377,6 @@ class VideoPipeline(BasePipeline):
     
     def _mode_specific_init(self):
         """Video模式特定初始化"""
-        logger.info("📹 ===== VIDEO模式 特定初始化 =====")
-        
         # Queue預載機制參數
         self.queue_preload_enabled = True
         max_queue_size = self.adaptive_params["max_queue_size"]
@@ -353,28 +390,23 @@ class VideoPipeline(BasePipeline):
         logger.info(f"  └─ 最小Queue深度: {self.min_queue_depth}")
         logger.info(f"  └─ 預載批次大小: {self.preload_batch_size}")
         logger.info(f"  └─ 預載檢查間隔: {self.preload_check_interval}秒")
-        logger.info("✅ Video模式初始化完成 - 確保無丟幀處理")
+        logger.info("✅ Pipeline初始化完成")
     
     def _producer_loop(self):
         """Video模式Producer - 確保無丟幀"""
-        logger.info("📸 ===== VIDEO PRODUCER 啟動 =====")
-        logger.info("📝 Video Producer策略: 確保無丟幀，完整性優先")
+        logger.info("🎬 ===== VIDEO PRODUCER 啟動 =====")
+        logger.info("📝 Video Producer策略: 完整性優先，確保無丟幀，順序處理")
         
         frame_count = 0
         last_adjustment_time = time.time()
         batch_timeout = self.adaptive_params["batch_timeout"]
-        logger.info(f"⏱️ 批次超時設定: {batch_timeout}秒")
-        
         # 預載相關變數
         frame_buffer = []
         max_buffer_size = self.preload_batch_size * 2
-        logger.info(f"📦 Frame緩衝器大小: {max_buffer_size}")
-        
         self.timeline_debugger.update_producer_state(active=True, frame_count=0)
-        logger.info("📈 Timeline狀態更新: Producer已啟動")
         
         try:
-            logger.info("🎬 開始讀取幀數據...")
+            logger.info("🎬 開始影片幀讀取循環...")
             for frame in self.producer:
                 if not self.running:
                     logger.warning("⚠️ Producer收到停止信號，中斷幀讀取")
@@ -383,9 +415,10 @@ class VideoPipeline(BasePipeline):
                 frame_buffer.append(frame)
                 frame_count += 1
                 
-                if frame_count % 100 == 0:  # 每100幀記錄一次
-                    logger.info(f"📊 Video Producer狀態: 已處理 {frame_count} 幀，緩衝器: {len(frame_buffer)}")
-                
+                # 添加詳細的幀處理日誌
+                if frame_count <= 5:
+                    logger.info(f"📦 第 {frame_count} 幀已加入緩衝區，緩衝區大小: {len(frame_buffer)}")
+
                 # 批次處理並預載
                 if len(frame_buffer) >= self.preload_batch_size:
                     logger.debug(f"📦 執行批次處理: {len(frame_buffer)} 幀")
@@ -408,14 +441,17 @@ class VideoPipeline(BasePipeline):
             
             # 處理剩餘frames
             if frame_buffer:
-                logger.info(f"📦 處理剩餘 {len(frame_buffer)} 幀")
+                logger.info(f"📦 處理剩餘的 {len(frame_buffer)} 幀")
                 self._process_frame_batch_video(frame_buffer, batch_timeout)
             
+        except StopIteration:
+            logger.info("🏁 Producer迭代完成 (StopIteration)")
+        except Exception as e:
+            logger.error(f"❌ Producer循環發生錯誤: {e}")
         finally:
             self.producer_finished = True
             self.timeline_debugger.update_producer_state(active=False, frame_count=frame_count)
             logger.info(f"✅ VIDEO PRODUCER 完成: 總共處理 {frame_count} 幀")
-            logger.info("🎯 Video模式確保所有幀都已加入處理隊列")
     
     def _process_frame_batch_video(self, frame_batch, timeout):
         """處理Video模式的frame批次"""
@@ -434,7 +470,7 @@ class VideoPipeline(BasePipeline):
     def _worker_loop(self):
         """Video模式Worker - 硬體適應性"""
         logger.info("⚙️ ===== VIDEO WORKER 啟動 =====")
-        logger.info("📝 Video Worker策略: 硬體適應性處理，確保完整性")
+        logger.info("📝 Video Worker策略: 硬體適應性，完整處理，順序保證")
         
         processed_count = 0
         
@@ -447,16 +483,19 @@ class VideoPipeline(BasePipeline):
                 
                 # 提交給WorkerPool處理
                 logger.debug(f"📤 提交第 {processed_count + 1} 幀給WorkerPool處理")
+                if processed_count < 5:  # 只記錄前5幀
+                    logger.info(f"📤 提交第 {processed_count + 1} 幀給WorkerPool處理")
+                
                 self.worker_pool.submit(frame)
                 processed_count += 1
                 
-                if processed_count % 50 == 0:  # 每50幀記錄一次
+                if processed_count % 20 == 0:  # 每20幀記錄一次
                     input_size = self.input_queue.qsize()
                     logger.info(f"⚙️ Video Worker狀態: 已處理 {processed_count} 幀，Input Queue: {input_size}")
-                
+
             except Exception as e:
                 if self.producer_finished and self.input_queue.empty():
-                    logger.info("✅ Producer已完成且Input Queue為空，Worker準備結束")
+                    logger.info("🏁 Producer已完成且Queue為空，Worker準備結束")
                     break
                 logger.debug(f"⚠️ Worker超時等待: {e}")
         
@@ -465,10 +504,9 @@ class VideoPipeline(BasePipeline):
     def _consumer_loop(self):
         """Video模式Consumer - 完整顯示"""
         logger.info("🖥️ ===== VIDEO CONSUMER 啟動 =====")
-        logger.info("📝 Video Consumer策略: 完整顯示，不丟幀")
+        logger.info("📝 Video Consumer策略: 完整顯示，順序處理，無丟幀")
         
         consumed_count = 0
-        
         while self.running:
             try:
                 result = self.output_queue.get(timeout=1.0)
@@ -477,11 +515,21 @@ class VideoPipeline(BasePipeline):
                     break
                 
                 logger.debug(f"📥 Consumer收到第 {consumed_count + 1} 個結果")
-                self.consumer.consume(result)
+                if consumed_count < 5:  # 只記錄前5個結果
+                    logger.info(f"📥 Consumer收到第 {consumed_count + 1} 個結果")
+                
+                # 調用consumer的consume方法處理結果
+                try:
+                    self.consumer.consume(result)
+                    if consumed_count < 5:
+                        logger.info(f"✅ Consumer成功處理第 {consumed_count + 1} 個結果")
+                except Exception as e:
+                    logger.error(f"❌ Consumer處理第 {consumed_count + 1} 個結果時出錯: {e}")
+                    
                 self.pipeline_frame_counter += 1
                 consumed_count += 1
                 
-                if consumed_count % 50 == 0:  # 每50個結果記錄一次
+                if consumed_count % 20 == 0:  # 每20個結果記錄一次
                     output_size = self.output_queue.qsize()
                     logger.info(f"🖥️ Video Consumer狀態: 已消費 {consumed_count} 個結果，Output Queue: {output_size}")
                 
@@ -492,18 +540,15 @@ class VideoPipeline(BasePipeline):
                 )
                 
             except Exception as e:
-                logger.debug(f"⚠️ Consumer超時等待: {e}")
                 if self.producer_finished and self.output_queue.empty():
-                    logger.info("✅ Producer已完成且Output Queue為空，Consumer準備結束")
+                    logger.info("🏁 Producer已完成且Output Queue為空，Consumer準備結束")
                     break
-        
+                logger.debug(f"⚠️ Consumer超時等待: {e}")
+
         logger.info(f"✅ VIDEO CONSUMER 完成: 總共消費 {consumed_count} 個結果")
-    
+
     def _handle_completion(self):
         """Video模式完成處理 - 等待完整"""
-        logger.info("🏁 ===== VIDEO模式 完成處理 =====")
-        logger.info("⏳ Video模式策略: 等待所有幀處理完成，確保完整性")
-        
         # 等待所有frames被處理完畢
         wait_start_time = time.time()
         while not self.input_queue.empty() or not self.output_queue.empty():
@@ -518,11 +563,8 @@ class VideoPipeline(BasePipeline):
                 break
         
         # 停止WorkerPool並等待完成
-        logger.info("🛑 停止WorkerPool...")
         self.worker_pool.stop()
-        logger.info("📤 發送Consumer終止信號...")
         self.output_queue.put(None)
-        logger.info("✅ Video模式完成處理結束 - 所有幀已處理完成")
     
     def _adjust_parameters_if_needed(self, metrics):
         """Video模式參數調整"""
@@ -578,7 +620,7 @@ class CameraPipeline(BasePipeline):
         logger.info(f"  └─ 智能丟幀: {'啟用' if self.frame_drop_enabled else '停用'}")
         logger.info(f"  └─ 最大連續丟幀: {self.max_consecutive_drops}")
         logger.info(f"  └─ 能力協商間隔: {self.capacity_negotiation_interval}秒")
-        logger.info("✅ Camera模式初始化完成 - 實時性優先")
+        logger.info("✅ Pipeline初始化完成")
     
     def _producer_loop(self):
         """Camera模式Producer - 協商式流控"""
@@ -684,7 +726,6 @@ class CameraPipeline(BasePipeline):
                 
             except Exception as e:
                 if self.producer_finished and self.input_queue.empty():
-                    logger.info("✅ Camera Producer已完成且Input Queue為空")
                     break
                 logger.debug(f"⚠️ Camera Worker短超時: {e}")
         
@@ -738,7 +779,6 @@ class CameraPipeline(BasePipeline):
             except Exception as e:
                 logger.debug(f"⚠️ Camera Consumer短超時: {e}")
                 if self.producer_finished and self.output_queue.empty():
-                    logger.info("✅ Camera Producer已完成且Output Queue為空")
                     break
         
         total_results = consumed_count + skipped_count
@@ -802,18 +842,16 @@ def create_pipeline(producer, worker_pool, consumer):
     根據producer.mode自動選擇適當的Pipeline類型
     """
     mode = getattr(producer, 'mode', 'camera')
-    
-    logger.info("🏭 ===== PIPELINE 工廠函數 =====")
-    logger.info(f"📝 檢測到Producer模式: {mode}")
-    
+
     if mode == 'video':
-        logger.info("🎬 創建VideoPipeline - 完整性優先策略")
-        logger.info("📋 Video模式特性: 確保無丟幀、硬體適應性、等待完整處理")
+        logger.info("� ============================================================")
+        logger.info("🔄 Video Pipeline初始化開始")
+        logger.info("🔄 ============================================================")
         pipeline = VideoPipeline(producer, worker_pool, consumer)
     else:
-        logger.info("📸 創建CameraPipeline - 實時性優先策略")
-        logger.info("📋 Camera模式特性: 協商式流控、智能丟幀、快速響應")
+        logger.info("� ============================================================")
+        logger.info("🔄 Camera Pipeline初始化開始")
+        logger.info("🔄 ============================================================")
         pipeline = CameraPipeline(producer, worker_pool, consumer)
-    
-    logger.info(f"✅ Pipeline創建完成: {type(pipeline).__name__}")
+
     return pipeline

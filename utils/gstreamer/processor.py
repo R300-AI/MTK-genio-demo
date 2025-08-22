@@ -123,7 +123,7 @@ class Processor:
             # 模型預熱
             import numpy as np
             dummy_input = np.zeros((640, 640, 3), dtype=np.uint8)
-            _ = self.model.predict(dummy_input, verbose=False, stream=True)
+            _ = self.model.predict(dummy_input, verbose=True, stream=True)
             
             elapsed = time.time() - start_time
             self._initialization_time = elapsed  # 記錄初始化時間

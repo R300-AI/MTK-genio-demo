@@ -94,7 +94,6 @@ class Consumer:
         logger.info(f"📊 [{self.mode.upper()}] 顯示尺寸: {self.display_size if self.display_size else '原始大小'}")
         logger.info(f"📊 [{self.mode.upper()}] FPS統計間隔: {self.fps_check_interval} 幀")
         logger.info(f"✅ Consumer初始化完成!")
-        logger.info("🖥️ " + "="*60)
 
     def start_display(self):
         if self._thread is None:
@@ -118,6 +117,37 @@ class Consumer:
                 if len(self.display_buffer) == self.display_buffer.maxlen:
                     pass
             self.display_buffer.append(frame)
+
+    def consume(self, result):
+        """處理WorkerPool的推理結果"""
+        import logging
+        logger = logging.getLogger('gstreamer_demo')
+        
+        if result is None:
+            logger.warning("⚠️ Consumer收到None結果")
+            return
+            
+        # 將YOLO推理結果轉換為可顯示的幀
+        try:
+            # result是YOLO推理結果的generator，需要取出實際結果
+            if hasattr(result, '__next__'):
+                # 如果是generator，取出所有結果
+                yolo_results = list(result)
+                if yolo_results:
+                    # 取第一個結果（通常YOLO每次只處理一幀）
+                    yolo_result = yolo_results[0]
+                    # 繪製檢測結果並獲取帶註解的圖像
+                    annotated_frame = yolo_result.plot()
+                    self.put_frame(annotated_frame)
+                    logger.debug(f"✅ Consumer成功處理推理結果並加入顯示緩衝")
+                else:
+                    logger.warning("⚠️ YOLO結果generator為空")
+            else:
+                logger.warning(f"⚠️ 未知的結果格式: {type(result)}")
+        except Exception as e:
+            logger.error(f"❌ Consumer處理結果時出錯: {e}")
+            import traceback
+            logger.error(f"❌ 詳細錯誤: {traceback.format_exc()}")
 
     def _display_loop(self):
         # 動態設定顯示間隔：video mode使用原始fps，camera mode使用設定fps

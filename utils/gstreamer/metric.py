@@ -259,6 +259,66 @@ class TimelineLogger:
             
             print(f"{'='*80}\n")
 
+    def get_visual_timeline_string(self, last_n_snapshots=20):
+        """返回視覺化時間軸的格式化字符串（用於logging輸出）"""
+        with self.lock:
+            recent_data = list(self.timeline_data)[-last_n_snapshots:]
+            
+            if not recent_data:
+                return "沒有足夠的時間軸數據"
+            
+            lines = []
+            lines.append("🕐 視覺化時間軸 (最近 {} 個時間點)".format(len(recent_data)))
+            
+            # 建立時間軸標題
+            time_labels = [f"t{i}" for i in range(len(recent_data))]
+            lines.append(f"時間軸:     " + " ".join(f"{t:<4}" for t in time_labels))
+            
+            # Producer行
+            producer_icons = []
+            for snapshot in recent_data:
+                icon = "📸" if snapshot["producer"]["active"] else "⏸️"
+                producer_icons.append(icon)
+            lines.append(f"Producer:   " + " ".join(f"{icon:<4}" for icon in producer_icons))
+            
+            # Input Queue行 (顯示數量)
+            queue_sizes = []
+            for snapshot in recent_data:
+                size = snapshot["queues"]["input"]
+                queue_sizes.append(f"[{size}]")
+            lines.append(f"InputQueue: " + " ".join(f"{size:<4}" for size in queue_sizes))
+            
+            # Worker行們
+            if recent_data[0]["workers"]:
+                worker_ids = list(recent_data[0]["workers"].keys())
+                for worker_id in worker_ids:
+                    worker_icons = []
+                    for snapshot in recent_data:
+                        if worker_id in snapshot["workers"]:
+                            icon = "⚙️" if snapshot["workers"][worker_id]["active"] else "💤"
+                        else:
+                            icon = "❌"
+                        worker_icons.append(icon)
+                    lines.append(f"Worker-{worker_id}:   " + " ".join(f"{icon:<4}" for icon in worker_icons))
+            else:
+                lines.append("Workers:    " + " ".join("❌ " for _ in range(len(recent_data))))
+            
+            # Output Queue行
+            output_sizes = []
+            for snapshot in recent_data:
+                size = snapshot["queues"]["output"]
+                output_sizes.append(f"[{size}]")
+            lines.append(f"OutputQueue:" + " ".join(f"{size:<4}" for size in output_sizes))
+            
+            # Consumer行
+            consumer_icons = []
+            for snapshot in recent_data:
+                icon = "💻" if snapshot["consumer"]["active"] else "⏹️"
+                consumer_icons.append(icon)
+            lines.append(f"Consumer:   " + " ".join(f"{icon:<4}" for icon in consumer_icons))
+            
+            return "\n".join(lines)
+
 
 class HardwarePerformanceLogger:
     def __init__(self):
@@ -288,7 +348,7 @@ class HardwarePerformanceLogger:
         else:
             self.performance_tier = "LOW"
             
-        logger.info(f"硬體性能等級檢測完成: {self.performance_tier} "
+        logger.info(f"硬體性能等級: {self.performance_tier} "
                    f"(CPU核心: {self.cpu_cores}, 記憶體: {self.memory_gb:.1f}GB, "
                    f"總分: {total_score:.2f})")
     

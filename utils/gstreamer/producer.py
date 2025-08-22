@@ -185,12 +185,6 @@ class BaseProducer(ABC):
             return frame
             
         except StopIteration:
-            if self.config.detailed_logging:
-                logger.info(f"🏁 [{self.mode.upper()}] 幀迭代完成")
-                logger.info(f"🏁 [{self.mode.upper()}] 總處理幀數: {self.frame_counter}")
-                logger.info(f"🏁 [{self.mode.upper()}] Producer類型: {self.__class__.__name__}")
-            else:
-                logger.info(f"🏁 [{self.mode.upper()}] 完成，總幀數: {self.frame_counter}")
             self.cleanup()
             raise
             
@@ -365,28 +359,19 @@ class VideoProducer(BaseProducer):
         
         ret, frame = self.cap.read()
         if not ret:
-            if self.config.detailed_logging:
-                logger.info(f"🏁 [VIDEO] 影片播放完成")
-                logger.info(f"🏁 [VIDEO] 總共處理幀數: {self.frame_counter}")
-                logger.info(f"🏁 [VIDEO] 完成率: 100% ({self.frame_counter}/{self.total_frames})")
-                logger.info(f"🏁 [VIDEO] Video模式任務完成")
-            else:
-                logger.info(f"🏁 [VIDEO] 播放完成，處理{self.frame_counter}幀")
+            logger.info(f"🏁 [VIDEO] 影片播放完成，總共讀取 {self.frame_counter} 幀")
+            logger.info(f"🏁 [VIDEO] 預期總幀數: {self.total_frames}")
+            if self.frame_counter == 0:
+                logger.error("❌ [VIDEO] 警告：沒有成功讀取任何幀！")
             raise StopIteration
         
         self.frame_counter += 1
         
-        # 進度追蹤報告 - Video模式特有
-        if self.frame_counter % 100 == 0 or self.config.detailed_logging:
-            progress = (self.frame_counter / self.total_frames) * 100 if self.total_frames > 0 else 0
-            
-            if self.config.detailed_logging:
-                processing_time = time.time() - frame_start_time
-                logger.info(f"📈 [VIDEO] 進度報告:")
-                logger.info(f"📈 [VIDEO]   - 完成度: {progress:.1f}% ({self.frame_counter}/{self.total_frames})")
-                logger.info(f"📈 [VIDEO]   - 當前幀處理時間: {processing_time*1000:.2f}ms")
-            else:
-                logger.info(f"📈 [VIDEO] 處理進度: {progress:.1f}% ({self.frame_counter}/{self.total_frames})")
+        # 添加幀讀取日誌
+        if self.frame_counter <= 5:  # 只記錄前5幀避免日誌過多
+            logger.info(f"📸 [VIDEO] 成功讀取第 {self.frame_counter} 幀，大小: {frame.shape if frame is not None else 'None'}")
+        elif self.frame_counter % 20 == 0:  # 每20幀記錄一次
+            logger.info(f"📸 [VIDEO] 已讀取 {self.frame_counter} 幀")
         
         return frame
 

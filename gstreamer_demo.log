@@ -1,127 +1,312 @@
-[2025-08-21 20:48:15,126] INFO - 🏭 ============================================================
-[2025-08-21 20:48:15,126] INFO - 🏭 Producer初始化開始
-[2025-08-21 20:48:15,126] INFO - 🏭 ============================================================
-[2025-08-21 20:48:15,126] INFO - 📋 步驟 1/2: 🚀 初始化Capture物件...
-[2025-08-21 20:48:15,126] INFO - 🔍 [VIDEO] 目標文件: ./data/video.mp4
-[2025-08-21 20:48:15,126] INFO - 🔍 [VIDEO] 正在建立VideoCapture連接...
-[2025-08-21 20:48:15,142] INFO - 🔧 [VIDEO] 應用Video模式優化設置...
-[2025-08-21 20:48:15,142] INFO - 🔧 [VIDEO] 緩衝區大小設為: 1
-[2025-08-21 20:48:15,142] INFO - 📋 步驟 2/2: ⚙️ 配置管理 - 設置系統串流參數...
-[2025-08-21 20:48:15,142] INFO - 📊 [VIDEO]  - FPS: 29.97002997002997
-[2025-08-21 20:48:15,142] INFO - 📊 [VIDEO]  - 解析度: 1920x1080
-[2025-08-21 20:48:15,142] INFO - 📊 [VIDEO]  - 總幀數: 109
-[2025-08-21 20:48:15,142] INFO - 🎯 [VIDEO] 模式設定: 完整性優先
-[2025-08-21 20:48:15,142] INFO - ⏱️ [VIDEO] 影片時長: 3.64 秒
-[2025-08-21 20:48:15,142] INFO - ⏱️ [VIDEO] 每幀間隔: 0.0334 秒
-[2025-08-21 20:48:15,142] INFO - 📈 [VIDEO] 進度追蹤: 啟用 (每100幀報告一次)
-[2025-08-21 20:48:15,142] INFO - ✅ Producer初始化完成!
-[2025-08-21 20:48:15,142] INFO - 🏭 ============================================================
-[2025-08-21 20:48:15,142] INFO - 🏭 WorkerPool初始化開始
-[2025-08-21 20:48:15,142] INFO - 🏭 ============================================================
-[2025-08-21 20:48:15,142] INFO - 📋 步驟 1/3: 🚀 配置驗證與基礎架構...
-[2025-08-21 20:48:15,142] INFO - 🔍 [VIDEO] 工作者數量: 2
-[2025-08-21 20:48:15,142] INFO - 🔍 [VIDEO] 緩衝區大小: 20
-[2025-08-21 20:48:15,142] INFO - 📊 [VIDEO]   - 硬體性能等級: EXTREME (CPU核心: 24, 記憶體: 23.6GB, 總分: 59.80)
-[2025-08-21 20:48:15,142] INFO - 📋 步驟 2/3: 🔧 配置Queue和內部結構...
-[2025-08-21 20:48:15,142] INFO - 🔧 [VIDEO] 任務佇列: 最大容量 20
-[2025-08-21 20:48:15,142] INFO - 📋 步驟 3/3: ⚙️ 創建Processor池並載入YOLO模型...
-[2025-08-21 20:48:15,142] INFO - 🔍 [VIDEO] 準備創建並初始化 2 個Processor...
-[2025-08-21 20:48:15,142] INFO - 🔍 [VIDEO] 正在初始化 Processor #1/2...
-[2025-08-21 20:48:17,584] INFO - 🔍 [VIDEO] 正在初始化 Processor #2/2...
-[2025-08-21 20:48:17,607] INFO - 📈 [VIDEO] 所有Processor已就緒，模型載入完成!
-[2025-08-21 20:48:17,607] INFO - ⏱️ [VIDEO] 模型載入總時間: 2.465s
-[2025-08-21 20:48:17,607] INFO - ✅ WorkerPool初始化完成!
-[2025-08-21 20:48:17,607] INFO - 🖥️ ============================================================
-[2025-08-21 20:48:17,607] INFO - 🖥️ Consumer初始化開始
-[2025-08-21 20:48:17,607] INFO - 🖥️ ============================================================
-[2025-08-21 20:48:17,607] INFO - 📋 步驟 1/2: 🚀 顯示緩衝區配置...
-[2025-08-21 20:48:17,607] INFO - 🔍 [VIDEO] 視窗名稱: Hetegeneous Integrated Chip Inference Demo
-[2025-08-21 20:48:17,607] INFO - 🔍 [VIDEO] 顯示緩衝區大小: 1
-[2025-08-21 20:48:17,607] INFO - 🔍 [VIDEO] 目標FPS: 30
-[2025-08-21 20:48:17,607] INFO - 📋 步驟 2/2: ⚙️ 顯示執行緒與統計初始化...
-[2025-08-21 20:48:17,607] INFO - 📊 [VIDEO] 顯示尺寸: (720, 480)
-[2025-08-21 20:48:17,607] INFO - 📊 [VIDEO] FPS統計間隔: 30 幀
-[2025-08-21 20:48:17,607] INFO - ✅ Consumer初始化完成!
-[2025-08-21 20:48:17,607] INFO - 🖥️ ============================================================
-[2025-08-21 20:48:17,607] INFO - 🏭 ===== PIPELINE 工廠函數 =====
-[2025-08-21 20:48:17,607] INFO - 📝 檢測到Producer模式: video
-[2025-08-21 20:48:17,607] INFO - 🎬 創建VideoPipeline - 完整性優先策略
-[2025-08-21 20:48:17,607] INFO - 📋 Video模式特性: 確保無丟幀、硬體適應性、等待完整處理
-[2025-08-21 20:48:17,607] INFO - 🚀 ===== PIPELINE 初始化開始 =====
-[2025-08-21 20:48:17,607] INFO - 📝 Producer類型: VideoProducer
-[2025-08-21 20:48:17,607] INFO - 📝 WorkerPool類型: WorkerPool
-[2025-08-21 20:48:17,607] INFO - 📝 Consumer類型: Consumer
-[2025-08-21 20:48:17,607] INFO - 🔧 初始化硬體檢測器...
-[2025-08-21 20:48:17,840] INFO - 硬體性能等級檢測完成: EXTREME (CPU核心: 24, 記憶體: 23.6GB, 總分: 86.94)
-[2025-08-21 20:48:17,840] INFO - 📊 硬體性能等級: EXTREME
-[2025-08-21 20:48:17,840] INFO - 📊 適應性參數: {'queue_high_watermark': 80, 'queue_low_watermark': 60, 'batch_timeout': 0.001, 'max_queue_size': 100, 'fps_check_interval': 50, 'worker_check_interval': 0.005}
-[2025-08-21 20:48:17,840] INFO - 📈 初始化Timeline調試工具...
-[2025-08-21 20:48:17,840] INFO - 🔧 配置Queue - 最大大小: 100
-[2025-08-21 20:48:17,840] INFO - ✅ Input/Output Queue 創建完成
-[2025-08-21 20:48:17,840] INFO - ⏱️ 性能監控間隔設定: 50秒
-[2025-08-21 20:48:17,840] INFO - 📸 Producer狀態追蹤器初始化完成
-[2025-08-21 20:48:17,840] INFO - 📊 性能歷史數據緩存: 最大100筆記錄
-[2025-08-21 20:48:17,840] INFO - 🛡️ 系統信號處理器註冊完成
-[2025-08-21 20:48:17,840] INFO - ⚙️ 執行模式特定初始化...
-[2025-08-21 20:48:17,840] INFO - 📹 ===== VIDEO模式 特定初始化 =====
-[2025-08-21 20:48:17,840] INFO - 🔧 Video模式參數配置:
-[2025-08-21 20:48:17,840] INFO -   └─ Queue預載: 啟用
-[2025-08-21 20:48:17,840] INFO -   └─ 最小Queue深度: 10
-[2025-08-21 20:48:17,840] INFO -   └─ 預載批次大小: 5
-[2025-08-21 20:48:17,840] INFO -   └─ 預載檢查間隔: 0.1秒
-[2025-08-21 20:48:17,840] INFO - ✅ Video模式初始化完成 - 確保無丟幀處理
-[2025-08-21 20:48:17,840] INFO - 🎉 ===== VideoPipeline 初始化完成 =====
-[2025-08-21 20:48:17,840] INFO - 📋 硬體等級: EXTREME | 隊列大小: 100 | FPS檢查間隔: 50
-[2025-08-21 20:48:17,840] INFO - ✅ Pipeline創建完成: VideoPipeline
-[2025-08-21 20:48:17,840] INFO - 🚀 ===== PIPELINE 執行開始 =====
-[2025-08-21 20:48:17,840] INFO - 🎯 Pipeline類型: VideoPipeline
-[2025-08-21 20:48:17,840] INFO - 📝 執行模式: Video完整性優先
-[2025-08-21 20:48:17,840] INFO - 📈 啟動Timeline監控線程...
-[2025-08-21 20:48:17,840] INFO - ⚙️ 啟動WorkerPool...
-[2025-08-21 20:48:17,840] INFO - 🚀 WorkerPool啟動線程池...
-[2025-08-21 20:48:17,840] INFO - 🔧 [VIDEO] 任務回調: 已設置
-[2025-08-21 20:48:17,840] INFO - ✅ [VIDEO] 線程池啟動完成，開始接受任務!
-[2025-08-21 20:48:17,840] INFO - 📊 [VIDEO] 執行器狀態: 運行中 (2個Processor就緒)
-[2025-08-21 20:48:17,840] INFO - 🖥️ 啟動Consumer顯示...
-[2025-08-21 20:48:17,840] INFO - 🧵 創建執行緒...
-[2025-08-21 20:48:17,840] INFO - ✅ Producer/Worker/Consumer 執行緒創建完成
-[2025-08-21 20:48:17,840] INFO - 🎬 啟動所有執行緒...
-[2025-08-21 20:48:17,840] INFO - ⚙️ ===== VIDEO WORKER 啟動 =====
-[2025-08-21 20:48:17,840] INFO - 📝 Video Worker策略: 硬體適應性處理，確保完整性
-[2025-08-21 20:48:17,840] INFO - 📸 ===== VIDEO PRODUCER 啟動 =====
-[2025-08-21 20:48:17,840] INFO - 🖥️ ===== VIDEO CONSUMER 啟動 =====
-[2025-08-21 20:48:17,840] INFO - 📝 Video Producer策略: 確保無丟幀，完整性優先
-[2025-08-21 20:48:17,840] INFO - 🎯 所有執行緒已啟動，進入主執行循環
-[2025-08-21 20:48:17,840] INFO - 📝 Video Consumer策略: 完整顯示，不丟幀
-[2025-08-21 20:48:17,840] INFO - ⏱️ 批次超時設定: 0.001秒
-[2025-08-21 20:48:17,840] INFO - ⏳ 等待Producer執行緒完成...
-[2025-08-21 20:48:17,840] INFO - 📦 Frame緩衝器大小: 10
-[2025-08-21 20:48:17,840] INFO - 📈 Timeline狀態更新: Producer已啟動
-[2025-08-21 20:48:17,840] INFO - 🎬 開始讀取幀數據...
-[2025-08-21 20:48:17,975] INFO - ⚙️ Video Worker狀態: 已處理 50 幀，Input Queue: 0
-[2025-08-21 20:48:18,101] INFO - 📈 [VIDEO] 處理進度: 91.7% (100/109)
-[2025-08-21 20:48:18,101] INFO - 📊 Video Producer狀態: 已處理 100 幀，緩衝器: 5
-[2025-08-21 20:48:18,101] INFO - ⚙️ Video Worker狀態: 已處理 100 幀，Input Queue: 0
-[2025-08-21 20:48:18,121] INFO - 🏁 [VIDEO] 播放完成，處理109幀
-[2025-08-21 20:48:18,121] INFO - 🏁 [VIDEO] 完成，總幀數: 109
-[2025-08-21 20:48:18,140] INFO - 📦 處理剩餘 4 幀
-[2025-08-21 20:48:18,140] INFO - ✅ VIDEO PRODUCER 完成: 總共處理 109 幀
-[2025-08-21 20:48:18,140] INFO - 🎯 Video模式確保所有幀都已加入處理隊列
-[2025-08-21 20:48:18,140] INFO - ✅ Producer執行緒已完成
-[2025-08-21 20:48:18,140] INFO - 🏁 執行VideoPipeline完成處理...
-[2025-08-21 20:48:18,140] INFO - 🏁 ===== VIDEO模式 完成處理 =====
-[2025-08-21 20:48:18,140] INFO - ✅ Producer已完成且Output Queue為空，Consumer準備結束
-[2025-08-21 20:48:18,140] INFO - ⏳ Video模式策略: 等待所有幀處理完成，確保完整性
-[2025-08-21 20:48:18,140] INFO - ✅ VIDEO CONSUMER 完成: 總共消費 0 個結果
-[2025-08-21 20:48:18,140] INFO - 🛑 停止WorkerPool...
-[2025-08-21 20:48:18,140] INFO - 🧹 WorkerPool關閉完成: 總任務109, 完成109, 丟棄0
-[2025-08-21 20:48:18,140] INFO - 📤 發送Consumer終止信號...
-[2025-08-21 20:48:18,140] INFO - ✅ Video模式完成處理結束 - 所有幀已處理完成
-[2025-08-21 20:48:18,140] INFO - ⏳ 等待Consumer執行緒完成...
-[2025-08-21 20:48:18,140] INFO - ✅ Consumer執行緒已完成
-[2025-08-21 20:48:18,140] INFO - 🛑 停止Consumer顯示...
-[2025-08-21 20:48:18,164] INFO - 📊 ===== 最終性能摘要 =====
-[2025-08-21 20:48:18,164] INFO - 📈 Timeline摘要: 無足夠的時間軸數據
-[2025-08-21 20:48:18,164] INFO - 🧹 執行清理程序...
-[2025-08-21 20:48:18,164] INFO - 🧹 WorkerPool關閉完成: 總任務109, 完成109, 丟棄0
-[2025-08-21 20:48:18,251] INFO - 🎉 ===== PIPELINE 執行完成 =====
+[2025-08-21 22:07:36,690] INFO - 🏭 ============================================================
+[2025-08-21 22:07:36,690] INFO - 🏭 Producer初始化開始
+[2025-08-21 22:07:36,690] INFO - 🏭 ============================================================
+[2025-08-21 22:07:36,690] INFO - 📋 步驟 1/2: 🚀 初始化Capture物件...
+[2025-08-21 22:07:36,690] INFO - 🔍 [VIDEO] 目標文件: ./data/video.mp4
+[2025-08-21 22:07:36,690] INFO - 🔍 [VIDEO] 正在建立VideoCapture連接...
+[2025-08-21 22:07:36,703] INFO - 🔧 [VIDEO] 應用Video模式優化設置...
+[2025-08-21 22:07:36,703] INFO - 🔧 [VIDEO] 緩衝區大小設為: 1
+[2025-08-21 22:07:36,703] INFO - 📋 步驟 2/2: ⚙️ 配置管理 - 設置系統串流參數...
+[2025-08-21 22:07:36,703] INFO - 📊 [VIDEO]  - FPS: 29.97002997002997
+[2025-08-21 22:07:36,703] INFO - 📊 [VIDEO]  - 解析度: 1920x1080
+[2025-08-21 22:07:36,703] INFO - 📊 [VIDEO]  - 總幀數: 109
+[2025-08-21 22:07:36,703] INFO - 🎯 [VIDEO] 模式設定: 完整性優先
+[2025-08-21 22:07:36,703] INFO - ⏱️ [VIDEO] 影片時長: 3.64 秒
+[2025-08-21 22:07:36,703] INFO - ⏱️ [VIDEO] 每幀間隔: 0.0334 秒
+[2025-08-21 22:07:36,703] INFO - 📈 [VIDEO] 進度追蹤: 啟用 (每100幀報告一次)
+[2025-08-21 22:07:36,703] INFO - ✅ Producer初始化完成!
+[2025-08-21 22:07:36,703] INFO - 🏭 ============================================================
+[2025-08-21 22:07:36,703] INFO - 🏭 WorkerPool初始化開始
+[2025-08-21 22:07:36,703] INFO - 🏭 ============================================================
+[2025-08-21 22:07:36,703] INFO - 📋 步驟 1/3: 🚀 配置驗證與基礎架構...
+[2025-08-21 22:07:36,703] INFO - 🔍 [VIDEO] 工作者數量: 2
+[2025-08-21 22:07:36,703] INFO - 🔍 [VIDEO] 緩衝區大小: 20
+[2025-08-21 22:07:36,703] INFO - 📋 步驟 2/3: 🔧 配置Queue和內部結構...
+[2025-08-21 22:07:36,703] INFO - 🔧 [VIDEO] 任務佇列: 最大容量 20
+[2025-08-21 22:07:36,703] INFO - 📋 步驟 3/3: ⚙️ 創建Processor池並載入YOLO模型...
+[2025-08-21 22:07:36,703] INFO - 🔍 [VIDEO] 準備創建並初始化 2 個Processor...
+[2025-08-21 22:07:36,703] INFO - 🔍 [VIDEO] 正在初始化 Processor #1/2...
+[2025-08-21 22:07:39,411] INFO - 🔍 [VIDEO] 正在初始化 Processor #2/2...
+[2025-08-21 22:07:39,435] INFO - 📈 [VIDEO] 所有Processor已就緒，模型載入完成!
+[2025-08-21 22:07:39,435] INFO - ⏱️ [VIDEO] 模型載入總時間: 2.732s
+[2025-08-21 22:07:39,435] INFO - ✅ WorkerPool初始化完成!
+[2025-08-21 22:07:39,435] INFO - 🖥️ ============================================================
+[2025-08-21 22:07:39,435] INFO - 🖥️ Consumer初始化開始
+[2025-08-21 22:07:39,435] INFO - 🖥️ ============================================================
+[2025-08-21 22:07:39,435] INFO - 📋 步驟 1/2: 🚀 顯示緩衝區配置...
+[2025-08-21 22:07:39,435] INFO - 🔍 [VIDEO] 視窗名稱: Hetegeneous Integrated Chip Inference Demo
+[2025-08-21 22:07:39,435] INFO - 🔍 [VIDEO] 顯示緩衝區大小: 1
+[2025-08-21 22:07:39,435] INFO - 🔍 [VIDEO] 目標FPS: 30
+[2025-08-21 22:07:39,435] INFO - 📋 步驟 2/2: ⚙️ 顯示執行緒與統計初始化...
+[2025-08-21 22:07:39,435] INFO - 📊 [VIDEO] 顯示尺寸: (720, 480)
+[2025-08-21 22:07:39,435] INFO - 📊 [VIDEO] FPS統計間隔: 30 幀
+[2025-08-21 22:07:39,435] INFO - ✅ Consumer初始化完成!
+[2025-08-21 22:07:39,435] INFO - � ============================================================
+[2025-08-21 22:07:39,435] INFO - 🔄 Video Pipeline初始化開始
+[2025-08-21 22:07:39,435] INFO - 🔄 ============================================================
+[2025-08-21 22:07:39,435] INFO - 📋 步驟 1/4: 🚀 組件類型檢測與註冊...
+[2025-08-21 22:07:39,435] INFO - � Producer類型: VideoProducer
+[2025-08-21 22:07:39,435] INFO - � WorkerPool類型: WorkerPool
+[2025-08-21 22:07:39,435] INFO - � Consumer類型: Consumer
+[2025-08-21 22:07:39,435] INFO - � 步驟 2/4: �🔧 初始化硬體檢測器與適應性參數...
+[2025-08-21 22:07:39,503] INFO - 硬體性能等級: EXTREME (CPU核心: 24, 記憶體: 23.6GB, 總分: 90.43)
+[2025-08-21 22:07:39,503] INFO - 📊 適應性參數: {'queue_high_watermark': 80, 'queue_low_watermark': 60, 'batch_timeout': 0.001, 'max_queue_size': 100, 'fps_check_interval': 50, 'worker_check_interval': 0.005}
+[2025-08-21 22:07:39,503] INFO - � 步驟 3/4: ⚙️ 初始化Timeline調試工具與性能監控...
+[2025-08-21 22:07:39,503] INFO - 🔧 配置Queue - 最大大小: 100
+[2025-08-21 22:07:39,503] INFO - ✅ Input/Output Queue 創建完成
+[2025-08-21 22:07:39,503] INFO - ⏱️ 性能監控間隔設定: 50秒
+[2025-08-21 22:07:39,503] INFO - 📊 性能歷史數據緩存: 最大100筆記錄
+[2025-08-21 22:07:39,503] INFO - 📋 步驟 4/4: 🎯 執行模式特定初始化...
+[2025-08-21 22:07:39,503] INFO - 🔧 Video模式參數配置:
+[2025-08-21 22:07:39,503] INFO -   └─ Queue預載: 啟用
+[2025-08-21 22:07:39,503] INFO -   └─ 最小Queue深度: 10
+[2025-08-21 22:07:39,503] INFO -   └─ 預載批次大小: 5
+[2025-08-21 22:07:39,503] INFO -   └─ 預載檢查間隔: 0.1秒
+[2025-08-21 22:07:39,503] INFO - ✅ Pipeline初始化完成
+[2025-08-21 22:07:39,503] INFO -  ---------------------------------------------------------
+[2025-08-21 22:07:39,503] INFO - 🚀 開始執行
+[2025-08-21 22:07:39,503] INFO - 🔧 正在啟動WorkerPool...
+[2025-08-21 22:07:39,503] INFO - 📞 WorkerPool已設置結果回調函數
+[2025-08-21 22:07:39,503] INFO - 🚀 WorkerPool線程池啟動成功，工作線程數: 2
+[2025-08-21 22:07:39,503] INFO - 🔧 正在啟動Consumer顯示...
+[2025-08-21 22:07:39,503] INFO - ⚙️ ===== VIDEO WORKER 啟動 =====
+[2025-08-21 22:07:39,503] INFO - 📝 Video Worker策略: 硬體適應性，完整處理，順序保證
+[2025-08-21 22:07:39,503] INFO - 🎬 ===== VIDEO PRODUCER 啟動 =====
+[2025-08-21 22:07:39,503] INFO - 🖥️ ===== VIDEO CONSUMER 啟動 =====
+[2025-08-21 22:07:39,503] INFO - 📝 Video Producer策略: 完整性優先，確保無丟幀，順序處理
+[2025-08-21 22:07:39,503] INFO - ⏳ 等待Producer執行緒完成...
+[2025-08-21 22:07:39,503] INFO - 📝 Video Consumer策略: 完整顯示，順序處理，無丟幀
+[2025-08-21 22:07:39,503] INFO - 🎬 開始影片幀讀取循環...
+[2025-08-21 22:07:39,528] INFO - 📸 [VIDEO] 成功讀取第 1 幀，大小: (1080, 1920, 3)
+[2025-08-21 22:07:39,528] INFO - 📦 第 1 幀已加入緩衝區，緩衝區大小: 1
+[2025-08-21 22:07:39,528] INFO - 📸 [VIDEO] 成功讀取第 2 幀，大小: (1080, 1920, 3)
+[2025-08-21 22:07:39,528] INFO - 📦 第 2 幀已加入緩衝區，緩衝區大小: 2
+[2025-08-21 22:07:39,528] INFO - 📸 [VIDEO] 成功讀取第 3 幀，大小: (1080, 1920, 3)
+[2025-08-21 22:07:39,528] INFO - 📦 第 3 幀已加入緩衝區，緩衝區大小: 3
+[2025-08-21 22:07:39,528] INFO - 📸 [VIDEO] 成功讀取第 4 幀，大小: (1080, 1920, 3)
+[2025-08-21 22:07:39,528] INFO - 📦 第 4 幀已加入緩衝區，緩衝區大小: 4
+[2025-08-21 22:07:39,542] INFO - 📸 [VIDEO] 成功讀取第 5 幀，大小: (1080, 1920, 3)
+[2025-08-21 22:07:39,542] INFO - 📦 第 5 幀已加入緩衝區，緩衝區大小: 5
+[2025-08-21 22:07:39,542] INFO - 📤 提交第 1 幀給WorkerPool處理
+[2025-08-21 22:07:39,542] INFO - 📊 WorkerPool收到第 1 個任務
+[2025-08-21 22:07:39,543] INFO - 🔬 開始處理任務 1，使用處理器: Processor
+[2025-08-21 22:07:39,543] INFO - 📊 WorkerPool成功提交第 1 個任務給ThreadPoolExecutor
+[2025-08-21 22:07:39,543] INFO - 🎯 任務 1 處理完成，結果類型: generator
+[2025-08-21 22:07:39,543] INFO - 📤 提交第 2 幀給WorkerPool處理
+[2025-08-21 22:07:39,543] INFO - 📞 調用回調函數處理結果 1
+[2025-08-21 22:07:39,543] INFO - 📊 WorkerPool收到第 2 個任務
+[2025-08-21 22:07:39,543] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 1)
+[2025-08-21 22:07:39,543] INFO - 📥 Consumer收到第 1 個結果
+[2025-08-21 22:07:39,543] INFO - 🔬 開始處理任務 2，使用處理器: Processor
+[2025-08-21 22:07:39,543] INFO - 📊 WorkerPool成功提交第 2 個任務給ThreadPoolExecutor
+[2025-08-21 22:07:39,543] INFO - 🎯 任務 2 處理完成，結果類型: generator
+[2025-08-21 22:07:39,543] INFO - 📤 提交第 3 幀給WorkerPool處理
+[2025-08-21 22:07:39,543] INFO - 📞 調用回調函數處理結果 2
+[2025-08-21 22:07:39,543] INFO - 📊 WorkerPool收到第 3 個任務
+[2025-08-21 22:07:39,543] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 1)
+[2025-08-21 22:07:39,543] INFO - 📊 WorkerPool成功提交第 3 個任務給ThreadPoolExecutor
+[2025-08-21 22:07:39,543] INFO - 🔬 開始處理任務 2，使用處理器: Processor
+[2025-08-21 22:07:39,543] INFO - 📤 提交第 4 幀給WorkerPool處理
+[2025-08-21 22:07:39,543] INFO - 🎯 任務 3 處理完成，結果類型: generator
+[2025-08-21 22:07:39,543] INFO - 📊 WorkerPool收到第 4 個任務
+[2025-08-21 22:07:39,543] INFO - 📞 調用回調函數處理結果 3
+[2025-08-21 22:07:39,543] INFO - 📊 WorkerPool成功提交第 4 個任務給ThreadPoolExecutor
+[2025-08-21 22:07:39,543] INFO - 🔬 開始處理任務 3，使用處理器: Processor
+[2025-08-21 22:07:39,543] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 2)
+[2025-08-21 22:07:39,543] INFO - 📤 提交第 5 幀給WorkerPool處理
+[2025-08-21 22:07:39,543] INFO - 🎯 任務 3 處理完成，結果類型: generator
+[2025-08-21 22:07:39,543] INFO - 📊 WorkerPool收到第 5 個任務
+[2025-08-21 22:07:39,543] INFO - 📞 調用回調函數處理結果 4
+[2025-08-21 22:07:39,543] INFO - 📊 WorkerPool成功提交第 5 個任務給ThreadPoolExecutor
+[2025-08-21 22:07:39,543] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 3)
+[2025-08-21 22:07:39,543] INFO - 🔬 開始處理任務 4，使用處理器: Processor
+[2025-08-21 22:07:39,543] INFO - 🎯 任務 5 處理完成，結果類型: generator
+[2025-08-21 22:07:39,543] INFO - 📞 調用回調函數處理結果 5
+[2025-08-21 22:07:39,543] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 4)
+[2025-08-21 22:07:39,543] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 5)
+[2025-08-21 22:07:39,543] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 6)
+[2025-08-21 22:07:39,543] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 7)
+[2025-08-21 22:07:39,543] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 8)
+[2025-08-21 22:07:39,543] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 9)
+[2025-08-21 22:07:39,558] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 10)
+[2025-08-21 22:07:39,558] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 11)
+[2025-08-21 22:07:39,558] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 12)
+[2025-08-21 22:07:39,558] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 13)
+[2025-08-21 22:07:39,558] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 14)
+[2025-08-21 22:07:39,574] INFO - 📸 [VIDEO] 已讀取 20 幀
+[2025-08-21 22:07:39,575] INFO - ⚙️ Video Worker狀態: 已處理 20 幀，Input Queue: 0
+[2025-08-21 22:07:39,575] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 15)
+[2025-08-21 22:07:39,575] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 16)
+[2025-08-21 22:07:39,575] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 17)
+[2025-08-21 22:07:39,575] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 18)
+[2025-08-21 22:07:39,575] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 19)
+[2025-08-21 22:07:39,575] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 20)
+[2025-08-21 22:07:39,575] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 21)
+[2025-08-21 22:07:39,575] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 22)
+[2025-08-21 22:07:39,575] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 23)
+[2025-08-21 22:07:39,575] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 24)
+[2025-08-21 22:07:39,590] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 25)
+[2025-08-21 22:07:39,590] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 26)
+[2025-08-21 22:07:39,590] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 27)
+[2025-08-21 22:07:39,590] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 28)
+[2025-08-21 22:07:39,590] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 29)
+[2025-08-21 22:07:39,609] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 30)
+[2025-08-21 22:07:39,609] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 31)
+[2025-08-21 22:07:39,609] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 32)
+[2025-08-21 22:07:39,609] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 33)
+[2025-08-21 22:07:39,609] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 34)
+[2025-08-21 22:07:39,622] INFO - 📸 [VIDEO] 已讀取 40 幀
+[2025-08-21 22:07:39,622] INFO - ⚙️ Video Worker狀態: 已處理 40 幀，Input Queue: 0
+[2025-08-21 22:07:39,622] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 35)
+[2025-08-21 22:07:39,622] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 36)
+[2025-08-21 22:07:39,622] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 37)
+[2025-08-21 22:07:39,622] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 38)
+[2025-08-21 22:07:39,622] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 39)
+[2025-08-21 22:07:39,642] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 40)
+[2025-08-21 22:07:39,642] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 41)
+[2025-08-21 22:07:39,642] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 42)
+[2025-08-21 22:07:39,642] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 43)
+[2025-08-21 22:07:39,642] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 44)
+[2025-08-21 22:07:39,654] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 45)
+[2025-08-21 22:07:39,654] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 46)
+[2025-08-21 22:07:39,654] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 47)
+[2025-08-21 22:07:39,654] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 48)
+[2025-08-21 22:07:39,654] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 49)
+[2025-08-21 22:07:39,670] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 50)
+[2025-08-21 22:07:39,670] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 51)
+[2025-08-21 22:07:39,670] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 52)
+[2025-08-21 22:07:39,670] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 53)
+[2025-08-21 22:07:39,670] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 54)
+[2025-08-21 22:07:39,676] INFO - 📸 [VIDEO] 已讀取 60 幀
+[2025-08-21 22:07:39,686] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 55)
+[2025-08-21 22:07:39,686] INFO - ⚙️ Video Worker狀態: 已處理 60 幀，Input Queue: 0
+[2025-08-21 22:07:39,686] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 56)
+[2025-08-21 22:07:39,686] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 57)
+[2025-08-21 22:07:39,687] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 58)
+[2025-08-21 22:07:39,687] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 59)
+[2025-08-21 22:07:39,690] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 60)
+[2025-08-21 22:07:39,690] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 61)
+[2025-08-21 22:07:39,690] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 62)
+[2025-08-21 22:07:39,690] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 63)
+[2025-08-21 22:07:39,690] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 64)
+[2025-08-21 22:07:39,715] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 65)
+[2025-08-21 22:07:39,715] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 66)
+[2025-08-21 22:07:39,715] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 67)
+[2025-08-21 22:07:39,715] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 68)
+[2025-08-21 22:07:39,715] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 69)
+[2025-08-21 22:07:39,728] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 70)
+[2025-08-21 22:07:39,728] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 71)
+[2025-08-21 22:07:39,728] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 72)
+[2025-08-21 22:07:39,728] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 73)
+[2025-08-21 22:07:39,728] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 74)
+[2025-08-21 22:07:39,743] INFO - 📸 [VIDEO] 已讀取 80 幀
+[2025-08-21 22:07:39,745] INFO - ⚙️ Video Worker狀態: 已處理 80 幀，Input Queue: 0
+[2025-08-21 22:07:39,745] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 75)
+[2025-08-21 22:07:39,745] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 76)
+[2025-08-21 22:07:39,745] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 77)
+[2025-08-21 22:07:39,745] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 78)
+[2025-08-21 22:07:39,745] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 79)
+[2025-08-21 22:07:39,760] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 80)
+[2025-08-21 22:07:39,760] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 81)
+[2025-08-21 22:07:39,760] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 82)
+[2025-08-21 22:07:39,761] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 83)
+[2025-08-21 22:07:39,761] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 84)
+[2025-08-21 22:07:39,770] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 85)
+[2025-08-21 22:07:39,770] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 86)
+[2025-08-21 22:07:39,770] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 87)
+[2025-08-21 22:07:39,770] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 88)
+[2025-08-21 22:07:39,776] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 89)
+[2025-08-21 22:07:39,787] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 90)
+[2025-08-21 22:07:39,787] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 91)
+[2025-08-21 22:07:39,787] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 92)
+[2025-08-21 22:07:39,787] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 93)
+[2025-08-21 22:07:39,787] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 94)
+[2025-08-21 22:07:39,801] INFO - 📸 [VIDEO] 已讀取 100 幀
+[2025-08-21 22:07:39,801] INFO - ⚙️ Video Worker狀態: 已處理 100 幀，Input Queue: 0
+[2025-08-21 22:07:39,801] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 95)
+[2025-08-21 22:07:39,801] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 96)
+[2025-08-21 22:07:39,801] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 97)
+[2025-08-21 22:07:39,801] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 98)
+[2025-08-21 22:07:39,801] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 99)
+[2025-08-21 22:07:39,810] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 100)
+[2025-08-21 22:07:39,817] INFO - 🏁 [VIDEO] 影片播放完成，總共讀取 109 幀
+[2025-08-21 22:07:39,817] INFO - 🏁 [VIDEO] 預期總幀數: 109
+[2025-08-21 22:07:39,837] INFO - 📦 處理剩餘的 4 幀
+[2025-08-21 22:07:39,837] INFO - ✅ VIDEO PRODUCER 完成: 總共處理 109 幀
+[2025-08-21 22:07:39,837] INFO - ✅ Producer執行緒已完成
+[2025-08-21 22:07:39,837] INFO - 🏁 執行VideoPipeline完成處理...
+[2025-08-21 22:07:40,009] INFO - [TIMELINE-DEBUG] t=0.5s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[100(100%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:40,514] INFO - [TIMELINE-DEBUG] t=1.0s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[100(100%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:40,818] ERROR - ❌ PIPELINE_CALLBACK: Failed to queue result: 
+[2025-08-21 22:07:40,819] ERROR - ❌ PIPELINE_CALLBACK: Failed to queue result: 
+[2025-08-21 22:07:40,844] INFO - 🏁 Producer已完成且Queue為空，Worker準備結束
+[2025-08-21 22:07:40,844] INFO - ✅ VIDEO WORKER 完成: 總共處理 109 幀
+[2025-08-21 22:07:41,016] INFO - [TIMELINE-DEBUG] t=1.5s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[100(100%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:41,524] INFO - [TIMELINE-DEBUG] t=2.0s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[100(100%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:41,835] ERROR - ❌ PIPELINE_CALLBACK: Failed to queue result: 
+[2025-08-21 22:07:41,835] ERROR - ❌ PIPELINE_CALLBACK: Failed to queue result: 
+[2025-08-21 22:07:41,929] INFO - ✅ Consumer成功處理第 1 個結果
+[2025-08-21 22:07:41,929] INFO - 📥 Consumer收到第 2 個結果
+[2025-08-21 22:07:41,929] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 100)
+[2025-08-21 22:07:42,026] INFO - [TIMELINE-DEBUG] t=2.5s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[100(100%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:42,052] INFO - ✅ Consumer成功處理第 2 個結果
+[2025-08-21 22:07:42,052] INFO - 📥 Consumer收到第 3 個結果
+[2025-08-21 22:07:42,052] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 100)
+[2025-08-21 22:07:42,186] INFO - ✅ Consumer成功處理第 3 個結果
+[2025-08-21 22:07:42,186] INFO - 📥 Consumer收到第 4 個結果
+[2025-08-21 22:07:42,186] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 100)
+[2025-08-21 22:07:42,304] INFO - ✅ Consumer成功處理第 4 個結果
+[2025-08-21 22:07:42,304] INFO - 📥 Consumer收到第 5 個結果
+[2025-08-21 22:07:42,304] INFO - 📤 WorkerPool結果已加入output_queue (當前大小: 100)
+[2025-08-21 22:07:42,400] INFO - ✅ Consumer成功處理第 5 個結果
+[2025-08-21 22:07:42,528] INFO - [TIMELINE-DEBUG] t=3.0s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[98(98%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:43,031] INFO - [TIMELINE-DEBUG] t=3.5s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[93(93%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:43,533] INFO - [TIMELINE-DEBUG] t=4.0s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[88(88%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:43,894] INFO - 🖥️ Video Consumer狀態: 已消費 20 個結果，Output Queue: 85
+[2025-08-21 22:07:44,035] INFO - [TIMELINE-DEBUG] t=4.5s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[83(83%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:44,538] INFO - [TIMELINE-DEBUG] t=5.0s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[80(80%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:45,041] INFO - [TIMELINE-DEBUG] t=5.5s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[74(74%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:45,543] INFO - [TIMELINE-DEBUG] t=6.0s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[69(69%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:46,046] INFO - [TIMELINE-DEBUG] t=6.5s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[65(65%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:46,161] INFO - 🖥️ Video Consumer狀態: 已消費 40 個結果，Output Queue: 65
+[2025-08-21 22:07:46,549] INFO - [TIMELINE-DEBUG] t=7.0s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[61(61%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:47,051] INFO - [TIMELINE-DEBUG] t=7.5s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[57(57%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:47,554] INFO - [TIMELINE-DEBUG] t=8.1s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[53(53%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:48,056] INFO - [TIMELINE-DEBUG] t=8.6s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[48(48%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:48,493] INFO - 🖥️ Video Consumer狀態: 已消費 60 個結果，Output Queue: 45
+[2025-08-21 22:07:48,559] INFO - [TIMELINE-DEBUG] t=9.1s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[44(44%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:49,061] INFO - [TIMELINE-DEBUG] t=9.6s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[40(40%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:49,563] INFO - [TIMELINE-DEBUG] t=10.1s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[35(35%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:50,066] INFO - [TIMELINE-DEBUG] t=10.6s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[32(32%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:50,568] INFO - [TIMELINE-DEBUG] t=11.1s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[28(28%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:51,048] INFO - 🖥️ Video Consumer狀態: 已消費 80 個結果，Output Queue: 25
+[2025-08-21 22:07:51,071] INFO - [TIMELINE-DEBUG] t=11.6s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[24(24%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:51,573] INFO - [TIMELINE-DEBUG] t=12.1s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[20(20%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:52,076] INFO - [TIMELINE-DEBUG] t=12.6s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[16(16%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:52,578] INFO - [TIMELINE-DEBUG] t=13.1s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[10(10%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:53,080] INFO - [TIMELINE-DEBUG] t=13.6s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[6(6%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:53,267] INFO - 🖥️ Video Consumer狀態: 已消費 100 個結果，Output Queue: 5
+[2025-08-21 22:07:53,582] INFO - [TIMELINE-DEBUG] t=14.1s | Producer:⏸️(Frame#109) | InputQ:[0(0%)] | Workers:0/0❌沒有Worker狀態 | OutputQ:[1(1%)] | Consumer:💻(Result#0)
+[2025-08-21 22:07:53,677] INFO - ⏳ 等待Consumer執行緒完成...
+[2025-08-21 22:07:53,728] INFO - ⚠️ Consumer收到終止信號 (None result)
+[2025-08-21 22:07:53,728] INFO - ✅ VIDEO CONSUMER 完成: 總共消費 105 個結果
+[2025-08-21 22:07:53,728] INFO - ✅ Consumer執行緒已完成
+[2025-08-21 22:07:53,728] INFO - 🛑 停止Consumer顯示...
+[2025-08-21 22:07:53,765] INFO - 📊 ============================================================
+[2025-08-21 22:07:53,765] INFO - 📊 最終性能摘要與清理
+[2025-08-21 22:07:53,765] INFO - 📊 ============================================================
+[2025-08-21 22:07:53,765] INFO - 📈 Timeline摘要: === 最近 30 秒時間軸摘要 ===
+總快照數: 28
+Producer活動率: 0/28 (0.0%)
+Consumer活動率: 28/28 (100.0%)
+⚠️ 沒有Worker活動記錄!
+[2025-08-21 22:07:53,766] INFO - 📊 🕐 視覺化時間軸 (最近 15 個時間點)
+[2025-08-21 22:07:53,766] INFO - 📊 時間軸:     t0   t1   t2   t3   t4   t5   t6   t7   t8   t9   t10  t11  t12  t13  t14 
+[2025-08-21 22:07:53,766] INFO - 📊 Producer:   ⏸️   ⏸️   ⏸️   ⏸️   ⏸️   ⏸️   ⏸️   ⏸️   ⏸️   ⏸️   ⏸️   ⏸️   ⏸️   ⏸️   ⏸️  
+[2025-08-21 22:07:53,766] INFO - 📊 InputQueue: [0]  [0]  [0]  [0]  [0]  [0]  [0]  [0]  [0]  [0]  [0]  [0]  [0]  [0]  [0] 
+[2025-08-21 22:07:53,766] INFO - 📊 Workers:    ❌  ❌  ❌  ❌  ❌  ❌  ❌  ❌  ❌  ❌  ❌  ❌  ❌  ❌  ❌ 
+[2025-08-21 22:07:53,766] INFO - 📊 OutputQueue:[61] [57] [53] [48] [44] [40] [35] [32] [28] [24] [20] [16] [10] [6]  [1] 
+[2025-08-21 22:07:53,766] INFO - 📊 Consumer:   💻    💻    💻    💻    💻    💻    💻    💻    💻    💻    💻    💻    💻    💻    💻   
+[2025-08-21 22:07:53,766] INFO - 🧹 執行清理程序...
+[2025-08-21 22:07:53,784] INFO - ✅ Pipeline執行完成!
+[2025-08-21 22:07:53,784] INFO - 📊 ============================================================
