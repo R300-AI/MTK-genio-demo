@@ -367,12 +367,6 @@ class VideoProducer(BaseProducer):
         
         self.frame_counter += 1
         
-        # 添加幀讀取日誌
-        if self.frame_counter <= 5:  # 只記錄前5幀避免日誌過多
-            logger.info(f"📸 [VIDEO] 成功讀取第 {self.frame_counter} 幀，大小: {frame.shape if frame is not None else 'None'}")
-        elif self.frame_counter % 20 == 0:  # 每20幀記錄一次
-            logger.info(f"📸 [VIDEO] 已讀取 {self.frame_counter} 幀")
-        
         return frame
 
 # ============================================================================

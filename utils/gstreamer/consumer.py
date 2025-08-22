@@ -137,7 +137,7 @@ class Consumer:
                     # 取第一個結果（通常YOLO每次只處理一幀）
                     yolo_result = yolo_results[0]
                     # 繪製檢測結果並獲取帶註解的圖像
-                    annotated_frame = yolo_result.plot()
+                    annotated_frame = yolo_result.plot(boxes=False)
                     self.put_frame(annotated_frame)
                     logger.debug(f"✅ Consumer成功處理推理結果並加入顯示緩衝")
                 else:

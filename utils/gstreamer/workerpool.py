@@ -224,10 +224,6 @@ class WorkerPool:
         try:
             # 儲存回調函數
             self._result_callback = result_callback
-            if result_callback:
-                logger.info("📞 WorkerPool已設置結果回調函數")
-            else:
-                logger.warning("⚠️ WorkerPool沒有設置結果回調函數")
             
             # 🎯 只在這裡啟動線程池 - 這才需要線程
             self.executor = ThreadPoolExecutor(
@@ -283,22 +279,13 @@ class WorkerPool:
             # 任務開始時增加pending計數
             with self.pending_tasks_lock:
                 self.pending_tasks += 1
-            
-            # 添加調試信息
-            if self._completed_tasks < 5:
-                logger.info(f"🔬 開始處理任務 {self._completed_tasks + 1}，使用處理器: {type(processor).__name__}")
-                
+
             result = processor.predict(frame)
-            
-            # 添加結果調試信息
-            if self._completed_tasks < 5:
-                logger.info(f"🎯 任務 {self._completed_tasks + 1} 處理完成，結果類型: {type(result).__name__}")
-            
+
             # 優先使用傳入的回調，否則使用啟動時設定的回調（向後兼容）
             active_callback = callback or getattr(self, '_result_callback', None)
+
             if active_callback:
-                if self._completed_tasks < 5:
-                    logger.info(f"📞 調用回調函數處理結果 {self._completed_tasks + 1}")
                 active_callback(result)
             else:
                 if self._completed_tasks < 3:
@@ -370,11 +357,7 @@ class WorkerPool:
         self._ensure_thread_pool_started()
         
         self._total_tasks += 1
-        
-        # 添加調試信息
-        if self._total_tasks <= 5:
-            logger.info(f"📊 WorkerPool收到第 {self._total_tasks} 個任務")
-        
+
         # 背壓控制檢查
         if self._should_drop_task():
             self._dropped_tasks += 1
@@ -396,8 +379,7 @@ class WorkerPool:
             self._process_task, processor, frame, task_id, callback
         )
         
-        if self._total_tasks <= 5:
-            logger.info(f"📊 WorkerPool成功提交第 {self._total_tasks} 個任務給ThreadPoolExecutor")
+        logger.info(f"📊 WorkerPool成功提交第 {self._total_tasks} 個任務給ThreadPoolExecutor")
         
         return future
     

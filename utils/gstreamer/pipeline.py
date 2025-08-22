@@ -237,20 +237,19 @@ class BasePipeline(ABC):
         logger.info("🚀 開始執行")
         self._start_timeline_logging()
         
+        logger.info(f"📊 Pipeline啟動前佇列狀態: input_queue={self.input_queue.qsize()}, output_queue={self.output_queue.qsize()}")
         def result_handler(result):
             if result is not None:
                 try:
                     self.output_queue.put(result, timeout=1.0)
                     self.timeline_debugger.update_consumer_state(active=True)
-                    logger.info(f"📤 WorkerPool結果已加入output_queue (當前大小: {self.output_queue.qsize()})")
+                    logger.info(f"📤 WorkerPool取得結果，已加入output_queue (當前大小: {self.output_queue.qsize()})")
                 except Exception as e:
                     logger.error(f"❌ PIPELINE_CALLBACK: Failed to queue result: {e}")
             else:
                 logger.warning("⚠️ WorkerPool返回了空結果 (None)")
 
-        logger.info("🔧 正在啟動WorkerPool...")
         self.worker_pool.start(result_handler)
-        logger.info("🔧 正在啟動Consumer顯示...")
         self.consumer.start_display()
 
         producer_thread = threading.Thread(target=self._producer_loop, daemon=True)
@@ -261,7 +260,6 @@ class BasePipeline(ABC):
         consumer_thread.start()
         
         try:
-            logger.info("⏳ 等待Producer執行緒完成...")
             producer_thread.join()
             logger.info("✅ Producer執行緒已完成")
             
@@ -394,9 +392,6 @@ class VideoPipeline(BasePipeline):
     
     def _producer_loop(self):
         """Video模式Producer - 確保無丟幀"""
-        logger.info("🎬 ===== VIDEO PRODUCER 啟動 =====")
-        logger.info("📝 Video Producer策略: 完整性優先，確保無丟幀，順序處理")
-        
         frame_count = 0
         last_adjustment_time = time.time()
         batch_timeout = self.adaptive_params["batch_timeout"]
@@ -406,7 +401,6 @@ class VideoPipeline(BasePipeline):
         self.timeline_debugger.update_producer_state(active=True, frame_count=0)
         
         try:
-            logger.info("🎬 開始影片幀讀取循環...")
             for frame in self.producer:
                 if not self.running:
                     logger.warning("⚠️ Producer收到停止信號，中斷幀讀取")
@@ -416,7 +410,7 @@ class VideoPipeline(BasePipeline):
                 frame_count += 1
                 
                 # 添加詳細的幀處理日誌
-                if frame_count <= 5:
+                if frame_count % 5 == 0:
                     logger.info(f"📦 第 {frame_count} 幀已加入緩衝區，緩衝區大小: {len(frame_buffer)}")
 
                 # 批次處理並預載
@@ -469,9 +463,6 @@ class VideoPipeline(BasePipeline):
     
     def _worker_loop(self):
         """Video模式Worker - 硬體適應性"""
-        logger.info("⚙️ ===== VIDEO WORKER 啟動 =====")
-        logger.info("📝 Video Worker策略: 硬體適應性，完整處理，順序保證")
-        
         processed_count = 0
         
         while self.running or not self.input_queue.empty():
@@ -480,11 +471,6 @@ class VideoPipeline(BasePipeline):
                 if frame is None:
                     logger.info("⚠️ Worker收到終止信號 (None frame)")
                     break
-                
-                # 提交給WorkerPool處理
-                logger.debug(f"📤 提交第 {processed_count + 1} 幀給WorkerPool處理")
-                if processed_count < 5:  # 只記錄前5幀
-                    logger.info(f"📤 提交第 {processed_count + 1} 幀給WorkerPool處理")
                 
                 self.worker_pool.submit(frame)
                 processed_count += 1
@@ -503,9 +489,6 @@ class VideoPipeline(BasePipeline):
     
     def _consumer_loop(self):
         """Video模式Consumer - 完整顯示"""
-        logger.info("🖥️ ===== VIDEO CONSUMER 啟動 =====")
-        logger.info("📝 Video Consumer策略: 完整顯示，順序處理，無丟幀")
-        
         consumed_count = 0
         while self.running:
             try:
@@ -513,11 +496,7 @@ class VideoPipeline(BasePipeline):
                 if result is None:
                     logger.info("⚠️ Consumer收到終止信號 (None result)")
                     break
-                
-                logger.debug(f"📥 Consumer收到第 {consumed_count + 1} 個結果")
-                if consumed_count < 5:  # 只記錄前5個結果
-                    logger.info(f"📥 Consumer收到第 {consumed_count + 1} 個結果")
-                
+
                 # 調用consumer的consume方法處理結果
                 try:
                     self.consumer.consume(result)
