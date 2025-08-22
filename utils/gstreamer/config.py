@@ -105,9 +105,8 @@ class ConsumerConfig:
     
     def __post_init__(self):
         """配置後處理"""
-        logger.info(f"🔧 [CONFIG] Consumer配置:")
-        logger.info(f"   模式: {self.mode}")
-        logger.info(f"   視窗: {self.window_name}")
-        logger.info(f"   大小: {self.display_size}")
-        logger.info(f"   FPS: {self.fps}")
-        logger.info(f"   超時: {self.timeout_seconds}s")
+        logger.info(f"    - 模式: {self.mode}")
+        logger.info(f"    - 視窗: {self.window_name}")
+        logger.info(f"    - 大小: {self.display_size}")
+        logger.info(f"    - FPS: {self.fps}")
+        logger.info(f"    - 超時: {self.timeout_seconds}s")

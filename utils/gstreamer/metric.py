@@ -20,8 +20,18 @@ class TimelineLogger:
         # 組件狀態追蹤
         self.producer_state = {"active": False, "frame_count": 0, "last_activity": 0}
         self.worker_states = {}  # {worker_id: {"active": bool, "task_count": int, "last_activity": float}}
-        self.consumer_state = {"active": False, "result_count": 0, "last_activity": 0}
+        self.consumer_state = {"active": False, "result_count": 0, "frame_count": 0, "last_activity": 0}
         self.queue_states = {"input": 0, "output": 0, "input_max": 0, "output_max": 0}
+        
+        # 流控統計追蹤
+        self.flow_control_stats = {
+            "throttle_events": 0,
+            "total_throttle_time": 0.0,
+            "max_input_queue": 0,
+            "avg_input_queue": 0.0,
+            "queue_full_events": 0,
+            "last_throttle_time": 0
+        }
         
     def update_producer_state(self, active=None, frame_count=None):
         """更新Producer狀態"""
@@ -48,7 +58,7 @@ class TimelineLogger:
             if task_count is not None:
                 self.worker_states[worker_id]["task_count"] = task_count
     
-    def update_consumer_state(self, active=None, result_count=None):
+    def update_consumer_state(self, active=None, result_count=None, frame_count=None):
         """更新Consumer狀態"""
         with self.lock:
             current_time = time.time()
@@ -58,18 +68,58 @@ class TimelineLogger:
                     self.consumer_state["last_activity"] = current_time
             if result_count is not None:
                 self.consumer_state["result_count"] = result_count
+            if frame_count is not None:
+                self.consumer_state["frame_count"] = frame_count
     
     def update_queue_states(self, input_size=None, output_size=None, input_max=None, output_max=None):
         """更新Queue狀態"""
         with self.lock:
             if input_size is not None:
                 self.queue_states["input"] = input_size
+                # 更新流控統計
+                self.flow_control_stats["max_input_queue"] = max(
+                    self.flow_control_stats["max_input_queue"], input_size
+                )
+                if input_size >= (input_max or 100):
+                    self.flow_control_stats["queue_full_events"] += 1
+                    
             if output_size is not None:
                 self.queue_states["output"] = output_size
             if input_max is not None:
                 self.queue_states["input_max"] = input_max
             if output_max is not None:
                 self.queue_states["output_max"] = output_max
+    
+    def record_throttle_event(self, throttle_duration=0.0):
+        """記錄流控事件"""
+        with self.lock:
+            self.flow_control_stats["throttle_events"] += 1
+            self.flow_control_stats["total_throttle_time"] += throttle_duration
+            self.flow_control_stats["last_throttle_time"] = time.time()
+    
+    def get_flow_control_summary(self):
+        """獲取流控統計摘要"""
+        with self.lock:
+            runtime = time.time() - self.start_time
+            stats = self.flow_control_stats.copy()
+            
+            # 計算平均值
+            if runtime > 0:
+                throttle_rate = stats["throttle_events"] / runtime * 60  # 每分鐘流控次數
+                throttle_percentage = (stats["total_throttle_time"] / runtime) * 100  # 流控時間百分比
+            else:
+                throttle_rate = 0
+                throttle_percentage = 0
+            
+            return {
+                "throttle_events": stats["throttle_events"],
+                "throttle_rate_per_minute": throttle_rate,
+                "total_throttle_time": stats["total_throttle_time"],
+                "throttle_time_percentage": throttle_percentage,
+                "max_input_queue": stats["max_input_queue"],
+                "queue_full_events": stats["queue_full_events"],
+                "runtime": runtime
+            }
     
     def should_log_timeline(self):
         """判斷是否應該記錄時間軸"""
@@ -102,57 +152,106 @@ class TimelineLogger:
             self._log_formatted_timeline(snapshot)
     
     def _log_formatted_timeline(self, snapshot):
-        """格式化並記錄時間軸狀態"""
+        """格式化並記錄時間軸狀態 - 增強版智能流控顯示"""
         elapsed = snapshot["elapsed"]
         
-        # Producer狀態圖示
-        producer_icon = "📸" if snapshot["producer"]["active"] else "⏸️"
-        producer_info = f"Frame#{snapshot['producer']['frame_count']}"
-        
-        # Queue狀態 (顯示使用率)
+        # 預先初始化 Queue 變量以避免 UnboundLocalError
         input_queue = snapshot["queues"]["input"]
         input_max = snapshot["queues"]["input_max"] or 100
         output_queue = snapshot["queues"]["output"]
         output_max = snapshot["queues"]["output_max"] or 100
         
+        # Producer狀態圖示 - 加入流控狀態
+        producer_active = snapshot["producer"]["active"]
+        frame_count = snapshot['producer']['frame_count']
+        
+        if producer_active:
+            # 檢查是否處於流控狀態（可以根據Queue狀態推斷）
+            if input_queue > input_max * 0.7:  # 70%以上可能觸發流控
+                producer_icon = "🐌"  # 流控中
+                producer_info = f"Frame#{frame_count}(流控中)"
+            else:
+                producer_icon = "📸"  # 正常讀取
+                producer_info = f"Frame#{frame_count}"
+        else:
+            producer_icon = "⏸️"  # 暫停
+            producer_info = f"Frame#{frame_count}(完成)"
+        
+        # Queue狀態 (顯示使用率和流控閾值)        
         input_usage = (input_queue / input_max * 100) if input_max > 0 else 0
         output_usage = (output_queue / output_max * 100) if output_max > 0 else 0
         
-        # Worker狀態圖示
+        # 增強的Worker狀態顯示 - 包含ThreadPoolExecutor信息
         worker_icons = []
         active_workers = 0
         total_workers = len(snapshot["workers"]) if snapshot["workers"] else 0
         
-        for worker_id, state in snapshot["workers"].items():
-            if state["active"]:
-                worker_icons.append("⚙️")
-                active_workers += 1
-            else:
-                worker_icons.append("💤")
-        
-        # 如果沒有worker狀態記錄，顯示警告
-        if total_workers == 0:
-            worker_icons = ["❌沒有Worker狀態"]
+        if total_workers > 0:
+            # 顯示詳細的Worker狀態
+            busy_count = 0
+            idle_count = 0
             
-        # Consumer狀態圖示
-        consumer_icon = "💻" if snapshot["consumer"]["active"] else "⏹️"
-        consumer_info = f"Result#{snapshot['consumer']['result_count']}"
+            for worker_id, state in snapshot["workers"].items():
+                if state["active"]:
+                    if state.get("task_count", 0) > 0:
+                        worker_icons.append("⚙️")  # 忙碌
+                        busy_count += 1
+                    else:
+                        worker_icons.append("⚡")  # 就緒
+                    active_workers += 1
+                else:
+                    worker_icons.append("💤")  # 休眠
+                    idle_count += 1
+            
+            # 顯示Worker狀態統計
+            if busy_count > 0:
+                worker_status = f"🔥{active_workers}/{total_workers}{''.join(worker_icons[:5])}"
+            elif active_workers > 0:
+                worker_status = f"⚡{active_workers}/{total_workers}{''.join(worker_icons[:5])}"
+            else:
+                worker_status = f"💤{active_workers}/{total_workers}{''.join(worker_icons[:5])}"
+        else:
+            # 沒有Worker狀態記錄
+            worker_status = "0/0⏳初始化中"
         
-        # 記錄完整的時間軸
-        logger.info(f"[TIMELINE-DEBUG] t={elapsed:.1f}s | "
+        # Consumer狀態圖示 - 修改為顯示frame數
+        consumer_icon = "💻" if snapshot["consumer"]["active"] else "⏹️"
+        # 優先顯示frame_count，如果沒有則顯示result_count
+        frame_count = snapshot['consumer'].get('frame_count', 0)
+        result_count = snapshot['consumer'].get('result_count', 0)
+        display_count = frame_count if frame_count > 0 else result_count
+        consumer_info = f"Frame#{display_count}"
+        
+        # 記錄增強的時間軸 - 包含流控信息
+        logger.info(f"[ENHANCED-TIMELINE] t={elapsed:.1f}s | "
                    f"Producer:{producer_icon}({producer_info}) | "
                    f"InputQ:[{input_queue}({input_usage:.0f}%)] | "
-                   f"Workers:{active_workers}/{total_workers}{''.join(worker_icons[:5])} | "
+                   f"Workers:{worker_status} | "
                    f"OutputQ:[{output_queue}({output_usage:.0f}%)] | "
                    f"Consumer:{consumer_icon}({consumer_info})")
         
-        # 如果發現worker問題，額外記錄警告
-        if total_workers > 0 and active_workers == 0:
-            logger.warning(f"[TIMELINE-ALERT] t={elapsed:.1f}s - 所有Worker都處於非活動狀態! "
-                         f"InputQueue={input_queue}, Workers={total_workers}, ActiveWorkers=0")
-        elif input_queue > input_max * 0.8 and active_workers < total_workers * 0.5:
-            logger.warning(f"[TIMELINE-ALERT] t={elapsed:.1f}s - Queue積壓且Worker利用率低! "
-                         f"InputQueue={input_queue}({input_usage:.0f}%), ActiveWorkers={active_workers}/{total_workers}")
+        # 智能警告系統 - 包含流控狀態分析
+        if total_workers > 0:
+            # 檢查系統瓶頸
+            if input_usage > 80 and active_workers == total_workers:
+                logger.warning(f"[SYSTEM-ANALYSIS] t={elapsed:.1f}s - 系統接近滿載: "
+                             f"InputQueue={input_queue}({input_usage:.0f}%), "
+                             f"所有Worker忙碌({active_workers}/{total_workers})")
+            
+            elif input_usage > 50 and active_workers < total_workers * 0.5:
+                logger.warning(f"[SYSTEM-ANALYSIS] t={elapsed:.1f}s - Worker利用率偏低: "
+                             f"InputQueue={input_queue}({input_usage:.0f}%), "
+                             f"活躍Worker={active_workers}/{total_workers}")
+                             
+            elif input_usage < 10 and output_usage > 80:
+                logger.info(f"[SYSTEM-ANALYSIS] t={elapsed:.1f}s - Consumer成為瓶頸: "
+                           f"InputQ={input_queue}({input_usage:.0f}%), "
+                           f"OutputQ={output_queue}({output_usage:.0f}%)")
+                           
+            elif producer_active and input_usage > 70:
+                logger.info(f"[FLOW-CONTROL-INFO] t={elapsed:.1f}s - 智能流控可能已啟動: "
+                           f"InputQueue={input_queue}({input_usage:.0f}%), "
+                           f"Producer可能正在減速讀取")
     
     def get_timeline_summary(self, last_n_seconds=10):
         """獲取最近N秒的時間軸摘要"""

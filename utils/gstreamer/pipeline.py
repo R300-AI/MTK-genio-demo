@@ -1,38 +1,30 @@
 """
 ================================================================================
-🏗        # 從WorkerPool獲取硬體資訊（避免重複檢測）
-        logger.info("📋 步驟 2/4: 🔧 從WorkerPool取得硬體資訊與適應性參數...")
-        if hasattr(self.worker_pool, '_performance_level'):
-            hardware_tier = getattr(self.worker_pool, '_performance_level', 'MEDIUM')
-            cpu_cores = getattr(self.worker_pool, '_cpu_cores', 4)
-            memory_gb = getattr(self.worker_pool, '_memory_gb', 8.0)
-            logger.info(f"📊 硬體資訊來源: WorkerPool")
-            logger.info(f"📊 硬體性能等級: {hardware_tier} (CPU核心: {cpu_cores}, 記憶體: {memory_gb:.1f}GB)")
-        else:
-            # 如果 WorkerPool 沒有硬體檢測，使用預設值
-            hardware_tier = 'MEDIUM'
-            logger.warning("⚠️ WorkerPool未提供硬體資訊，使用預設等級: MEDIUM")
-        
-        # 根據硬體等級生成Pipeline專用的適應性參數
-        self.adaptive_params = self._generate_pipeline_adaptive_params(hardware_tier)
-        logger.info(f"📊 Pipeline適應性參數: {self.adaptive_params}")line 架構設計
+🏗️ Pipeline 架構設計 2025.08.23 (更新版)
 ================================================================================
 
 Pipeline類採用繼承架構，支援Video模式（完整性優先）和Camera模式（實時性優先）。
 
-🎯 核心組件：
+� Frame ID 追蹤整合 (2025.08.23)：
+Pipeline 現在支援完整的 frame_id 追蹤，從 Producer 產生開始到 Consumer 顯示結束，
+確保每個幀都能在整個處理管道中保持可追蹤性，完美支援多線程並行處理環境。
+
+�🎯 核心組件：
 ┌─────────────┬──────────────────┬─────────────────────────────────────────┐
 │ 📸 Producer │ 幀生產與推送     │ Video:確保無丟幀 / Camera:協商式流控    │
 │ ⚙️ Worker   │ 幀處理與推理     │ Video:硬體適應性 / Camera:背壓檢測      │
 │ 🖥️ Consumer │ 結果顯示與輸出   │ Video:完整保證 / Camera:實時優化        │
 └─────────────┴──────────────────┴─────────────────────────────────────────┘
 
-📊 資料流向：Producer ──[input_queue]──> Worker ──[output_queue]──> Consumer
+📊 資料流向 (整合架構更新版)：
+    Producer ──> ThreadPoolExecutor ──[output_queue]──> Consumer
+    (Frame+ID)     (直接處理)            (Results+ID)     (追蹤顯示)
 
 🎯 繼承關係：
                     BasePipeline (抽象基類)
                     ├── 通用初始化和硬體檢測
-                    ├── 統一執行流程模板
+                    ├── 統一執行流程模板  
+                    ├── Frame ID 追蹤機制 🆕
                     └── 抽象方法定義
                            │
             ┌──────────────┴──────────────┐
@@ -69,6 +61,8 @@ import threading
 import time
 import signal
 import logging
+import queue
+import os
 from queue import Queue
 from abc import ABC, abstractmethod
 from .metric import TimelineLogger, HardwarePerformanceLogger
@@ -103,23 +97,46 @@ class BasePipeline(ABC):
         self.worker_pool = worker_pool
         self.consumer = consumer
         
-        # 硬體性能檢測和適應性參數
-        logger.info("� 步驟 2/4: �🔧 初始化硬體檢測器與適應性參數...")
-        self.hardware_detector = HardwarePerformanceLogger()
-        self.adaptive_params = self.hardware_detector.get_adaptive_parameters()
-        logger.info(f"📊 適應性參數: {self.adaptive_params}")
+        # 從WorkerPool獲取硬體資訊（避免重複檢測）
+        logger.info("📋 步驟 2/4: 🔧 從WorkerPool取得硬體資訊與適應性參數...")
+        if hasattr(self.worker_pool, '_performance_level'):
+            hardware_tier = getattr(self.worker_pool, '_performance_level', '中等性能')
+            cpu_cores = getattr(self.worker_pool, '_cpu_cores', 4)
+            memory_gb = getattr(self.worker_pool, '_memory_gb', 8.0)
+            logger.info(f"📊 硬體資訊來源: WorkerPool")
+            logger.info(f"📊 硬體性能等級: {hardware_tier} (CPU核心: {cpu_cores}, 記憶體: {memory_gb:.1f}GB)")
+        else:
+            # 如果 WorkerPool 沒有硬體檢測，使用預設值
+            hardware_tier = '中等性能'
+            logger.warning("⚠️ WorkerPool未提供硬體資訊，使用預設等級: 中等性能")
+        
+        # 根據硬體等級生成Pipeline專用的適應性參數
+        self.adaptive_params = self._generate_pipeline_adaptive_params(hardware_tier)
+        logger.info(f"📊 Pipeline適應性參數: {self.adaptive_params}")
         
         # Timeline調試工具
-        logger.info("� 步驟 3/4: ⚙️ 初始化Timeline調試工具與性能監控...")
+        logger.info("📋 步驟 3/4: ⚙️ 初始化Timeline調試工具與性能監控...")
         self.timeline_debugger = TimelineLogger()
         
-        # Queue配置（使用適應性參數）
+        # 🎯 整合架構：直接使用ThreadPoolExecutor，移除INPUT_QUEUE
+        logger.info("📋 步驟 4/4: 🎯 整合架構初始化 - 直接使用ThreadPoolExecutor...")
         max_queue_size = self.adaptive_params["max_queue_size"]
-        logger.info(f"🔧 配置Queue - 最大大小: {max_queue_size}")
-        self.input_queue = Queue(maxsize=max_queue_size)
+        logger.info(f"🔧 整合模式: 直接提交到ThreadPoolExecutor，只使用OUTPUT_QUEUE")
+        logger.info(f"🔧 配置OUTPUT_QUEUE - 最大大小: {max_queue_size}")
+        
         self.output_queue = Queue(maxsize=max_queue_size)
         self.running = False
-        logger.info("✅ Input/Output Queue 創建完成")
+        
+        # 🎯 整合架構：初始化專用的ThreadPoolExecutor
+        from concurrent.futures import ThreadPoolExecutor
+        max_workers = min(4, os.cpu_count() or 4)  # 預設4個worker或CPU核心數
+        self.thread_pool = ThreadPoolExecutor(
+            max_workers=max_workers,
+            thread_name_prefix="Pipeline-Direct"
+        )
+        logger.info(f"🚀 Pipeline專用ThreadPoolExecutor已創建：{max_workers}個worker")
+        
+        logger.info("✅ 整合架構Queue創建完成")
         
         # 性能監控變數
         self.pipeline_frame_counter = 0
@@ -151,37 +168,39 @@ class BasePipeline(ABC):
         pass
     
     def _generate_pipeline_adaptive_params(self, hardware_tier):
-        """根據硬體等級生成Pipeline專用的適應性參數"""
+        """根據硬體等級生成Pipeline專用的適應性參數 - 簡化版"""
         params_map = {
-            "EXTREME": {
-                "max_queue_size": 100,
-                "fps_check_interval": 50,
-                "batch_timeout": 0.001,
-                "queue_high_watermark": 80,
-                "queue_low_watermark": 60
-            },
-            "HIGH": {
+            "高性能": {
                 "max_queue_size": 80,
                 "fps_check_interval": 35,
                 "batch_timeout": 0.002,
                 "queue_high_watermark": 70,
                 "queue_low_watermark": 50
             },
-            "MEDIUM": {
+            "中等性能": {
                 "max_queue_size": 60,
                 "fps_check_interval": 25,
                 "batch_timeout": 0.005,
                 "queue_high_watermark": 60,
                 "queue_low_watermark": 40
             },
-            "LOW": {
+            "基本性能": {
                 "max_queue_size": 40,
                 "fps_check_interval": 15,
                 "batch_timeout": 0.01,
                 "queue_high_watermark": 50,
                 "queue_low_watermark": 30
+            },
+            "未知": {
+                "max_queue_size": 50,
+                "fps_check_interval": 20,
+                "batch_timeout": 0.008,
+                "queue_high_watermark": 55,
+                "queue_low_watermark": 35
             }
         }
+        
+        return params_map.get(hardware_tier, params_map["中等性能"])
         return params_map.get(hardware_tier, params_map["MEDIUM"])
     
     def _signal_handler(self, signum, frame):
@@ -204,29 +223,64 @@ class BasePipeline(ABC):
         self.timeline_thread.start()
     
     def _update_timeline_states(self):
-        """更新時間軸狀態信息"""
+        """更新時間軸狀態信息 - 整合架構版"""
         try:
-            # 更新Queue狀態
+            # 🎯 整合架構：監控ThreadPoolExecutor work_queue
+            thread_pool_queue_size = 0
+            if hasattr(self, 'thread_pool') and self.thread_pool is not None:
+                if hasattr(self.thread_pool, '_work_queue'):
+                    thread_pool_queue_size = self.thread_pool._work_queue.qsize()
+            
+            # 更新Queue狀態 - 使用ThreadPool work_queue作為input_size
             self.timeline_debugger.update_queue_states(
-                input_size=self.input_queue.qsize(),
+                input_size=thread_pool_queue_size,  # 🎯 監控真實的任務隊列
                 output_size=self.output_queue.qsize()
             )
             
-            # 更新Worker狀態
-            if hasattr(self.worker_pool, 'workers'):
-                for i, worker in enumerate(getattr(self.worker_pool, 'workers', [])):
-                    worker_id = f"W{i+1}"
-                    is_active = getattr(worker, 'is_busy', False) or getattr(worker, 'active', False)
-                    task_count = getattr(worker, 'task_count', 0)
-                    self.timeline_debugger.update_worker_state(worker_id, active=is_active, task_count=task_count)
-            elif hasattr(self.worker_pool, 'active_workers') and hasattr(self.worker_pool, 'num_workers'):
-                active_workers = getattr(self.worker_pool, 'active_workers', 0)
-                total_workers = getattr(self.worker_pool, 'num_workers', 1)
+            # 增強版Worker狀態追蹤 - 支援ThreadPoolExecutor
+            if hasattr(self.worker_pool, 'executor') and self.worker_pool.executor is not None:
+                executor = self.worker_pool.executor
+                max_workers = self.worker_pool.worker_pool_config.max_workers
                 
-                for i in range(total_workers):
+                # 獲取詳細的執行狀態
+                pending_tasks = getattr(self.worker_pool, 'pending_tasks', 0)
+                
+                # 檢查ThreadPoolExecutor內部工作隊列
+                internal_queue_size = 0
+                if hasattr(executor, '_work_queue'):
+                    internal_queue_size = executor._work_queue.qsize()
+                
+                # 檢查活躍線程數量
+                active_threads = 0
+                if hasattr(executor, '_threads'):
+                    active_threads = len([t for t in executor._threads if t.is_alive()])
+                
+                # 估算活躍Worker數量
+                # 活躍 = min(pending_tasks + internal_queue_size, max_workers)
+                total_workload = pending_tasks + internal_queue_size
+                estimated_active = min(total_workload, max_workers) if total_workload > 0 else 0
+                
+                # 更新每個Worker的狀態
+                for i in range(max_workers):
                     worker_id = f"W{i+1}"
-                    is_active = i < active_workers
-                    self.timeline_debugger.update_worker_state(worker_id, active=is_active)
+                    is_active = i < estimated_active
+                    task_count = 1 if is_active else 0
+                    self.timeline_debugger.update_worker_state(worker_id, active=is_active, task_count=task_count)
+                
+                # 記錄詳細的Worker狀態調試信息
+                logger.debug(f"[ENHANCED-WORKER-TRACKING] "
+                           f"pending_tasks={pending_tasks}, "
+                           f"internal_queue={internal_queue_size}, "
+                           f"active_threads={active_threads}/{max_workers}, "
+                           f"estimated_active={estimated_active}")
+            
+            elif hasattr(self.worker_pool, 'worker_pool_config'):
+                # 如果ThreadPoolExecutor尚未啟動，創建空白Worker狀態
+                max_workers = self.worker_pool.worker_pool_config.max_workers
+                for i in range(max_workers):
+                    worker_id = f"W{i+1}"
+                    self.timeline_debugger.update_worker_state(worker_id, active=False, task_count=0)
+                logger.debug(f"[WORKER-TRACKING] ThreadPoolExecutor未啟動，設置{max_workers}個Worker為非活躍狀態")
             
         except Exception as e:
             logger.debug(f"Timeline state update error: {e}")
@@ -238,15 +292,28 @@ class BasePipeline(ABC):
         logger.info("🚀 開始執行")
         self._start_timeline_logging()
         
-        logger.info(f"📊 Pipeline啟動前佇列狀態: input_queue={self.input_queue.qsize()}, output_queue={self.output_queue.qsize()}")
+        logger.info(f"📊 Pipeline啟動前佇列狀態: 整合架構 - 直接使用ThreadPoolExecutor，output_queue={self.output_queue.qsize()}")
         def result_handler(result):
             if result is not None:
                 try:
-                    # 添加詳細的put操作日誌
-                    queue_size_before = self.output_queue.qsize()
-                    self.output_queue.put(result, timeout=1.0)
-                    queue_size_after = self.output_queue.qsize()
-                    logger.info(f"📤 [OUTPUT_QUEUE_PUT] 成功加入結果 當前大小: {queue_size_before}→{queue_size_after}/{self.output_queue.maxsize}")
+                    # 🔍 檢查結果是否是多個對象的容器
+                    if isinstance(result, (list, tuple)):
+                        for idx, item in enumerate(result):
+                            queue_size_before = self.output_queue.qsize()
+                            self.output_queue.put(item, timeout=1.0)
+                            queue_size_after = self.output_queue.qsize()
+                            
+                    elif hasattr(result, '__iter__') and not isinstance(result, (str, bytes)):
+                        for idx, item in enumerate(result):
+                            queue_size_before = self.output_queue.qsize()
+                            self.output_queue.put(item, timeout=1.0)
+                            queue_size_after = self.output_queue.qsize()
+                            
+                    else:
+                        # 單一結果
+                        queue_size_before = self.output_queue.qsize()
+                        self.output_queue.put(result, timeout=1.0)
+                        queue_size_after = self.output_queue.qsize()
 
                     self.timeline_debugger.update_consumer_state(active=True)
 
@@ -259,25 +326,23 @@ class BasePipeline(ABC):
         self.consumer.start()
 
         producer_thread = threading.Thread(target=self._producer_loop, daemon=True)
-        worker_thread = threading.Thread(target=self._worker_loop, daemon=True)
+        # 🎯 整合架構：不再需要worker_thread，ThreadPoolExecutor直接處理
+        # worker_thread = threading.Thread(target=self._worker_loop, daemon=True)  
         consumer_thread = threading.Thread(target=self._consumer_loop, daemon=True)
-        worker_thread.start()
+
         producer_thread.start() 
         consumer_thread.start()
         
         try:
             producer_thread.join()
-            logger.info("✅ Producer執行緒已完成")
-            
+
             # 模式特定的完成處理
             logger.info(f"🏁 執行{self.__class__.__name__}完成處理...")
             self._handle_completion()
-            
-            logger.info("⏳ 等待Consumer執行緒完成...")
             consumer_thread.join()
-            logger.info("✅ Consumer執行緒已完成")
-            
-            logger.info("🛑 停止Consumer顯示...")
+
+            logger.info("✅ 執行緒已完成")
+            logger.info("🛑 停止顯示...")
             self.consumer.stop()
             
             # 打印最終時間軸摘要
@@ -293,12 +358,31 @@ class BasePipeline(ABC):
                 if line.strip():  # 只輸出非空行
                     logger.info(f"📊 {line}")
             
+            # 輸出流控統計摘要
+            flow_stats = self.timeline_debugger.get_flow_control_summary()
+            logger.info("🚦 ============== 智能流控統計摘要 ==============")
+            logger.info(f"🚦 流控事件總數: {flow_stats['throttle_events']}")
+            logger.info(f"🚦 流控頻率: {flow_stats['throttle_rate_per_minute']:.1f} 次/分鐘")
+            logger.info(f"🚦 總流控時間: {flow_stats['total_throttle_time']:.2f} 秒")
+            logger.info(f"🚦 流控時間占比: {flow_stats['throttle_time_percentage']:.2f}%")
+            logger.info(f"🚦 最大ThreadPool利用率: {flow_stats['max_input_queue']}")
+            logger.info(f"🚦 Queue滿載次數: {flow_stats['queue_full_events']}")
+            logger.info(f"🚦 總運行時間: {flow_stats['runtime']:.2f} 秒")
+            logger.info("🚦 =============================================")
+            
         except Exception as e:
             logger.error(f"❌ PIPELINE_RUN: Error during execution: {e}")
         finally:
             logger.info("🧹 執行清理程序...")
             self.running = False
             self.worker_pool.stop()
+            
+            # 🎯 整合架構：清理專用ThreadPoolExecutor
+            if hasattr(self, 'thread_pool') and self.thread_pool is not None:
+                logger.info("🧹 關閉Pipeline專用ThreadPoolExecutor...")
+                self.thread_pool.shutdown(wait=True)
+                logger.info("✅ ThreadPoolExecutor已關閉")
+                
             if hasattr(self, 'timeline_thread'):
                 self.timeline_thread.join(timeout=1.0)
             logger.info("✅ Pipeline執行完成!")
@@ -307,11 +391,6 @@ class BasePipeline(ABC):
     @abstractmethod
     def _producer_loop(self):
         """Producer邏輯（子類實現）"""
-        pass
-    
-    @abstractmethod
-    def _worker_loop(self):
-        """Worker邏輯（子類實現）"""
         pass
     
     @abstractmethod
@@ -325,11 +404,18 @@ class BasePipeline(ABC):
         pass
     
     def _collect_recent_performance_metrics(self):
-        """收集最近的性能指標用於適應性調整"""
+        """收集最近的性能指標用於適應性調整 - 整合架構版"""
         current_time = time.time()
         
-        # 收集隊列狀態
-        input_queue_utilization = self.input_queue.qsize() / self.input_queue.maxsize
+        # 🎯 整合架構：收集ThreadPoolExecutor隊列狀態
+        thread_pool_utilization = 0.0
+        if hasattr(self, 'thread_pool') and self.thread_pool is not None:
+            if hasattr(self.thread_pool, '_work_queue') and hasattr(self.thread_pool, '_max_workers'):
+                work_queue_size = self.thread_pool._work_queue.qsize()
+                max_workers = self.thread_pool._max_workers
+                # 以工作線程的10倍作為滿載基準
+                thread_pool_utilization = work_queue_size / (max_workers * 10.0)
+                
         output_queue_utilization = self.output_queue.qsize() / self.output_queue.maxsize
         
         # 收集worker狀態
@@ -349,10 +435,10 @@ class BasePipeline(ABC):
         self.last_fps_calculation_time = current_time
         self.last_frame_count = self.pipeline_frame_counter
         
-        # 記錄性能數據
+        # 記錄性能數據 - 整合架構版
         performance_metrics = {
             'timestamp': current_time,
-            'input_queue_util': input_queue_utilization,
+            'thread_pool_util': thread_pool_utilization,  # 🎯 使用ThreadPoolExecutor利用率
             'output_queue_util': output_queue_utilization,
             'worker_utilization': worker_utilization,
             'current_fps': current_fps,
@@ -397,7 +483,7 @@ class VideoPipeline(BasePipeline):
         logger.info("✅ Pipeline初始化完成")
     
     def _producer_loop(self):
-        """Video模式Producer - 確保無丟幀"""
+        """Video模式Producer - 智能流控確保無丟幀"""
         frame_count = 0
         last_adjustment_time = time.time()
         batch_timeout = self.adaptive_params["batch_timeout"]
@@ -412,13 +498,25 @@ class VideoPipeline(BasePipeline):
                     logger.warning("⚠️ Producer收到停止信號，中斷幀讀取")
                     break
                 
+                # 🎯 智能流控：檢查系統處理能力
+                if self._should_throttle_reading():
+                    throttle_wait = self._calculate_throttle_delay()
+                    logger.debug(f"🐌 [FLOW-CONTROL] WorkerPool負載過高，暫停讀取 {throttle_wait*1000:.0f}ms")
+                    
+                    # 記錄流控事件到Timeline
+                    self.timeline_debugger.record_throttle_event(throttle_wait)
+                    
+                    time.sleep(throttle_wait)
+                    continue
+                
                 frame_buffer.append(frame)
                 frame_count += 1
 
-                # 批次處理並預載
+                # 批次處理並預載 - 使用智能流控
                 if len(frame_buffer) >= self.preload_batch_size:
-                    logger.debug(f"📦 執行批次處理: {len(frame_buffer)} 幀")
-                    self._process_frame_batch_video(frame_buffer, batch_timeout)
+                    logger.debug(f"📦 執行智能批次處理: {len(frame_buffer)} 幀")
+                    success_count = self._process_frame_batch_with_flow_control(frame_buffer, batch_timeout)
+                    logger.debug(f"📦 批次處理完成: {success_count}/{len(frame_buffer)} 幀成功放入隊列")
                     frame_buffer = []
                 
                 # 更新Producer狀態
@@ -430,15 +528,16 @@ class VideoPipeline(BasePipeline):
                 if current_time - last_adjustment_time > self.pipeline_fps_check_interval:
                     metrics = self._collect_recent_performance_metrics()
                     logger.debug(f"📊 性能指標更新: FPS={metrics['current_fps']:.2f}, "
-                               f"Input Queue={metrics['input_queue_util']:.2f}, "
+                               f"Thread Pool={metrics['thread_pool_util']:.2f}, "
                                f"Worker利用率={metrics['worker_utilization']:.2f}")
                     self._adjust_parameters_if_needed(metrics)
                     last_adjustment_time = current_time
             
-            # 處理剩餘frames
+            # 處理剩餘frames - 使用智能流控
             if frame_buffer:
                 logger.info(f"📦 處理剩餘的 {len(frame_buffer)} 幀")
-                self._process_frame_batch_video(frame_buffer, batch_timeout)
+                success_count = self._process_frame_batch_with_flow_control(frame_buffer, batch_timeout)
+                logger.info(f"📦 最終批次處理完成: {success_count}/{len(frame_buffer)} 幀成功放入隊列")
             
         except StopIteration:
             logger.info("🏁 Producer迭代完成 (StopIteration)")
@@ -450,52 +549,138 @@ class VideoPipeline(BasePipeline):
             logger.info(f"✅ VIDEO PRODUCER 完成: 總共處理 {frame_count} 幀")
     
     def _process_frame_batch_video(self, frame_batch, timeout):
-        """處理Video模式的frame批次"""
-        for i, frame in enumerate(frame_batch):
-            try:
-                # 添加詳細的put操作日誌
-                queue_size_before = self.input_queue.qsize()
-                self.input_queue.put(frame, timeout=timeout)
-                queue_size_after = self.input_queue.qsize()
-                logger.info(f"📥 [INPUT_QUEUE_PUT] 成功加入幀 #{i+1}/{len(frame_batch)}，當前大小: {queue_size_before}→{queue_size_after}/{self.input_queue.maxsize}")
-                
-            except Exception as e:
-                logger.warning(f"⚠️ [INPUT_QUEUE_PUT] Video模式幀put超時: maxsize={self.input_queue.maxsize}, timeout={timeout}s")
-                # Video模式重試機制
-                time.sleep(0.01)
-                try:
-                    retry_queue_size = self.input_queue.qsize()
-                    logger.info(f"🔄 [INPUT_QUEUE_PUT] 重試加入幀，當前大小: {retry_queue_size}/{self.input_queue.maxsize}")
-                    self.input_queue.put(frame, timeout=timeout * 2)
-                    logger.info(f"✅ [INPUT_QUEUE_PUT] 重試成功")
-                except Exception as retry_e:
-                    logger.error(f"❌ [INPUT_QUEUE_PUT] Video模式重試失敗: {str(retry_e)}")
-    
-    def _worker_loop(self):
-        """Video模式Worker - 硬體適應性"""
-        processed_count = 0
-        
-        while self.running or not self.input_queue.empty():
-            try:
-                queue_size_before = self.input_queue.qsize()
-                frame = self.input_queue.get(timeout=1.0)
-                queue_size_after = self.input_queue.qsize()
-                logger.info(f"📥 [INPUT_QUEUE_GET] 取得幀({queue_size_before}→{queue_size_after}/{self.input_queue.maxsize}), 提交第 {processed_count + 1} 個任務到WorkerPool")
-                
-                if frame is None:
-                    logger.info("⚠️ Worker收到終止信號 (None frame)")
-                    break
-                self.worker_pool.submit(frame)
-                processed_count += 1
+        """🎯 整合架構：Video模式統一使用流控批次處理"""
+        # 使用整合架構的流控方法處理所有frame批次
+        return self._process_frame_batch_with_flow_control(frame_batch, timeout)
 
-            except Exception as e:
-                logger.info(f"📥 [INPUT_QUEUE_GET] Queue為空，等待超時")
-                if self.producer_finished and self.input_queue.empty():
-                    logger.info("🏁 Producer已完成且Queue為空，Worker準備結束")
-                    break
-                logger.debug(f"⚠️ Worker超時等待: {e}")
+    def _should_throttle_reading(self):
+        """🎯 智能流控：檢查是否應該放慢讀取速度 - 整合架構監控ThreadPoolExecutor"""
+        try:
+            # 🎯 整合架構：直接監控ThreadPoolExecutor
+            
+            # 1. 檢查ThreadPoolExecutor的work_queue
+            if hasattr(self, 'thread_pool') and self.thread_pool is not None:
+                if hasattr(self.thread_pool, '_work_queue'):
+                    work_queue_size = self.thread_pool._work_queue.qsize()
+                    max_workers = self.thread_pool._max_workers if hasattr(self.thread_pool, '_max_workers') else 2
+                    
+                    # 閾值：10倍於worker數量
+                    work_queue_threshold = max_workers * 10
+                    if work_queue_size > work_queue_threshold:
+                        logger.debug(f"🐌 [THROTTLE] ThreadPool work_queue過載: {work_queue_size} > {work_queue_threshold}")
+                        return True
+            
+            # 2. 檢查WorkerPool的pending任務
+            if hasattr(self.worker_pool, 'executor') and self.worker_pool.executor is not None:
+                executor = self.worker_pool.executor
+                pending_tasks = getattr(self.worker_pool, 'pending_tasks', 0)
+                max_workers = getattr(self.worker_pool.worker_pool_config, 'max_workers', 2)
+                
+                # 如果pending任務超過worker數量的15倍，則需要流控
+                max_pending_threshold = max_workers * 15
+                if pending_tasks > max_pending_threshold:
+                    logger.debug(f"🐌 [THROTTLE] WorkerPool過載: pending_tasks={pending_tasks} > {max_pending_threshold}")
+                    return True
+            
+            return False
+            
+        except Exception as e:
+            logger.debug(f"⚠️ [THROTTLE] 檢查流控狀態時發生錯誤: {e}")
+            return False
+    
+    def _calculate_throttle_delay(self):
+        """🎯 計算流控延遲時間 - 整合架構基於ThreadPoolExecutor負載"""
+        try:
+            # 基礎延遲：50ms
+            base_delay = 0.05
+            
+            # 🎯 整合架構：根據ThreadPoolExecutor work_queue負載調整
+            work_queue_multiplier = 1.0
+            if hasattr(self, 'thread_pool') and self.thread_pool is not None:
+                if hasattr(self.thread_pool, '_work_queue'):
+                    work_queue_size = self.thread_pool._work_queue.qsize()
+                    max_workers = self.thread_pool._max_workers if hasattr(self.thread_pool, '_max_workers') else 2
+                    
+                    # 工作隊列負載：正常化到0-1
+                    work_load = work_queue_size / max(max_workers * 10.0, 1)  # 10倍worker為滿載
+                    work_queue_multiplier = 1.0 + work_load * 2.0  # 最多3倍基礎延遲
+            
+            # 根據WorkerPool負載調整
+            worker_multiplier = 1.0
+            if hasattr(self.worker_pool, 'pending_tasks'):
+                pending_tasks = getattr(self.worker_pool, 'pending_tasks', 0)
+                max_workers = getattr(self.worker_pool.worker_pool_config, 'max_workers', 2)
+                if max_workers > 0:
+                    worker_load = pending_tasks / (max_workers * 10.0)  # 正常化到0-1
+                    worker_multiplier = 1.0 + min(worker_load * 3.0, 3.0)  # 最多4倍
+            
+            # 計算最終延遲
+            final_delay = base_delay * work_queue_multiplier * worker_multiplier
+            return min(final_delay, 1.0)  # 最長1秒延遲
+            
+        except Exception as e:
+            logger.debug(f"⚠️ [THROTTLE] 計算延遲時發生錯誤: {e}")
+            return 0.1  # 預設100ms延遲
+
+    def _process_frame_task(self, frame):
+        """🎯 整合架構：ThreadPoolExecutor執行的任務方法"""
+        try:
+            # 🎯 關鍵修正：直接獲取Future結果，而非嵌套Future
+            future = self.worker_pool.submit(frame)
+            
+            if future is None:
+                # 背壓控制丟棄了任務
+                logger.warning(f"⚠️ [TASK_DROPPED] 任務被背壓控制丟棄")
+                return None
+                
+            # 等待WorkerPool任務完成並獲取結果
+            result = future.result(timeout=self.worker_pool.processor_config.inference_timeout)
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ [TASK_ERROR] ThreadPoolExecutor任務處理失敗: {e}")
+            return None
+
+    def _process_frame_batch_with_flow_control(self, frame_batch, timeout):
+        """🎯 使用流控機制處理frame批次 - 整合架構直接提交到ThreadPoolExecutor"""
+        success_count = 0
         
-        logger.info(f"✅ VIDEO WORKER 完成: 總共處理 {processed_count} 幀")
+        for i, frame in enumerate(frame_batch):
+            # 在每個幀處理前檢查流控
+            if self._should_throttle_reading():
+                throttle_wait = self._calculate_throttle_delay()
+                logger.debug(f"🐌 [BATCH-THROTTLE] 第{i+1}幀前暫停 {throttle_wait*1000:.0f}ms")
+                
+                # 記錄流控事件
+                self.timeline_debugger.record_throttle_event(throttle_wait)
+                
+                time.sleep(throttle_wait)
+            
+            try:
+                # 提取frame_id用於日誌顯示
+                frame_id = frame.get('frame_id', i) if isinstance(frame, dict) else i
+                
+                # 🎯 整合架構：直接提交到ThreadPoolExecutor
+                work_queue_size_before = self.thread_pool._work_queue.qsize() if hasattr(self.thread_pool, '_work_queue') else 0
+                
+                # 直接提交任務到ThreadPoolExecutor
+                future = self.thread_pool.submit(self._process_frame_task, frame)
+                
+                work_queue_size_after = self.thread_pool._work_queue.qsize() if hasattr(self.thread_pool, '_work_queue') else 0
+                success_count += 1
+
+                logger.info(f"� [PIPELINE] 提交幀 #{frame_id} 到ThreadPool，work_queue: {work_queue_size_before}→{work_queue_size_after}")
+
+                # 智能流控：如果ThreadPoolExecutor的work_queue太多任務，暫停一下
+                if work_queue_size_after > 50:  # 閾值設為50個待處理任務
+                    time.sleep(0.02)  # 20ms微暫停
+                    
+            except Exception as e:
+                frame_id = frame.get('frame_id', i) if isinstance(frame, dict) else i
+                logger.error(f"❌ [DIRECT_SUBMIT] 提交幀 #{frame_id} 失敗: {e}")
+                break
+                
+        return success_count
     
     def _consumer_loop(self):
         """Video模式Consumer - 完整顯示"""
@@ -514,9 +699,7 @@ class VideoPipeline(BasePipeline):
 
                 # 調用consumer的consume方法處理結果
                 try:
-                    logger.info(f"📤 [OUTPUT_QUEUE_GET] Consume")
                     self.consumer.consume(result)
-                    logger.info(f"📤 [OUTPUT_QUEUE_GET] Consumed")
                 except Exception as e:
                     logger.error(f"❌ [CONSUMER_PROCESS] Consumer處理第 {consumed_count + 1} 個結果時出錯: {e}")
                     
@@ -527,14 +710,14 @@ class VideoPipeline(BasePipeline):
                     output_size = self.output_queue.qsize()
                     logger.info(f"🖥️ Video Consumer狀態: 已消費 {consumed_count} 個結果，Output Queue: {output_size}")
                 
-                # 更新Consumer狀態
+                # 更新Consumer狀態 - 使用Consumer的實際顯示幀數
+                consumer_frame_count = getattr(self.consumer.stats, 'total_displayed', consumed_count) if hasattr(self.consumer, 'stats') and self.consumer.stats else consumed_count
                 self.timeline_debugger.update_consumer_state(
                     active=True, 
-                    frame_count=self.pipeline_frame_counter
+                    frame_count=consumer_frame_count
                 )
                 
             except Exception as e:
-                logger.info(f"📤 [OUTPUT_QUEUE_GET] Queue為空，等待超時")
                 if self.producer_finished and self.output_queue.empty():
                     logger.info("🏁 Producer已完成且Output Queue為空，Consumer準備結束")
                     break
@@ -543,18 +726,27 @@ class VideoPipeline(BasePipeline):
         logger.info(f"✅ VIDEO CONSUMER 完成: 總共消費 {consumed_count} 個結果")
 
     def _handle_completion(self):
-        """Video模式完成處理 - 等待完整"""
-        # 等待所有frames被處理完畢
+        """Video模式完成處理 - 整合架構等待完整"""
+        # 🎯 整合架構：等待ThreadPoolExecutor和OUTPUT_QUEUE清空
         wait_start_time = time.time()
-        while not self.input_queue.empty() or not self.output_queue.empty():
-            input_size = self.input_queue.qsize()
+        while not self.output_queue.empty():
+            # 檢查ThreadPoolExecutor是否有待處理任務
+            thread_pool_queue_size = 0
+            if hasattr(self, 'thread_pool') and self.thread_pool is not None:
+                if hasattr(self.thread_pool, '_work_queue'):
+                    thread_pool_queue_size = self.thread_pool._work_queue.qsize()
+                    
             output_size = self.output_queue.qsize()
-            logger.debug(f"⏳ 等待隊列清空... Input: {input_size}, Output: {output_size}")
+            logger.debug(f"⏳ 等待隊列清空... ThreadPool work_queue: {thread_pool_queue_size}, Output: {output_size}")
             time.sleep(0.1)
             
             # 避免無限等待
             if time.time() - wait_start_time > 30:  # 30秒超時
                 logger.warning("⚠️ 等待隊列清空超時，強制結束")
+                break
+                
+            # 如果ThreadPool和OUTPUT_QUEUE都空了就結束
+            if thread_pool_queue_size == 0 and output_size == 0:
                 break
         
         # 停止WorkerPool並等待完成
@@ -567,7 +759,7 @@ class VideoPipeline(BasePipeline):
             return
         
         recent_metrics = self.performance_history[-5:]
-        avg_input_util = sum(m['input_queue_util'] for m in recent_metrics) / len(recent_metrics)
+        avg_thread_pool_util = sum(m['thread_pool_util'] for m in recent_metrics) / len(recent_metrics)
         
         high_watermark = self.adaptive_params["queue_high_watermark"] / 100.0
         low_watermark = self.adaptive_params["queue_low_watermark"] / 100.0
@@ -645,26 +837,26 @@ class CameraPipeline(BasePipeline):
                 else:
                     self.consecutive_drops = 0
                 
-                # 嘗試非阻塞put - 添加詳細日誌
+                # 🎯 整合架構：Camera模式直接提交到ThreadPoolExecutor
                 try:
-                    queue_size_before = self.input_queue.qsize()
-                    logger.info(f"📥 [INPUT_QUEUE_PUT_NOWAIT] Camera準備加入幀 #{frame_count + 1}，當前大小: {queue_size_before}/{self.input_queue.maxsize}")
+                    work_queue_size_before = self.thread_pool._work_queue.qsize() if hasattr(self.thread_pool, '_work_queue') else 0
+                    logger.info(f"� [CAMERA_DIRECT_SUBMIT] Camera準備直接提交幀 #{frame_count + 1}，ThreadPool work_queue: {work_queue_size_before}")
                     
-                    self.input_queue.put_nowait(frame)
+                    # 直接提交任務到ThreadPoolExecutor
+                    future = self.thread_pool.submit(self._process_frame_task, frame)
                     
-                    queue_size_after = self.input_queue.qsize()
+                    work_queue_size_after = self.thread_pool._work_queue.qsize() if hasattr(self.thread_pool, '_work_queue') else 0
                     frame_count += 1
-                    logger.info(f"� [INPUT_QUEUE_PUT_NOWAIT] Camera成功加入幀 {queue_size_before}→{queue_size_after}")
-                except:
-                    # 隊列滿時丟幀
+                    logger.info(f"✅ [CAMERA_DIRECT_SUBMIT] Camera成功提交幀 work_queue: {work_queue_size_before}→{work_queue_size_after}")
+                except Exception as e:
+                    # 提交失敗時丟幀
                     dropped_frames += 1
-                    current_size = self.input_queue.qsize()
-                    logger.warning(f"🗑️ [INPUT_QUEUE_PUT_NOWAIT] Camera Queue滿載丟幀: 第 {dropped_frames} 幀 (當前: {current_size}/{self.input_queue.maxsize})")
+                    logger.warning(f"🗑️ [CAMERA_DIRECT_SUBMIT] Camera提交失敗丟幀: 第 {dropped_frames} 幀 - {e}")
                 
                 if (frame_count + dropped_frames) % 100 == 0:  # 每100幀記錄一次
                     drop_rate = dropped_frames / (frame_count + dropped_frames) * 100
-                    input_size = self.input_queue.qsize()
-                    logger.info(f"📊 Camera Producer狀態: 處理 {frame_count} 幀, 丟幀 {dropped_frames} ({drop_rate:.1f}%), Queue: {input_size}")
+                    work_queue_size = self.thread_pool._work_queue.qsize() if hasattr(self.thread_pool, '_work_queue') else 0
+                    logger.info(f"📊 Camera Producer狀態: 處理 {frame_count} 幀, 丟幀 {dropped_frames} ({drop_rate:.1f}%), ThreadPool work_queue: {work_queue_size}")
                 
                 # 更新Producer狀態
                 self.producer_last_activity = time.time()
@@ -686,13 +878,20 @@ class CameraPipeline(BasePipeline):
         if not self.frame_drop_enabled:
             return False
         
-        # 檢查隊列壓力
-        input_util = self.input_queue.qsize() / self.input_queue.maxsize
+        # 🎯 整合架構：檢查ThreadPoolExecutor和OUTPUT_QUEUE壓力
+        thread_pool_util = 0.0
+        if hasattr(self, 'thread_pool') and self.thread_pool is not None:
+            if hasattr(self.thread_pool, '_work_queue') and hasattr(self.thread_pool, '_max_workers'):
+                work_queue_size = self.thread_pool._work_queue.qsize()
+                max_workers = self.thread_pool._max_workers
+                # 以5倍worker數量作為滿載基準
+                thread_pool_util = work_queue_size / (max_workers * 5.0)
+                
         output_util = self.output_queue.qsize() / self.output_queue.maxsize
         
         # 背壓條件
-        if input_util > self.backpressure_threshold or output_util > self.backpressure_threshold:
-            logger.debug(f"🔴 背壓檢測觸發: Input={input_util:.2f}, Output={output_util:.2f}, 閾值={self.backpressure_threshold:.2f}")
+        if thread_pool_util > self.backpressure_threshold or output_util > self.backpressure_threshold:
+            logger.debug(f"🔴 背壓檢測觸發: ThreadPool={thread_pool_util:.2f}, Output={output_util:.2f}, 閾值={self.backpressure_threshold:.2f}")
             return True
         
         # 連續丟幀限制
@@ -701,45 +900,6 @@ class CameraPipeline(BasePipeline):
             return False
         
         return False
-    
-    def _worker_loop(self):
-        """Camera模式Worker - 背壓檢測"""
-        logger.info("⚙️ ===== CAMERA WORKER 啟動 =====")
-        logger.info("📝 Camera Worker策略: 背壓檢測，快速響應")
-        
-        processed_count = 0
-        
-        while self.running or not self.input_queue.empty():
-            try:
-                # 添加詳細的get操作日誌
-                queue_size_before = self.input_queue.qsize()
-                logger.info(f"📥 [INPUT_QUEUE_GET] Camera準備取得幀，當前大小: {queue_size_before}")
-                
-                frame = self.input_queue.get(timeout=0.5)  # 更短超時
-                
-                queue_size_after = self.input_queue.qsize()
-                logger.info(f"📥 [INPUT_QUEUE_GET] Camera成功取得幀 {queue_size_before}→{queue_size_after}")
-                
-                if frame is None:
-                    logger.info("⚠️ Camera Worker收到終止信號")
-                    break
-                
-                # 提交給WorkerPool處理
-                logger.info(f"⚙️ [WORKER_SUBMIT] Camera Worker處理第 {processed_count + 1} 幀")
-                self.worker_pool.submit(frame)
-                processed_count += 1
-                
-                if processed_count % 30 == 0:  # Camera模式更頻繁記錄
-                    input_size = self.input_queue.qsize()
-                    logger.info(f"⚙️ Camera Worker狀態: 已處理 {processed_count} 幀，Input Queue: {input_size}")
-                
-            except Exception as e:
-                logger.info(f"📥 [INPUT_QUEUE_GET] Camera Queue為空，等待超時")
-                if self.producer_finished and self.input_queue.empty():
-                    break
-                logger.debug(f"⚠️ Camera Worker短超時: {e}")
-        
-        logger.info(f"✅ CAMERA WORKER 完成: 總共處理 {processed_count} 幀")
     
     def _consumer_loop(self):
         """Camera模式Consumer - 智能丟幀"""
@@ -780,10 +940,11 @@ class CameraPipeline(BasePipeline):
                     self.pipeline_frame_counter += 1
                     consumed_count += 1
                     
-                    # 更新Consumer狀態
+                    # 更新Consumer狀態 - 使用Consumer的實際顯示幀數
+                    consumer_frame_count = getattr(self.consumer.stats, 'total_displayed', consumed_count) if hasattr(self.consumer, 'stats') and self.consumer.stats else consumed_count
                     self.timeline_debugger.update_consumer_state(
                         active=True, 
-                        frame_count=self.pipeline_frame_counter
+                        frame_count=consumer_frame_count
                     )
                 else:
                     # 跳過此幀以維持實時性
@@ -811,10 +972,14 @@ class CameraPipeline(BasePipeline):
         logger.info("🏁 ===== CAMERA模式 完成處理 =====")
         logger.info("⚡ Camera模式策略: 快速停止，不等待所有幀完成")
         
-        # Camera模式快速停止，不等待所有幀處理完成
-        input_remaining = self.input_queue.qsize()
+        # 🎯 整合架構：Camera模式快速停止，檢查ThreadPoolExecutor和OUTPUT_QUEUE狀態
+        thread_pool_remaining = 0
+        if hasattr(self, 'thread_pool') and self.thread_pool is not None:
+            if hasattr(self.thread_pool, '_work_queue'):
+                thread_pool_remaining = self.thread_pool._work_queue.qsize()
+                
         output_remaining = self.output_queue.qsize()
-        logger.info(f"📊 停止時隊列狀態: Input Queue: {input_remaining}, Output Queue: {output_remaining}")
+        logger.info(f"📊 停止時隊列狀態: ThreadPool work_queue: {thread_pool_remaining}, Output Queue: {output_remaining}")
         
         logger.info("🛑 快速停止WorkerPool...")
         self.worker_pool.stop()
@@ -835,7 +1000,7 @@ class CameraPipeline(BasePipeline):
         self.components_capacity = {
             'producer_fps': metrics['current_fps'],
             'worker_utilization': metrics['worker_utilization'],
-            'queue_pressure': max(metrics['input_queue_util'], metrics['output_queue_util'])
+            'queue_pressure': max(metrics['thread_pool_util'], metrics['output_queue_util'])
         }
         
         logger.debug(f"🤝 能力協商更新: FPS={self.components_capacity['producer_fps']:.1f}, "

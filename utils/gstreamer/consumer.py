@@ -1,30 +1,39 @@
 """
 ================================================================================
-🖥️ Consumer 架構設計 2025.08.22
+🖥️ Consumer 架構設計 2025.08.23 (更新版)
 ================================================================================
 
 Consumer 採用單一職責原則設計，專責推論結果的顯示、輸出與性能監控。
-系統支援 Video（完整性優先）和 Camera（實時性優先）兩種模式差異化處理，並提供統一顯示介面與統計資料，不參與推論執行或結果處理邏輯。。
+系統支援 Video（完整性優先）和 Camera（實時性優先）兩種模式差異化處理，並提供統一顯示介面與統計資料。
 
-📊 資料流向：
-    YOLO Results ──> Consumer ──> Display Output
-                       │
-┌───────────────────────────────────────────────────────┐
-│ SafeResultHandler ──> result.plot() ──> SimpleBuffer  │
-└───────────────────────────────────────────────────────┘
-📊 架構組件：
+🆕 Frame ID 追蹤整合 (2025.08.23)：
+Consumer 現在能夠追蹤從 Producer 開始的完整 frame 生命周期，通過提取 original_frame_id 
+確保每個顯示的幀都能追溯到最初的 Producer 產生順序，完美配合多線程處理環境。
+
+📊 資料流向 (更新版)：
+    YOLO Results + Frame ID ──> Consumer ──> Display Output + Frame Tracking
+                                   │
+        ┌─────────────────────────────────────────────────────────────┐
+        │ SafeResultHandler ──> result.plot() ──> SimpleBuffer       │
+        │        ↓                                      ↓            │
+        │ Extract Frame ID ────────────────────> Attach Frame ID      │
+        └─────────────────────────────────────────────────────────────┘
+
+🎯 核心架構 (簡化版)：
 Consumer（主控制器）  
 ├── SafeResultHandler（核心：安全處理Generator並調用.plot()）  
-├── SimpleBuffer（緩衝區：Video/Camera差異化處理）  
+├── SimpleBuffer（緩衝區：Video/Camera差異化處理 + Frame ID保持）
+├── Frame ID 追蹤系統（提取、附加、顯示完整追蹤）🆕
 └── StatsCollector（統計：FPS監控與回調）
 
-📊 核心功能：
+📊 核心功能 (更新版)：
 ┌─────────────────┬──────────────────────────────┐
 │   功能類別      │ 說明內容                      │
 ├─────────────────┼──────────────────────────────┤
 │ ✅ Generator處理 │ 安全提取Generator，帶超時保護 │
 │ 🎨 自動渲染     │ 直接調用 result.plot() 方法   │
 │ 🖥️ 差異化緩衝   │ Video完整緩衝/Camera實時緩衝  │
+│ 🆕 Frame追蹤    │ Producer→Consumer完整ID追蹤  │
 │ 📊 統計監控     │ FPS、處理計數、錯誤統計       │
 │ 🔧 統一介面     │ start/stop/consume 統一模式   │
 └─────────────────┴──────────────────────────────┘
@@ -89,21 +98,16 @@ class SafeResultHandler:
             可顯示的幀（調用.plot()的結果），失敗時返回 None
         """
         try:
-            logger.info(f"🔍 [SAFE_HANDLER] 處理結果 #{self.processing_count + 1}，類型: {type(result)}")
-            
             if result is None:
                 logger.warning("⚠️ [SAFE_HANDLER] 收到 None 結果")
                 return None
             
             # 🔧 關鍵：安全處理 Generator
             if hasattr(result, '__iter__') and hasattr(result, '__next__'):
-                logger.info(f"🔍 [SAFE_HANDLER] 檢測到 Generator，開始安全提取...")
                 yolo_results = self._safe_extract_generator(result)
             elif hasattr(result, '__iter__') and not isinstance(result, (str, bytes)):
-                logger.info(f"🔍 [SAFE_HANDLER] 處理可迭代結果...")
                 yolo_results = list(result)
             else:
-                logger.info(f"🔍 [SAFE_HANDLER] 處理單一結果...")
                 yolo_results = [result]
             
             if not yolo_results:
@@ -112,13 +116,9 @@ class SafeResultHandler:
             
             # 🎨 核心：直接調用 .plot() 方法
             yolo_result = yolo_results[0]
-            logger.info(f"🎨 [SAFE_HANDLER] 調用 result.plot() 生成顯示幀...")
-            
             display_frame = yolo_result.plot(boxes=False)
             
             self.processing_count += 1
-            logger.info(f"✅ [SAFE_HANDLER] 成功處理第 {self.processing_count} 個結果")
-            
             return display_frame
             
         except Exception as e:
@@ -359,12 +359,14 @@ class Consumer:
         self._running = threading.Event()
         self._display_thread = None
         
+        # Frame ID 追蹤
+        self.displayed_frame_id = 0  # 已顯示的幀ID計數器
+        
         logger.info("✅ Consumer初始化完成!")
     
     def start(self, callback: Optional[Callable[[Dict[str, Any]], None]] = None):
         """統一啟動介面"""
         if self._display_thread is not None:
-            logger.warning("⚠️ [CONSUMER] 系統已在運行")
             return
         
         # 初始化統計收集器
@@ -374,8 +376,6 @@ class Consumer:
         self._running.set()
         self._display_thread = threading.Thread(target=self._display_loop, daemon=True)
         self._display_thread.start()
-        
-        logger.info(f"🚀 [CONSUMER] 系統已啟動")
     
     def stop(self):
         """統一停止介面"""
@@ -410,10 +410,11 @@ class Consumer:
         if not self._running.is_set() or not self.stats:
             logger.warning("⚠️ [CONSUMER] 系統未啟動，忽略結果")
             return
-        
-        logger.info(f"🔄 [CONSUMER] 開始處理結果...")
-        
+
         try:
+            # 🔍 提取Producer的原始frame ID
+            producer_frame_id = self._extract_producer_frame_id(result)
+            
             # Step 1: 安全提取並調用 .plot()
             display_frame = self.safe_handler.extract_and_plot(result)
             
@@ -421,13 +422,28 @@ class Consumer:
                 logger.warning("⚠️ [CONSUMER] 結果處理失敗，跳過")
                 return
             
-            # Step 2: 加入緩衝區
+            # Step 2: 直接將Producer frame_id附加到display_frame對象
+            if hasattr(display_frame, '__dict__') or hasattr(display_frame, '__setattr__'):
+                try:
+                    display_frame.producer_frame_id = producer_frame_id
+                except:
+                    # 如果無法附加屬性，使用包裝字典
+                    display_frame = {
+                        'frame': display_frame,
+                        'producer_frame_id': producer_frame_id
+                    }
+            else:
+                # 對於numpy array等不可附加屬性的對象，使用字典包裝
+                display_frame = {
+                    'frame': display_frame,
+                    'producer_frame_id': producer_frame_id
+                }
+            
             success = self.buffer.put(display_frame)
             
             if success:
                 # Step 3: 更新統計
                 self.stats.count_processed()
-                logger.info(f"✅ [CONSUMER] 成功處理結果 (總計: {self.stats.total_processed})")
             else:
                 logger.warning("⚠️ [CONSUMER] 緩衝區操作失敗")
                 
@@ -439,21 +455,30 @@ class Consumer:
         """簡化的顯示循環"""
         target_fps = self.config.fps
         frame_interval = 1.0 / target_fps
-        
-        logger.info(f"🔄 [CONSUMER] 顯示循環開始 (目標FPS: {target_fps})")
-        
         while self._running.is_set():
             try:
-                frame = self.buffer.get()
+                frame_data = self.buffer.get()
                 
-                if frame is not None:
-                    # 調整顯示大小
-                    display_frame = frame
-                    if self.config.display_size:
-                        display_frame = cv2.resize(frame, self.config.display_size)
+                if frame_data is not None:
+                    # 提取顯示frame和Producer原始ID
+                    if isinstance(frame_data, dict) and 'frame' in frame_data:
+                        display_frame = frame_data['frame']
+                        producer_frame_id = frame_data.get('producer_frame_id', 'unknown')
+                    else:
+                        # 向後兼容：直接是frame的情況
+                        display_frame = frame_data
+                        producer_frame_id = 'legacy'
                     
-                    # 顯示幀
+                    # 調整顯示大小
+                    if self.config.display_size:
+                        display_frame = cv2.resize(display_frame, self.config.display_size)
+                    
+                    # 增加Consumer顯示計數
+                    self.displayed_frame_id += 1
+                    
+                    # 顯示幀並記錄Producer原始frame ID
                     cv2.imshow(self.config.window_name, display_frame)
+                    logger.info(f"🖼️ [CONSUMER] 顯示Producer幀#{producer_frame_id} (Consumer第{self.displayed_frame_id}次顯示)")
                     
                     # 更新顯示統計
                     if self.stats:
@@ -473,18 +498,39 @@ class Consumer:
         
         logger.info(f"🏁 [CONSUMER] 顯示循環結束")
     
-    # 向下兼容方法
-    def start_display(self):
-        """向下兼容的啟動方法"""
-        logger.warning("⚠️ [CONSUMER] start_display() 已廢棄，請使用 start()")
-        self.start()
-    
-    def stop_display(self):
-        """向下兼容的停止方法"""
-        logger.warning("⚠️ [CONSUMER] stop_display() 已廢棄，請使用 stop()")
-        self.stop()
-    
-    def put_frame(self, frame):
-        """向下兼容的 put_frame 方法"""
-        logger.warning("⚠️ [CONSUMER] put_frame() 已廢棄，請使用 consume()")
-        return self.buffer.put(frame)
+    def _extract_producer_frame_id(self, result):
+        """提取Producer分配的原始frame ID - 簡化版"""
+        try:
+            # 檢查常見的ID屬性（按優先級排序）
+            id_attributes = [
+                'original_frame_id',  # WorkerPool添加的原始ID（最優先）
+                'frame_id',           # 標準frame ID
+                'source_frame_id',    # 來源ID
+                'orig_frame_id'       # 原始ID的其他命名
+            ]
+            
+            # 1. 直接檢查對象屬性
+            for attr in id_attributes:
+                if hasattr(result, attr):
+                    return getattr(result, attr)
+            
+            # 2. 檢查字典格式
+            if isinstance(result, dict):
+                for attr in id_attributes + ['id']:
+                    if attr in result:
+                        return result[attr]
+            
+            # 3. 檢查對象的__dict__
+            if hasattr(result, '__dict__'):
+                result_dict = vars(result)
+                for attr in id_attributes + ['id']:
+                    if attr in result_dict:
+                        return result_dict[attr]
+                        
+            # 如果都找不到，返回unknown
+            logger.debug(f"🔍 [CONSUMER] 未找到Producer frame_id，result類型: {type(result)}")
+            return 'unknown'
+            
+        except Exception as e:
+            logger.debug(f"❌ [CONSUMER] 提取frame_id失敗: {e}")
+            return 'error'
