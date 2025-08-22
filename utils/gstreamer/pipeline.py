@@ -241,16 +241,21 @@ class BasePipeline(ABC):
         def result_handler(result):
             if result is not None:
                 try:
+                    # 添加詳細的put操作日誌
+                    queue_size_before = self.output_queue.qsize()
                     self.output_queue.put(result, timeout=1.0)
+                    queue_size_after = self.output_queue.qsize()
+                    logger.info(f"📤 [OUTPUT_QUEUE_PUT] 成功加入結果 Output queue: {queue_size_before}→{queue_size_after}/{self.output_queue.maxsize}")
+
                     self.timeline_debugger.update_consumer_state(active=True)
-                    logger.info(f"📤 WorkerPool取得結果，已加入output_queue (當前大小: {self.output_queue.qsize()})")
+
                 except Exception as e:
-                    logger.error(f"❌ PIPELINE_CALLBACK: Failed to queue result: {e}")
+                    logger.error(f"❌ [OUTPUT_QUEUE_PUT] 加入失敗: {str(e)} (當前大小: {self.output_queue.qsize()}/{self.output_queue.maxsize})")
             else:
                 logger.warning("⚠️ WorkerPool返回了空結果 (None)")
 
         self.worker_pool.start(result_handler)
-        self.consumer.start_display()
+        self.consumer.start()
 
         producer_thread = threading.Thread(target=self._producer_loop, daemon=True)
         worker_thread = threading.Thread(target=self._worker_loop, daemon=True)
@@ -272,7 +277,7 @@ class BasePipeline(ABC):
             logger.info("✅ Consumer執行緒已完成")
             
             logger.info("🛑 停止Consumer顯示...")
-            self.consumer.stop_display()
+            self.consumer.stop()
             
             # 打印最終時間軸摘要
             logger.info("📊 ============================================================")
@@ -408,10 +413,6 @@ class VideoPipeline(BasePipeline):
                 
                 frame_buffer.append(frame)
                 frame_count += 1
-                
-                # 添加詳細的幀處理日誌
-                if frame_count % 5 == 0:
-                    logger.info(f"📦 第 {frame_count} 幀已加入緩衝區，緩衝區大小: {len(frame_buffer)}")
 
                 # 批次處理並預載
                 if len(frame_buffer) >= self.preload_batch_size:
@@ -449,17 +450,25 @@ class VideoPipeline(BasePipeline):
     
     def _process_frame_batch_video(self, frame_batch, timeout):
         """處理Video模式的frame批次"""
-        for frame in frame_batch:
+        for i, frame in enumerate(frame_batch):
             try:
+                # 添加詳細的put操作日誌
+                queue_size_before = self.input_queue.qsize()
                 self.input_queue.put(frame, timeout=timeout)
+                queue_size_after = self.input_queue.qsize()
+                logger.info(f"📥 [INPUT_QUEUE_PUT] 成功加入幀 #{i+1}/{len(frame_batch)}，Input Queue: {queue_size_before}→{queue_size_after}/{self.input_queue.maxsize}")
+                
             except Exception as e:
-                logger.warning(f"Video mode frame put timeout: {e}")
+                logger.warning(f"⚠️ [INPUT_QUEUE_PUT] Video模式幀put超時: maxsize={self.input_queue.maxsize}, timeout={timeout}s")
                 # Video模式重試機制
                 time.sleep(0.01)
                 try:
+                    retry_queue_size = self.input_queue.qsize()
+                    logger.info(f"🔄 [INPUT_QUEUE_PUT] 重試加入幀，當前大小: {retry_queue_size}/{self.input_queue.maxsize}")
                     self.input_queue.put(frame, timeout=timeout * 2)
-                except:
-                    logger.error("Video mode frame lost despite retry")
+                    logger.info(f"✅ [INPUT_QUEUE_PUT] 重試成功")
+                except Exception as retry_e:
+                    logger.error(f"❌ [INPUT_QUEUE_PUT] Video模式重試失敗: {str(retry_e)}")
     
     def _worker_loop(self):
         """Video模式Worker - 硬體適應性"""
@@ -467,19 +476,19 @@ class VideoPipeline(BasePipeline):
         
         while self.running or not self.input_queue.empty():
             try:
+                queue_size_before = self.input_queue.qsize()
                 frame = self.input_queue.get(timeout=1.0)
+                queue_size_after = self.input_queue.qsize()
+                logger.info(f"📥 [INPUT_QUEUE_GET] 取得幀({queue_size_before}→{queue_size_after}/{self.input_queue.maxsize}), 提交第 {processed_count + 1} 個任務到WorkerPool")
+                
                 if frame is None:
                     logger.info("⚠️ Worker收到終止信號 (None frame)")
                     break
-                
                 self.worker_pool.submit(frame)
                 processed_count += 1
-                
-                if processed_count % 20 == 0:  # 每20幀記錄一次
-                    input_size = self.input_queue.qsize()
-                    logger.info(f"⚙️ Video Worker狀態: 已處理 {processed_count} 幀，Input Queue: {input_size}")
 
             except Exception as e:
+                logger.info(f"📥 [INPUT_QUEUE_GET] Queue為空，等待超時")
                 if self.producer_finished and self.input_queue.empty():
                     logger.info("🏁 Producer已完成且Queue為空，Worker準備結束")
                     break
@@ -492,18 +501,23 @@ class VideoPipeline(BasePipeline):
         consumed_count = 0
         while self.running:
             try:
+                # 添加詳細的get操作日誌
+                queue_size_before = self.output_queue.qsize()
                 result = self.output_queue.get(timeout=1.0)
+                queue_size_after = self.output_queue.qsize()
+                logger.info(f"📤 [OUTPUT_QUEUE_GET] 取得結果 ({queue_size_before}→{queue_size_after}/{self.output_queue.maxsize}), 提交第 {consumed_count + 1} 個結果到Consumer")
+
                 if result is None:
                     logger.info("⚠️ Consumer收到終止信號 (None result)")
                     break
 
                 # 調用consumer的consume方法處理結果
                 try:
+                    logger.info(f"📤 [OUTPUT_QUEUE_GET] Consume")
                     self.consumer.consume(result)
-                    if consumed_count < 5:
-                        logger.info(f"✅ Consumer成功處理第 {consumed_count + 1} 個結果")
+                    logger.info(f"📤 [OUTPUT_QUEUE_GET] Consumed")
                 except Exception as e:
-                    logger.error(f"❌ Consumer處理第 {consumed_count + 1} 個結果時出錯: {e}")
+                    logger.error(f"❌ [CONSUMER_PROCESS] Consumer處理第 {consumed_count + 1} 個結果時出錯: {e}")
                     
                 self.pipeline_frame_counter += 1
                 consumed_count += 1
@@ -519,6 +533,7 @@ class VideoPipeline(BasePipeline):
                 )
                 
             except Exception as e:
+                logger.info(f"📤 [OUTPUT_QUEUE_GET] Queue為空，等待超時")
                 if self.producer_finished and self.output_queue.empty():
                     logger.info("🏁 Producer已完成且Output Queue為空，Consumer準備結束")
                     break
@@ -629,15 +644,21 @@ class CameraPipeline(BasePipeline):
                 else:
                     self.consecutive_drops = 0
                 
-                # 嘗試非阻塞put
+                # 嘗試非阻塞put - 添加詳細日誌
                 try:
+                    queue_size_before = self.input_queue.qsize()
+                    logger.info(f"📥 [INPUT_QUEUE_PUT_NOWAIT] Camera準備加入幀 #{frame_count + 1}，當前大小: {queue_size_before}/{self.input_queue.maxsize}")
+                    
                     self.input_queue.put_nowait(frame)
+                    
+                    queue_size_after = self.input_queue.qsize()
                     frame_count += 1
-                    logger.debug(f"📤 第 {frame_count} 幀已加入處理隊列")
+                    logger.info(f"� [INPUT_QUEUE_PUT_NOWAIT] Camera成功加入幀 {queue_size_before}→{queue_size_after}")
                 except:
                     # 隊列滿時丟幀
                     dropped_frames += 1
-                    logger.debug(f"🗑️ Queue滿載丟幀: 第 {dropped_frames} 幀")
+                    current_size = self.input_queue.qsize()
+                    logger.warning(f"🗑️ [INPUT_QUEUE_PUT_NOWAIT] Camera Queue滿載丟幀: 第 {dropped_frames} 幀 (當前: {current_size}/{self.input_queue.maxsize})")
                 
                 if (frame_count + dropped_frames) % 100 == 0:  # 每100幀記錄一次
                     drop_rate = dropped_frames / (frame_count + dropped_frames) * 100
@@ -689,13 +710,21 @@ class CameraPipeline(BasePipeline):
         
         while self.running or not self.input_queue.empty():
             try:
+                # 添加詳細的get操作日誌
+                queue_size_before = self.input_queue.qsize()
+                logger.info(f"📥 [INPUT_QUEUE_GET] Camera準備取得幀，當前大小: {queue_size_before}")
+                
                 frame = self.input_queue.get(timeout=0.5)  # 更短超時
+                
+                queue_size_after = self.input_queue.qsize()
+                logger.info(f"📥 [INPUT_QUEUE_GET] Camera成功取得幀 {queue_size_before}→{queue_size_after}")
+                
                 if frame is None:
                     logger.info("⚠️ Camera Worker收到終止信號")
                     break
                 
                 # 提交給WorkerPool處理
-                logger.debug(f"📤 Camera Worker處理第 {processed_count + 1} 幀")
+                logger.info(f"⚙️ [WORKER_SUBMIT] Camera Worker處理第 {processed_count + 1} 幀")
                 self.worker_pool.submit(frame)
                 processed_count += 1
                 
@@ -704,6 +733,7 @@ class CameraPipeline(BasePipeline):
                     logger.info(f"⚙️ Camera Worker狀態: 已處理 {processed_count} 幀，Input Queue: {input_size}")
                 
             except Exception as e:
+                logger.info(f"📥 [INPUT_QUEUE_GET] Camera Queue為空，等待超時")
                 if self.producer_finished and self.input_queue.empty():
                     break
                 logger.debug(f"⚠️ Camera Worker短超時: {e}")
@@ -724,7 +754,15 @@ class CameraPipeline(BasePipeline):
         
         while self.running:
             try:
+                # 添加詳細的get操作日誌
+                queue_size_before = self.output_queue.qsize()
+                logger.info(f"📤 [OUTPUT_QUEUE_GET] Camera準備取得結果，當前大小: {queue_size_before}")
+                
                 result = self.output_queue.get(timeout=0.5)  # 更短超時
+                
+                queue_size_after = self.output_queue.qsize()
+                logger.info(f"📤 [OUTPUT_QUEUE_GET] Camera成功取得結果 {queue_size_before}→{queue_size_after}")
+                
                 if result is None:
                     logger.info("⚠️ Camera Consumer收到終止信號")
                     break
@@ -734,8 +772,9 @@ class CameraPipeline(BasePipeline):
                 
                 # 智能顯示頻率控制
                 if time_since_last >= target_display_interval:
-                    logger.debug(f"📥 Camera Consumer顯示第 {consumed_count + 1} 個結果")
+                    logger.info(f"�️ [CONSUMER_PROCESS] Camera Consumer顯示第 {consumed_count + 1} 個結果")
                     self.consumer.consume(result)
+                    logger.info(f"✅ [CONSUMER_PROCESS] Camera Consumer成功顯示結果")
                     last_display_time = current_time
                     self.pipeline_frame_counter += 1
                     consumed_count += 1
@@ -756,6 +795,7 @@ class CameraPipeline(BasePipeline):
                     logger.info(f"🖥️ Camera Consumer狀態: 顯示 {consumed_count}, 跳過 {skipped_count} ({skip_rate:.1f}%), Queue: {output_size}")
                 
             except Exception as e:
+                logger.info(f"📤 [OUTPUT_QUEUE_GET] Camera Queue為空，等待超時")
                 logger.debug(f"⚠️ Camera Consumer短超時: {e}")
                 if self.producer_finished and self.output_queue.empty():
                     break

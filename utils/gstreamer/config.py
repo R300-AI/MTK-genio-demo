@@ -1,5 +1,8 @@
+import logging
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, Optional, Tuple
+
+logger = logging.getLogger('gstreamer_demo')
 
 @dataclass
 class ProducerConfig:
@@ -85,3 +88,26 @@ class WorkerPoolConfig:
             self.buffer_size = min(self.buffer_size, 5)  # 小緩衝
             self.enable_backpressure = True  # 啟用背壓
             self.preserve_order = False  # 無需順序
+
+@dataclass
+class ConsumerConfig:
+    """Consumer 配置類別 - 統一顯示與統計配置管理"""
+    window_name: str = "YOLO Detection"
+    display_size: Optional[Tuple[int, int]] = None
+    fps: int = 30
+    mode: str = 'camera'  # 'video' 或 'camera'
+    
+    # 簡化配置參數
+    timeout_seconds: float = 5.0  # Generator 提取超時
+    video_buffer_size: int = 50   # Video 模式緩衝區大小
+    camera_buffer_size: int = 1   # Camera 模式緩衝區大小
+    stats_interval: int = 10      # 統計回調間隔
+    
+    def __post_init__(self):
+        """配置後處理"""
+        logger.info(f"🔧 [CONFIG] Consumer配置:")
+        logger.info(f"   模式: {self.mode}")
+        logger.info(f"   視窗: {self.window_name}")
+        logger.info(f"   大小: {self.display_size}")
+        logger.info(f"   FPS: {self.fps}")
+        logger.info(f"   超時: {self.timeout_seconds}s")

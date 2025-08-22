@@ -47,7 +47,6 @@ def main():
 
     producer = Producer(args.video_path, mode=mode)
     worker_pool = WorkerPool(model_path=args.model_path, mode=mode, max_workers=args.max_workers)
-    
     consumer = Consumer(
         window_name="Hetegeneous Integrated Chip Inference Demo", 
         display_size=(720, 480), 

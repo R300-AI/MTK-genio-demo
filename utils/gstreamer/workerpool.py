@@ -378,9 +378,6 @@ class WorkerPool:
         future = self.executor.submit(
             self._process_task, processor, frame, task_id, callback
         )
-        
-        logger.info(f"📊 WorkerPool成功提交第 {self._total_tasks} 個任務給ThreadPoolExecutor")
-        
         return future
     
     def submit(self, frame: Any) -> Optional[Future]:
