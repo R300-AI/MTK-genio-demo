@@ -1,50 +1,20 @@
-# Genio EVK 最佳實作指南
+# MediaTek Genio APU AI 部署與推論流程示範
 
-
-## AI 部署工作流程概述
-
-隨著人工智慧技術的快速發展，深度學習模型已廣泛應用於影像辨識、語音處理、智慧監控等多種場域。傳統上，AI 模型的開發與訓練大多在資源充足的雲端平台或高效能電腦上進行，開發者可專注於提升模型準確度與泛化能力。然而，將模型實際應用於終端設備時，往往面臨運算資源有限、功耗受限、即時性要求高等挑戰。因此，AI 部署成為連結模型開發與實際應用的關鍵橋樑。
-
-AI 部署的核心目標，是將已訓練完成的模型最佳化並移植到目標硬體平台，使其能在受限的運算與記憶體資源下，依然維持高效且穩定的推論效能。這一過程涉及模型格式轉換、量化、剪枝、加速器適配等最佳化處理，部署成效將直接影響 AI 應用的即時性、可靠性與能源效率。
-
-### 工作流程架構
-
-在 MediaTek Genio 平台上，AI 部署需考慮多種異質運算資源的協同運作，並根據應用場景選擇最合適的推論路徑。開發者必須在模型準確度、推論延遲、功耗、相容性等多重目標間取得平衡，才能發揮硬體平台的最大效益。
-
-```
-開發階段          →    轉換階段         →    部署階段         →    最佳化階段
-┌─────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
-│ 模型訓練     │   │ 格式轉換      │   │ 硬體驅動安裝  │   │ 效能調校      │
-│ TF/PyTorch  │   │ TFLite       │   │ 加速器設定    │   │ 記憶體優化    │
-│ 模型驗證     │───→│ 量化壓縮      │───→│ 推論測試      │───→│ 延遲最佳化    │
-│ 準確度測試   │   │ DLA編譯      │   │ 應用整合      │   │ 能耗管理      │
-└─────────────┘   └──────────────┘   └──────────────┘   └──────────────┘
-```
-
-本文件將以系統化流程，說明如何在 Genio EVK 上完成 AI 模型的部署，並針對部署過程中的關鍵考量與實務細節，提供完整的技術指引，協助開發者順利將 AI 創新落地於各類智慧終端。
-
-## Genio 處理器架構與模型部署選擇
-
-MediaTek Genio 系列採用先進的異質整合封裝技術，透過小晶片（chiplet）互聯，將 CPU、GPU、MDLA、VPU 等多種運算處理器高效整合於單一晶片內。與雲端平台的單一加速器架構不同，Genio 提供多元化的運算資源選擇，開發者必須理解這種異質運算架構的特性，才能針對不同 AI 模型的特性與效能需求，選擇最適合的部署策略。
+本專案展示在 MediaTek Genio 異構運算平台上實現高效能 AI 模型部署與推論的完整解決方案。透過結合 ARM 處理器架構與 MediaTek 專用 AI 加速器，建構具備零複製記憶體共享機制的協程式非同步推論流程。
 
 <div align="center">
-<img src="https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/images/UCIe-diagram.jpg" width="360"/>
+
+![架構圖](docs/images/UCIe-diagram.jpg)
+<p><i>MediaTek Genio 異構運算平台工作流程</i></p>
+
 </div>
 
-### 記憶體共享機制
+## MediaTek Genio 異構運算平台架構
 
-傳統 SoC 架構的主要挑戰在於記憶體頻寬限制。當 AI 模型需要從 CPU 轉交給 GPU 執行時，必須透過 PCIe 匯流排進行資料傳輸，每次拷貝都會產生延遲並消耗額外功耗，成為即時 AI 應用的效能瓶頸。
+Genio 平台採用異構運算設計，將 Cortex-A 系列 CPU、Mali-G 系列 GPU 和 MediaTek 專用 AI 加速器（MDLA、VPU）整合在統一的 SoC 架構中，透過 UCIe（Universal Chiplet Interconnect Express）高頻寬互連技術和共享記憶體子系統，實現跨處理單元的無縫協作。
 
-Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與 VPU 等專用 AI 加速器能直接與 CPU 共享主記憶體，實現關鍵優勢：
-
-- **直接記憶體存取**：MDLA 和 VPU 可直接讀寫 CPU 主記憶體，無需額外記憶體控制器。模型使用 NeuronRT 編譯為 .dla 格式後載入時無需額外記憶體拷貝，顯著縮短載入時間。
-- **零複製傳輸**：模型權重和推論資料在 CPU 與 AI 加速器間傳遞時無需重複複製，實現 pipeline 並行處理，提升推論效率並降低延遲。
-- **統一位址空間**：AI 加速器與 CPU 使用相同記憶體位址映射，簡化軟體開發複雜度，降低總體記憶體需求。
-
-
-這種架構設計為開發者帶來更短的模型載入時間、更低的推論延遲、更少的記憶體佔用，在處理高解析度影像或複雜 AI 工作流時優勢更加明顯。MediaTek Genio 系列針對不同應用場景推出多款 AI SoC：
-
-<div style="overflow-x:auto;">
+<div style="background-color: #f6f8fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+<h4>📊 Genio 平台規格比較</h4>
 <table>
   <tr>
     <td style="vertical-align: middle; text-align: center; font-weight: bold; background: #f6f8fa;">Provider</td>
@@ -88,6 +58,11 @@ Genio 平台透過 UCIe 小晶片互聯技術從根本解決此問題。MDLA 與
 </table>
 </div>
 
+### 模型部署方案
+
+在 Genio 平台上部署 AI 模型時，需要將模型轉換為 TensorFlow Lite 格式。若您使用 PyTorch 進行開發，可透過 ONNX 中繼格式並使用 onnx2tf 工具完成轉換；TensorFlow 開發者則可直接使用 TFLiteConverter 進行格式轉換。
+
+平台提供兩種主要的推論引擎選擇：ArmNN 引擎適用於 ARM CPU 和 Mali GPU，能夠處理 FP16/FP32 精度運算，適合需要高精度的研究應用；NeuronRT 引擎專為 MediaTek AI 加速器最佳化，特別針對 INT8 量化模型設計，並支援 .dla 格式編譯，能夠在 MDLA或VPU上實現卓越的推論效能。
 
 ## 事前準備
 
@@ -152,11 +127,6 @@ $ uv run --with jupyter jupyter lab
 
 ## 🚀 TO DO List
 
-- [ ] 🛠️ **Arm Streamline Performance Analyzer**  
-      ARM 平台效能分析工具，協助優化推論流程。
-
-- [ ] 📦 **MTK-Quantizer**  
-      MediaTek 專用模型量化精度微調訓練，提升模型部署效率。
-
-- [ ] 🔗 **NNStreamer**  
-      AI 流水線串流框架，支援多源資料即時推論整合。
+- [ ] ARM 平台效能分析工具，協助優化推論流程。
+- [ ] 📦 MediaTek 專用模型量化精度微調訓練，提升模型部署效率。
+- [ ] 🔗 AI 流水線串流框架，支援多源資料即時推論整合。
