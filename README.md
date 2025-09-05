@@ -150,6 +150,13 @@ $ uv run --with jupyter jupyter lab
 > | **Genio 510** | [yolov8n_float32_mdla3.dla](https://github.com/R300-AI/MTK-genio-demo/blob/main/models/yolov8n_float32_mdla3.dla)  | **30 FPS** ||
 > | **Genio 700** | [yolov8n_float32_mdla3.dla](https://github.com/R300-AI/MTK-genio-demo/blob/main/models/yolov8n_float32_mdla3.dla)  | **FPS** ||
 
-## TO DO
+## 🚀 TO DO List
 
-Arm Streamline Performance Analyzer
+- [ ] 🛠️ **Arm Streamline Performance Analyzer**  
+      ARM 平台效能分析工具，協助優化推論流程。
+
+- [ ] 📦 **MTK-Quantizer**  
+      MediaTek 專用模型量化精度微調訓練，提升模型部署效率。
+
+- [ ] 🔗 **NNStreamer**  
+      AI 流水線串流框架，支援多源資料即時推論整合。
