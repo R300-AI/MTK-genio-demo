@@ -11,7 +11,7 @@
 
 ## MediaTek Genio 異構運算平台架構
 
-Genio 平台採用異構運算設計，將 Cortex-A 系列 CPU、Mali-G 系列 GPU 和 MediaTek 專用 AI 加速器（MDLA、VPU）整合在統一的 SoC 架構中，透過 UCIe（Universal Chiplet Interconnect Express）高頻寬互連技術和共享記憶體子系統，實現跨處理單元的無縫協作。
+Genio 平台採用異構運算設計，將 Cortex-A 系列 CPU、Mali-G 系列 GPU 和 MediaTek 專用 AI 加速器（MDLA、VPU）整合在統一的 SoC 架構中，透過 UCIe（Universal Chiplet Interconnect Express）高頻寬互連技術和共享記憶體子系統，實現跨處理單元的無縫資料傳輸。
 
 <div style="background-color: #f6f8fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
 <h4>📊 Genio 平台規格比較</h4>
