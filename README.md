@@ -72,7 +72,7 @@ Genio 平台採用異構運算設計，將 Cortex-A 系列 CPU、Mali-G 系列 G
 2. **系統安裝**：透過 [Getting Start 指南](https://github.com/R300-AI/MTK-genio-demo/blob/main/docs/getting_start_with_ubuntu_zh.md) 燒錄 Ubuntu 作業系統，並安裝BSPs（`ArmNN`、`NeuronRT`）
 3. **環境設定**：開機並依照以下步驟安裝MTK-genio-demo
     ```bash
-    # 安裝 Python 套件管理工具（需使用 Python 3.12）
+    # 安裝 Python 套件管理工具（需使用 Python 3.12作為開發環境）
     curl -LsSf https://astral.sh/uv/install.sh | sh  
     ```
     ```bash
